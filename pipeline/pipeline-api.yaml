@@ -1,0 +1,255 @@
+name: 'V1-B$(Date:yyyyMMdd)-$(BuildID)'
+parameters:
+  - name: forceDevDeploy
+    displayName: "Force deployment to DEV"
+    type: boolean
+    default: false
+  - name: deployDevSlot
+    displayName: "Deploy to DEV Staging Slot?"
+    type: boolean
+    default: false
+  - name: deployTstSlot
+    displayName: "Deploy to TST Staging Slot?"
+    type: boolean
+    default: false
+  - name: deployPreSlot
+    displayName: "Deploy to Pre-Prod Staging Slot?"
+    type: boolean
+    default: false
+  - name: deployPrdSlot
+    displayName: "Deploy to Production Staging Slot?"
+    type: boolean
+    default: false
+  - name: deployToSecondary
+    displayName: "Select Secondary Region"
+    type: string
+    default: PRD
+    values:
+      - None
+      - DEV
+      - TST
+      - PRE
+      - PRD
+  - name: runOpenAPIDiff
+    displayName: "Run Open Api Diff"
+    type: boolean
+    default: false
+  - name: allowAPIBreakingChanges
+    displayName: "Allow breaking API changes"
+    type: boolean
+    default: false
+  - name: runCodeGeneration
+    displayName: "Generate Client Libraries?"
+    type: boolean
+    default: false
+  - name: runVulnerabilityScan
+    displayName: "Run Vulnerability Scan"
+    type: boolean
+    default: true
+  - name: libraryVersion
+    displayName: "Client Library Version Number"
+    type: string
+    default: '1.0.0'
+  - name: qualityGate
+    displayName: "Quality Gate parameters"
+    type: object
+    default:
+      enforceQualityGate: true
+      warningVariance: 1
+      coverageVariance: 1
+      coverageType: 'blocks'
+      baseBranch: '$(System.PullRequest.TargetBranch)'
+      allowWarningVariance: true
+      allowCoverageVariance: true
+
+trigger:
+  batch: true
+  branches:
+    include:
+      - '*'
+  paths:
+    include:
+      - src/Defra.Trade.EUCerts.Api/*
+      - test/*
+resources:
+  repositories:
+    - repository: PipelineCommon
+      name: DEFRA-TRD/Defra.TRD.Pipeline.Common
+      type: git
+      ref: master
+  pipelines:
+    - pipeline: INFRA
+      source: Defra.EEHC.Infra EUCerts API WebApp
+      trigger:
+        branches:
+          include:
+            - '*'
+        stages:
+          - DEV
+variables:
+  APIName: Defra.Trade.EUCerts.Api
+extends:
+  template: /templates/basic-webapp-deploy-pipeline.yaml@PipelineCommon
+  parameters:
+    appName: $(APIName)
+    appProject: TRS
+    appInstanceNumber: $(nc-region-id)30
+    buildProjects: |
+      **/*Api.csproj
+      **/*Tests.csproj
+    publishProject: '**/*Api.csproj'
+    appSettingsEnv:
+        dev: >-
+          -CommonSql:UseAzureAccessToken true
+          -KeyVaultEndpoint "https://$(Environment.Name)TRD$(nc-function-infrastructure)$(nc-resource-keyvault)1001.vault.azure.net/"
+          -ApimSettings:Authority "$(internalAPIMAudience)"
+          -Blobs:ServiceUri "https://$(environment)trsinfsa1007.blob.core.windows.net/"
+          -Blobs:ContainerName "public-uploads"
+          -AppSettings:AdapterApiUri "https://$(internalAPIMUrl)/trade-traces-adapter/v1/"        
+          -AppSettings:AdapterFunctionUri "https://$(environment)trswebaf$(nc-region-id)02.azurewebsites.net/"
+          -AppSettings:ReferenceAnalyticsApiUri "https://$(internalAPIMUrl)/trade-reference-analytics/v1/graphql"
+          -AppSettings:ApiSciCustomer "https://$(internalAPIMUrl)/trade-identity/v1"
+          -AppSettings:TracesRefDataApiUri "https://$(internalAPIMUrl)/trade-traces-reference-data/v1"
+          -AppSettings:IdentityApiUri "https://$(internalAPIMUrl)/trade-identity/v1/"
+          -AppSettings:NotifyApiUrl "https://$(internalAPIMUrl)/trade-notify/v1/"          
+          -AppSettings:CertificateGeneratorApi "https://$(internalAPIMUrl)/trade-certificate-generator/v1/"
+          -AppSettings:BcpApiUri "https://$(internalAPIMUrl)/trade-bcps-api/v1/"
+          -AppSettings:BankHolidaysApiUrl "https://$(internalAPIMUrl)/trade-bankholidays-api/v1/"
+          -AppSettings:ApiUrl "https://$(etradeUrl)/"
+          -AppSettings:XApiVersion "1"
+          -AppSettings:XTracesUat true
+          -AppSettings:Timeout 500000
+          -AppSettings:OsPlacesUrl "https://api.os.uk/search/places/v1" 
+          -AppSettings:OsPlacesClassificationCodes "CA01,CA03,CE05,CI,CI01,CI02,CI03,CI04,CI05,CL08,CL11,CN03,CN04,CN05,CO01,CR02,CR04,CR08,CS01,CS02,CT04,LA01,LA02,LB,LD01,LF02,LP01,OR04,P,PP,RD01,RD02,RD03,RD04,RD06,RD07,RD08,RD10,X" 
+          -AppSettings:OsPlacesClassificationFarmCodes "CA01,CA03,CE05,CI,CI01,CI02,CI03,CI04,CI05,CL08,CL11,CN03,CN04,CN05,CR02,CR04,CR08,CS01,CS02,CT04,LA01,LA02,OR04,P,PP" 
+          -AppSettings:RoyalMailPostcodeFinderUrl "https://www.royalmail.com/find-a-postcode"
+          -InMemoryCacheConfigurations:MinutesToLive "60"
+          -SocSettings:Environment "${environment}"
+        snd: >-
+          -CommonSql:UseAzureAccessToken true
+          -KeyVaultEndpoint "https://$(Environment.Name)TRD$(nc-function-infrastructure)$(nc-resource-keyvault)1001.vault.azure.net/"
+          -ApimSettings:Authority "$(internalAPIMAudience)"
+          -Blobs:ServiceUri "https://$(environment)trsinfsa1007.blob.core.windows.net/"
+          -Blobs:ContainerName "public-uploads"
+          -AppSettings:AdapterApiUri "https://$(internalAPIMUrl)/trade-traces-adapter/v1/"        
+          -AppSettings:AdapterFunctionUri "https://$(environment)trswebaf$(nc-region-id)02.azurewebsites.net/"
+          -AppSettings:ReferenceAnalyticsApiUri "https://$(internalAPIMUrl)/trade-reference-analytics/v1/graphql"
+          -AppSettings:TracesRefDataApiUri "https://$(internalAPIMUrl)/trade-traces-reference-data/v1"
+          -AppSettings:IdentityApiUri "https://$(internalAPIMUrl)/trade-identity/v1/"
+          -AppSettings:NotifyApiUrl "https://$(internalAPIMUrl)/trade-notify/v1/"          
+          -AppSettings:CertificateGeneratorApi "https://$(internalAPIMUrl)/trade-certificate-generator/v1/"
+          -AppSettings:ApiSciCustomer "https://$(internalAPIMUrl)/trade-identity/v1"
+          -AppSettings:BcpApiUri "https://$(internalAPIMUrl)/trade-bcps-api/v1/"
+          -AppSettings:BankHolidaysApiUrl "https://$(internalAPIMUrl)/trade-bankholidays-api/v1/"
+          -AppSettings:ApiUrl "https://$(etradeUrl)/"
+          -AppSettings:XApiVersion "1"
+          -AppSettings:XTracesUat true
+          -AppSettings:Timeout 500000
+          -AppSettings:OsPlacesUrl "https://api.os.uk/search/places/v1" 
+          -AppSettings:OsPlacesClassificationCodes "CA01,CA03,CE05,CI,CI01,CI02,CI03,CI04,CI05,CL08,CL11,CN03,CN04,CN05,CO01,CR02,CR04,CR08,CS01,CS02,CT04,LA01,LA02,LB,LD01,LF02,LP01,OR04,P,PP,RD01,RD02,RD03,RD04,RD06,RD07,RD08,RD10,X" 
+          -AppSettings:OsPlacesClassificationFarmCodes "CA01,CA03,CE05,CI,CI01,CI02,CI03,CI04,CI05,CL08,CL11,CN03,CN04,CN05,CR02,CR04,CR08,CS01,CS02,CT04,LA01,LA02,OR04,P,PP" 
+          -AppSettings:RoyalMailPostcodeFinderUrl "https://www.royalmail.com/find-a-postcode"
+          -InMemoryCacheConfigurations:MinutesToLive "60"
+          -SocSettings:Environment "${environment}"
+        tst: >-
+          -CommonSql:UseAzureAccessToken true
+          -KeyVaultEndpoint "https://$(Environment.Name)TRD$(nc-function-infrastructure)$(nc-resource-keyvault)1001.vault.azure.net/"
+          -ApimSettings:Authority "$(internalAPIMAudience)"
+          -Blobs:ServiceUri "https://$(environment)trsinfsa1007.blob.core.windows.net/"
+          -Blobs:ContainerName "public-uploads"
+          -AppSettings:AdapterApiUri "https://$(internalAPIMUrl)/trade-traces-adapter/v1/"  
+          -AppSettings:AdapterFunctionUri "https://$(environment)trswebaf$(nc-region-id)02.azurewebsites.net/"
+          -AppSettings:ReferenceAnalyticsApiUri "https://$(internalAPIMUrl)/trade-reference-analytics/v1/graphql"
+          -AppSettings:TracesRefDataApiUri "https://$(internalAPIMUrl)/trade-traces-reference-data/v1"
+          -AppSettings:IdentityApiUri "https://$(internalAPIMUrl)/trade-identity/v1/"
+          -AppSettings:NotifyApiUrl "https://$(internalAPIMUrl)/trade-notify/v1/"         
+          -AppSettings:CertificateGeneratorApi "https://$(internalAPIMUrl)/trade-certificate-generator/v1/"
+          -AppSettings:ApiSciCustomer "https://$(internalAPIMUrl)/trade-identity/v1"
+          -AppSettings:BcpApiUri "https://$(internalAPIMUrl)/trade-bcps-api/v1/"
+          -AppSettings:BankHolidaysApiUrl "https://$(internalAPIMUrl)/trade-bankholidays-api/v1/"
+          -AppSettings:ApiUrl "https://$(etradeUrl)/"
+          -AppSettings:XApiVersion "1"
+          -AppSettings:XTracesUat false
+          -AppSettings:Timeout 500000
+          -AppSettings:OsPlacesUrl "https://api.os.uk/search/places/v1" 
+          -AppSettings:OsPlacesClassificationCodes "CA01,CA03,CE05,CI,CI01,CI02,CI03,CI04,CI05,CL08,CL11,CN03,CN04,CN05,CO01,CR02,CR04,CR08,CS01,CS02,CT04,LA01,LA02,LB,LD01,LF02,LP01,OR04,P,PP,RD01,RD02,RD03,RD04,RD06,RD07,RD08,RD10,X" 
+          -AppSettings:OsPlacesClassificationFarmCodes "CA01,CA03,CE05,CI,CI01,CI02,CI03,CI04,CI05,CL08,CL11,CN03,CN04,CN05,CR02,CR04,CR08,CS01,CS02,CT04,LA01,LA02,OR04,P,PP" 
+          -AppSettings:RoyalMailPostcodeFinderUrl "https://www.royalmail.com/find-a-postcode"
+          -InMemoryCacheConfigurations:MinutesToLive "60"
+          -SocSettings:Environment "${environment}"
+        pre: >-
+          -CommonSql:UseAzureAccessToken true
+          -KeyVaultEndpoint "https://$(Environment.Name)TRD$(nc-function-infrastructure)$(nc-resource-keyvault)1001.vault.azure.net/"
+          -ApimSettings:Authority "$(internalAPIMAudience)"
+          -Blobs:ServiceUri "https://$(environment)trsinfsa1007.blob.core.windows.net/"
+          -Blobs:ContainerName "public-uploads"
+          -AppSettings:AdapterApiUri "https://$(internalAPIMUrl)/trade-traces-adapter/v1/"     
+          -AppSettings:AdapterFunctionUri "https://$(environment)trswebaf$(nc-region-id)02.azurewebsites.net/"
+          -AppSettings:ReferenceAnalyticsApiUri "https://$(internalAPIMUrl)/trade-reference-analytics/v1/graphql"
+          -AppSettings:TracesRefDataApiUri "https://$(internalAPIMUrl)/trade-traces-reference-data/v1"
+          -AppSettings:IdentityApiUri "https://$(internalAPIMUrl)/trade-identity/v1/"
+          -AppSettings:NotifyApiUrl "https://$(internalAPIMUrl)/trade-notify/v1/"          
+          -AppSettings:CertificateGeneratorApi "https://$(internalAPIMUrl)/trade-certificate-generator/v1/"
+          -AppSettings:ApiSciCustomer "https://$(internalAPIMUrl)/trade-identity/v1"
+          -AppSettings:BcpApiUri "https://$(internalAPIMUrl)/trade-bcps-api/v1/"
+          -AppSettings:BankHolidaysApiUrl "https://$(internalAPIMUrl)/trade-bankholidays-api/v1/"
+          -AppSettings:ApiUrl "https://$(etradeUrl)/"
+          -AppSettings:XApiVersion "1"
+          -AppSettings:XTracesUat false
+          -AppSettings:Timeout 500000
+          -AppSettings:OsPlacesUrl "https://api.os.uk/search/places/v1" 
+          -AppSettings:OsPlacesClassificationCodes "CA01,CA03,CE05,CI,CI01,CI02,CI03,CI04,CI05,CL08,CL11,CN03,CN04,CN05,CO01,CR02,CR04,CR08,CS01,CS02,CT04,LA01,LA02,LB,LD01,LF02,LP01,OR04,P,PP,RD01,RD02,RD03,RD04,RD06,RD07,RD08,RD10,X" 
+          -AppSettings:OsPlacesClassificationFarmCodes "CA01,CA03,CE05,CI,CI01,CI02,CI03,CI04,CI05,CL08,CL11,CN03,CN04,CN05,CR02,CR04,CR08,CS01,CS02,CT04,LA01,LA02,OR04,P,PP" 
+          -AppSettings:RoyalMailPostcodeFinderUrl "https://www.royalmail.com/find-a-postcode"
+          -InMemoryCacheConfigurations:MinutesToLive "60"
+          -SocSettings:Environment "${environment}"
+        prd: >-
+          -CommonSql:UseAzureAccessToken true
+          -KeyVaultEndpoint "https://$(Environment.Name)TRD$(nc-function-infrastructure)$(nc-resource-keyvault)1001.vault.azure.net/"
+          -ApimSettings:Authority "$(internalAPIMAudience)"
+          -Blobs:ServiceUri "https://$(environment)trsinfsa1007.blob.core.windows.net/"
+          -Blobs:ContainerName "public-uploads"
+          -AppSettings:AdapterApiUri "https://$(internalAPIMUrl)/trade-traces-adapter/v1/"
+          -AppSettings:AdapterFunctionUri "https://$(environment)trswebaf$(nc-region-id)02.azurewebsites.net/"
+          -AppSettings:ReferenceAnalyticsApiUri "https://$(internalAPIMUrl)/trade-reference-analytics/v1/graphql"
+          -AppSettings:TracesRefDataApiUri "https://$(internalAPIMUrl)/trade-traces-reference-data/v1"
+          -AppSettings:IdentityApiUri "https://$(internalAPIMUrl)/trade-identity/v1/"
+          -AppSettings:NotifyApiUrl "https://$(internalAPIMUrl)/trade-notify/v1/"          
+          -AppSettings:CertificateGeneratorApi "https://$(internalAPIMUrl)/trade-certificate-generator/v1/"
+          -AppSettings:ApiSciCustomer "https://$(internalAPIMUrl)/trade-identity/v1"
+          -AppSettings:BcpApiUri "https://$(internalAPIMUrl)/trade-bcps-api/v1/"
+          -AppSettings:BankHolidaysApiUrl "https://$(internalAPIMUrl)/trade-bankholidays-api/v1/"
+          -AppSettings:ApiUrl "https://$(etradeUrl)/"
+          -AppSettings:XApiVersion "1"
+          -AppSettings:XTracesUat false
+          -AppSettings:Timeout 500000
+          -AppSettings:OsPlacesUrl "https://api.os.uk/search/places/v1" 
+          -AppSettings:OsPlacesClassificationCodes "CA01,CA03,CE05,CI,CI01,CI02,CI03,CI04,CI05,CL08,CL11,CN03,CN04,CN05,CO01,CR02,CR04,CR08,CS01,CS02,CT04,LA01,LA02,LB,LD01,LF02,LP01,OR04,P,PP,RD01,RD02,RD03,RD04,RD06,RD07,RD08,RD10,X" 
+          -AppSettings:OsPlacesClassificationFarmCodes "CA01,CA03,CE05,CI,CI01,CI02,CI03,CI04,CI05,CL08,CL11,CN03,CN04,CN05,CR02,CR04,CR08,CS01,CS02,CT04,LA01,LA02,OR04,P,PP" 
+          -AppSettings:RoyalMailPostcodeFinderUrl "https://www.royalmail.com/find-a-postcode"
+          -InMemoryCacheConfigurations:MinutesToLive "60"
+          -SocSettings:Environment "${environment}"
+    connectionStrings: '[{"name": "sql_db", "value": "Server=tcp:$(sqlServerName),1433;Database=trade-eucerts;", "type": "SQLAzure", "slotSetting": false}]'
+    setupMiUser: 'true'
+    forceDevDeploy: ${{ parameters.forceDevDeploy }}
+    deployToSecondary: ${{ parameters.deployToSecondary }}
+    deployDevSlot: ${{ parameters.deployDevSlot }}
+    deployTstSlot: ${{ parameters.deployTstSlot }}
+    deployPreSlot: ${{ parameters.deployPreSlot }}
+    deployPrdSlot: ${{ parameters.deployPrdSlot }}
+    runOpenAPIDiff: ${{ parameters.runOpenAPIDiff }}    
+    allowAPIBreakingChanges: ${{ parameters.allowAPIBreakingChanges }}
+    codeGeneration:
+      ApiClientName: 'EUCerts'
+      ApiVersion: 'v1'
+      Version: ${{ parameters.libraryVersion }}
+      runClientGeneration: ${{ parameters.runCodeGeneration }}
+    runSonarScan: true
+    sonarExclusionPaths: 'src/*.UI.Vue/**'
+    publishAPIMApi: 
+      apiConfig: '**/api-config/trade-eucerts-api.yml'
+      apiProjectName: '$(APIName)'
+      apiTemplate: 'trade-eucerts-api'
+    qualityGate: ${{ parameters.qualityGate }}
+    skipBuildTests: true
+    runVulnerabilityScan: ${{ parameters.runVulnerabilityScan }}
