@@ -248,7 +248,7 @@ extends:
       ApiVersion: 'v1'
       Version: ${{ parameters.libraryVersion }}
       runClientGeneration: ${{ parameters.runCodeGeneration }}
-    # runSonarScan: true
+    runSonarScan: true
     # sonarExclusionPaths: 'src/*'
     # publishAPIMApi: 
     #   apiConfig: '**/api-config/pts-checker-web-api.yml'
