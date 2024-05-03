@@ -69,7 +69,7 @@ trigger:
       - '*'
   paths:
     include:
-      - src/Defra.PTS.Checker.Web.Api/*
+      - src/*
       - test/*
 
 resources:
