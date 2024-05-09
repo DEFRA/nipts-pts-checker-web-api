@@ -95,7 +95,7 @@ extends:
   template: /templates/basic-webapp-deploy-pipeline.yaml@PipelineCommon
   parameters:
     appName: $(APIName)
-    appProject: TRS
+    appProject: PTS
     appInstanceNumber: $(nc-region-id)03
     buildProjects: |
       **/*Api.csproj
