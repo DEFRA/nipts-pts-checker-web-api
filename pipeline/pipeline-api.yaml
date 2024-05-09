@@ -69,35 +69,39 @@ trigger:
       - '*'
   paths:
     include:
-      - src/Defra.Trade.EUCerts.Api/*
+      - src/Defra.PTS.Checker.Web.Api/*
       - test/*
+
 resources:
   repositories:
     - repository: PipelineCommon
       name: DEFRA-TRD/Defra.TRD.Pipeline.Common
       type: git
       ref: master
-  pipelines:
-    - pipeline: INFRA
-      source: Defra.EEHC.Infra EUCerts API WebApp
-      trigger:
-        branches:
-          include:
-            - '*'
-        stages:
-          - DEV
+  # pipelines:
+  #   - pipeline: INFRA # need to change as per infra
+  #     source: Defra.EEHC.Infra EUCerts API WebApp
+  #     trigger:
+  #       branches:
+  #         include:
+  #           - '*'
+  #       stages:
+  #         - DEV
+
 variables:
-  APIName: Defra.Trade.EUCerts.Api
+  APIName: nipts-pts-checker-web-api #Defra.PTS.Checker.Web.Api
+
 extends:
   template: /templates/basic-webapp-deploy-pipeline.yaml@PipelineCommon
   parameters:
     appName: $(APIName)
     appProject: TRS
-    appInstanceNumber: $(nc-region-id)30
+    appInstanceNumber: $(nc-region-id)03
     buildProjects: |
       **/*Api.csproj
       **/*Tests.csproj
     publishProject: '**/*Api.csproj'
+    scr: GH
     appSettingsEnv:
         dev: >-
           -CommonSql:UseAzureAccessToken true
@@ -240,16 +244,16 @@ extends:
     runOpenAPIDiff: ${{ parameters.runOpenAPIDiff }}    
     allowAPIBreakingChanges: ${{ parameters.allowAPIBreakingChanges }}
     codeGeneration:
-      ApiClientName: 'EUCerts'
+      ApiClientName: 'PTS'
       ApiVersion: 'v1'
       Version: ${{ parameters.libraryVersion }}
       runClientGeneration: ${{ parameters.runCodeGeneration }}
     runSonarScan: true
-    sonarExclusionPaths: 'src/*.UI.Vue/**'
-    publishAPIMApi: 
-      apiConfig: '**/api-config/trade-eucerts-api.yml'
-      apiProjectName: '$(APIName)'
-      apiTemplate: 'trade-eucerts-api'
+    # sonarExclusionPaths: 'src/*.Api*/**, src/Defra.PTS.Checker.Web.Api/Program.cs'
+    # publishAPIMApi: 
+    #   apiConfig: '**/api-config/pts-checker-web-api.yml'
+    #   apiProjectName: '$(APIName)'
+    #   apiTemplate: 'pts-checker-web-api'
     qualityGate: ${{ parameters.qualityGate }}
     skipBuildTests: true
     runVulnerabilityScan: ${{ parameters.runVulnerabilityScan }}
