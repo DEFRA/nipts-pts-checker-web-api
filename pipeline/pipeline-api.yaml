@@ -233,7 +233,7 @@ extends:
           -AppSettings:RoyalMailPostcodeFinderUrl "https://www.royalmail.com/find-a-postcode"
           -InMemoryCacheConfigurations:MinutesToLive "60"
           -SocSettings:Environment "${environment}"
-    connectionStrings: '[{"name": "sql_db", "value": "Server=tcp:$(sqlServerName),1433;Database=trade-eucerts;", "type": "SQLAzure", "slotSetting": false}]'
+    connectionStrings: '[{"name": "sql_db", "value": "Server=tcp:$(sqlServerName),1433;Database=pet-travel;Authentication=Active Directory Managed Identity;", "type": "SQLAzure", "slotSetting": false}]'
     setupMiUser: 'true'
     forceDevDeploy: ${{ parameters.forceDevDeploy }}
     deployToSecondary: ${{ parameters.deployToSecondary }}
