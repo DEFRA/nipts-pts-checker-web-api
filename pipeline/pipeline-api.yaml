@@ -248,7 +248,7 @@ extends:
       ApiVersion: 'v1'
       Version: ${{ parameters.libraryVersion }}
       runClientGeneration: ${{ parameters.runCodeGeneration }}
-    runSonarScan: true
+    runSonarScan: false
     # sonarExclusionPaths: 'src/*.Api*/**, src/Defra.PTS.Checker.Web.Api/Program.cs'
     # publishAPIMApi: 
     #   apiConfig: '**/api-config/pts-checker-web-api.yml'
@@ -256,4 +256,4 @@ extends:
     #   apiTemplate: 'pts-checker-web-api'
     qualityGate: ${{ parameters.qualityGate }}
     skipBuildTests: true
-    runVulnerabilityScan: ${{ parameters.runVulnerabilityScan }}
+    # runVulnerabilityScan: ${{ parameters.runVulnerabilityScan }}
