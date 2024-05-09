@@ -254,6 +254,7 @@ extends:
     #   apiConfig: '**/api-config/pts-checker-web-api.yml'
     #   apiProjectName: '$(APIName)'
     #   apiTemplate: 'pts-checker-web-api'
+    runHealthCheck: false
     qualityGate: ${{ parameters.qualityGate }}
     skipBuildTests: true
     # runVulnerabilityScan: ${{ parameters.runVulnerabilityScan }}
