@@ -96,6 +96,7 @@ extends:
   parameters:
     appName: $(APIName)
     appProject: PTS
+    sqlProject: TRS
     appInstanceNumber: $(nc-region-id)03
     buildProjects: |
       **/*Api.csproj
