@@ -97,7 +97,7 @@ extends:
     appName: $(APIName)
     appProject: PTS
     sqlProject: TRS
-    appInstanceNumber: pet-testing-api
+    appInstanceNumber: $(nc-region-id)05
     buildProjects: |
       **/*Api.csproj
       **/*Tests.csproj
@@ -115,7 +115,7 @@ extends:
         prd: >-
           -AddressApi:BaseUrl "https://$(internalAPIMUrl)/trade-address-api/v1/"
     connectionStrings: '[{"name": "sql_db", "value": "Server=tcp:$(sqlServerName),1433;Database=pet-travel; Authentication=Active Directory Managed Identity;", "type": "SQLAzure", "slotSetting": false}]'
-    setupMiUser: 'false'
+    setupMiUser: 'true'
     forceDevDeploy: ${{ parameters.forceDevDeploy }}
     deployToSecondary: ${{ parameters.deployToSecondary }}
     deployDevSlot: ${{ parameters.deployDevSlot }}
