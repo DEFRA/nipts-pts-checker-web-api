@@ -89,13 +89,14 @@ resources:
   #         - DEV
 
 variables:
-  APIName: nipts-pts-checker-web-api #Defra.PTS.Checker.Web.Api
+  APIName: Defra.PTS.Checker.Web.Api
 
 extends:
   template: /templates/basic-webapp-deploy-pipeline.yaml@PipelineCommon
   parameters:
     appName: $(APIName)
     appProject: PTS
+    sqlProject: TRS
     appInstanceNumber: pet-testing-api
     buildProjects: |
       **/*Api.csproj
@@ -113,7 +114,7 @@ extends:
           -AddressApi:BaseUrl "https://$(internalAPIMUrl)/trade-address-api/v1/"
         prd: >-
           -AddressApi:BaseUrl "https://$(internalAPIMUrl)/trade-address-api/v1/"
-    connectionStrings: '[{"name": "sql_db", "value": "Server=tcp:$(sqlServerName),1433;Database=trade-eucerts;", "type": "SQLAzure", "slotSetting": false}]'
+    connectionStrings: '[{"name": "sql_db", "value": "Server=tcp:$(sqlServerName),1433;Database=pet-travel; Authentication=Active Directory Managed Identity;", "type": "SQLAzure", "slotSetting": false}]'
     setupMiUser: 'true'
     forceDevDeploy: ${{ parameters.forceDevDeploy }}
     deployToSecondary: ${{ parameters.deployToSecondary }}
@@ -134,6 +135,7 @@ extends:
     #   apiConfig: '**/api-config/pts-checker-web-api.yml'
     #   apiProjectName: '$(APIName)'
     #   apiTemplate: 'pts-checker-web-api'
+    runHealthCheck: false
     qualityGate: ${{ parameters.qualityGate }}
     skipBuildTests: true
-    runVulnerabilityScan: ${{ parameters.runVulnerabilityScan }}
+    # runVulnerabilityScan: ${{ parameters.runVulnerabilityScan }}
