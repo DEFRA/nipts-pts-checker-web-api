@@ -5,7 +5,9 @@ using Defra.Trade.Common.AppConfig;
 using Defra.Trade.Common.Security.Authentication.Infrastructure;
 using Defra.Trade.Common.Security.AzureKeyVault;
 using Defra.Trade.Common.Security.AzureKeyVault.Configuration;
+using Microsoft.Azure.Management.Storage.Fluent.Models;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OpenApi.Models;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,6 +36,10 @@ if (string.IsNullOrEmpty(builder.Configuration.GetConnectionString("sql_db")))
 
 builder.Services.AddDefraRepositoriesServices(builder.Configuration.GetConnectionString("sql_db")!);
 builder.Services.AddDefraApiServices(builder.Configuration);
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "PTS Checker API", Version = "v1" });
+});
 
 //var secretClient = builder.Services.AddKeyVault(builder.Configuration);
 //builder.Services.AddSingleton(secretClient);
@@ -42,11 +48,14 @@ builder.Services.AddDefraApiServices(builder.Configuration);
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "PTS Checker API v1");
+});
+
+
 
 app.UseHttpsRedirection();
 
