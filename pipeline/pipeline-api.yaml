@@ -23,7 +23,7 @@ parameters:
   - name: deployToSecondary
     displayName: "Select Secondary Region"
     type: string
-    default: PRD
+    default: None
     values:
       - None
       - DEV
