@@ -96,7 +96,7 @@ extends:
   parameters:
     appName: $(APIName)
     appProject: PTS
-    appInstanceNumber: $(nc-region-id)03
+    appInstanceNumber: pet-testing-api
     buildProjects: |
       **/*Api.csproj
       **/*Tests.csproj
