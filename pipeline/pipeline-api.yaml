@@ -115,7 +115,7 @@ extends:
         prd: >-
           -AddressApi:BaseUrl "https://$(internalAPIMUrl)/trade-address-api/v1/"
     connectionStrings: '[{"name": "sql_db", "value": "Server=tcp:$(sqlServerName),1433;Database=pet-travel; Authentication=Active Directory Managed Identity;", "type": "SQLAzure", "slotSetting": false}]'
-    setupMiUser: 'false'
+    setupMiUser: 'true'
     forceDevDeploy: ${{ parameters.forceDevDeploy }}
     deployToSecondary: ${{ parameters.deployToSecondary }}
     deployDevSlot: ${{ parameters.deployDevSlot }}
