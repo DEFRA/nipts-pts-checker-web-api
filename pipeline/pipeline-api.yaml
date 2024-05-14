@@ -138,4 +138,4 @@ extends:
     runHealthCheck: false
     qualityGate: ${{ parameters.qualityGate }}
     skipBuildTests: true
-    # runVulnerabilityScan: ${{ parameters.runVulnerabilityScan }}
+    runVulnerabilityScan: ${{ parameters.runVulnerabilityScan }}
