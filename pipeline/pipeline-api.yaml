@@ -89,7 +89,7 @@ resources:
   #         - DEV
 
 variables:
-  APIName: Defra.PTS.Checker.Web.Api
+  APIName: nipts-pts-checker-web-api #Defra.PTS.Checker.Web.Api
 
 extends:
   template: /templates/basic-webapp-deploy-pipeline.yaml@PipelineCommon
@@ -129,7 +129,7 @@ extends:
       ApiVersion: 'v1'
       Version: ${{ parameters.libraryVersion }}
       runClientGeneration: ${{ parameters.runCodeGeneration }}
-    runSonarScan: false
+    runSonarScan: true
     # sonarExclusionPaths: 'src/*.Api*/**, src/Defra.PTS.Checker.Web.Api/Program.cs'
     # publishAPIMApi: 
     #   apiConfig: '**/api-config/pts-checker-web-api.yml'
@@ -138,4 +138,4 @@ extends:
     runHealthCheck: false
     qualityGate: ${{ parameters.qualityGate }}
     skipBuildTests: true
-    # runVulnerabilityScan: ${{ parameters.runVulnerabilityScan }}
+    runVulnerabilityScan: ${{ parameters.runVulnerabilityScan }}
