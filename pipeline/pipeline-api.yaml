@@ -77,7 +77,8 @@ resources:
     - repository: PipelineCommon
       name: DEFRA-TRD/Defra.TRD.Pipeline.Common
       type: git
-      ref: master
+      ref: JA/sonar-git
+
   # pipelines:
   #   - pipeline: INFRA # need to change as per infra
   #     source: Defra.EEHC.Infra EUCerts API WebApp
@@ -89,7 +90,7 @@ resources:
   #         - DEV
 
 variables: 
-  APIName: 'DEFRA_nipts-pts-checker-web-api' #Defra.PTS.Checker.Web.Api
+  APIName: 'nipts-pts-checker-web-api' #Defra.PTS.Checker.Web.Api
 
 extends:
   template: /templates/basic-webapp-deploy-pipeline.yaml@PipelineCommon
