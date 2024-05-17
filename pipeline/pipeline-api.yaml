@@ -77,7 +77,7 @@ resources:
     - repository: PipelineCommon
       name: DEFRA-TRD/Defra.TRD.Pipeline.Common
       type: git
-      ref: JA/sonar-git
+      ref: master
 
   # pipelines:
   #   - pipeline: INFRA # need to change as per infra
