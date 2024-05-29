@@ -89,8 +89,8 @@ resources:
   #       stages:
   #         - DEV
 
-variables: 
-  APIName: 'nipts-pts-checker-web-api' #Defra.PTS.Checker.Web.Api
+variables:
+  APIName: DEFRA_nipts-pts-checker-web-api
 
 extends:
   template: /templates/basic-webapp-deploy-pipeline.yaml@PipelineCommon
