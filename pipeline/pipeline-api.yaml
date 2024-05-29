@@ -78,6 +78,7 @@ resources:
       name: DEFRA-TRD/Defra.TRD.Pipeline.Common
       type: git
       ref: master
+
   # pipelines:
   #   - pipeline: INFRA # need to change as per infra
   #     source: Defra.EEHC.Infra EUCerts API WebApp
@@ -89,7 +90,7 @@ resources:
   #         - DEV
 
 variables:
-  APIName: Defra.PTS.Checker.Web.Api
+  APIName: DEFRA_nipts-pts-checker-web-api
 
 extends:
   template: /templates/basic-webapp-deploy-pipeline.yaml@PipelineCommon
@@ -129,7 +130,7 @@ extends:
       ApiVersion: 'v1'
       Version: ${{ parameters.libraryVersion }}
       runClientGeneration: ${{ parameters.runCodeGeneration }}
-    runSonarScan: false
+    runSonarScan: true
     # sonarExclusionPaths: 'src/*.Api*/**, src/Defra.PTS.Checker.Web.Api/Program.cs'
     # publishAPIMApi: 
     #   apiConfig: '**/api-config/pts-checker-web-api.yml'
@@ -138,4 +139,4 @@ extends:
     runHealthCheck: false
     qualityGate: ${{ parameters.qualityGate }}
     skipBuildTests: true
-    # runVulnerabilityScan: ${{ parameters.runVulnerabilityScan }}
+    runVulnerabilityScan: ${{ parameters.runVulnerabilityScan }}
