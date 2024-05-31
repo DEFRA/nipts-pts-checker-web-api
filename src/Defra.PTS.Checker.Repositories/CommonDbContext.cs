@@ -20,5 +20,7 @@ namespace  Defra.PTS.Checker.Repositories
         public DbSet<entity.Breed> Breed { get; set; }
         public DbSet<entity.Color> Color { get; set; }
         public DbSet<entity.TravelDocument> TravelDocument { get; set; }
+        public DbSet<entity.Operator> Operator { get; set; }
+        public DbSet<entity.Port> Port { get; set; }
     }
 }
