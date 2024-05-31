@@ -23,5 +23,9 @@ namespace  Defra.PTS.Checker.Repositories
         public DbSet<entity.Operator> Operator { get; set; }
         public DbSet<entity.Port> Port { get; set; }
         public DbSet<entity.Route> Route { get; set; }
+        public DbSet<entity.Role> Role { get; set; }
+        public DbSet<entity.Checker> Checker { get; set; }
+        public DbSet<entity.Outcome> Outcome { get; set; }
+        public DbSet<entity.PasengerType> PasengerType { get; set; }
     }
 }
