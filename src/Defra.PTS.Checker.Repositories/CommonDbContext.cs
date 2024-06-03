@@ -52,6 +52,12 @@ namespace  Defra.PTS.Checker.Repositories
                 .WithMany(o => o.Routes)
                 .HasForeignKey(r => r.OperatorId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<entity.Checker>()
+              .HasOne(c => c.RoleNavigation)
+              .WithMany(r => r.Checkers)
+              .HasForeignKey(c => c.RoleId)
+              .OnDelete(DeleteBehavior.Restrict);
         }
 
     }
