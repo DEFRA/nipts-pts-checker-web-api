@@ -1,10 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Defra.PTS.Checker.Entities
 {
-    [ExcludeFromCodeCoverageAttribute]
+    [ExcludeFromCodeCoverage]
     [Table("CheckSummary")]
     public class CheckSummary
     {
@@ -13,11 +14,11 @@ namespace Defra.PTS.Checker.Entities
 
         public bool? GBCheck { get; set; }
 
-        public Guid LinkedCheckId { get; set; }
+        public Guid? LinkedCheckId { get; set; }
 
         public Guid CheckerId { get; set; }
 
-        public int? Route { get; set; }
+        public int? RouteId { get; set; }
 
         public DateTime? Date { get; set; }
 
@@ -38,6 +39,7 @@ namespace Defra.PTS.Checker.Entities
 
         public bool? PTDFailStatusUnsuccessfulRevokedSuspended { get; set; }
 
+        // Navigation properties
         [ForeignKey("CheckOutcomeId")]
         public virtual CheckOutcome CheckOutcome { get; set; }
 
@@ -50,7 +52,7 @@ namespace Defra.PTS.Checker.Entities
         [ForeignKey("TravelDocumentId")]
         public virtual TravelDocument TravelDocument { get; set; }
 
-        [ForeignKey("Route")]
+        [ForeignKey("RouteId")]
         public virtual Route RouteNavigation { get; set; }
 
         [ForeignKey("CheckerId")]
