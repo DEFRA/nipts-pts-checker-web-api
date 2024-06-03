@@ -38,6 +38,11 @@ namespace Defra.PTS.Checker.Repositories.Implementation
             return await _dbContext.Set<TEntity>().FindAsync(id);
         }
 
+        public async Task<IEnumerable<TEntity>> GetAllAsync()
+        {
+            return await _dbContext.Set<TEntity>().ToListAsync();
+        }
+
         public IEnumerable<TEntity> GetAll()
         {
             return _dbContext.Set<TEntity>().ToList();
