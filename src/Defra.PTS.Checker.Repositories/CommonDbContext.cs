@@ -3,14 +3,14 @@ using Microsoft.EntityFrameworkCore;
 using System.Diagnostics.CodeAnalysis;
 using entity = Defra.PTS.Checker.Entities;
 
-namespace  Defra.PTS.Checker.Repositories
+namespace Defra.PTS.Checker.Repositories
 {
     [ExcludeFromCodeCoverage]
     public class CommonDbContext : DbContext
     {
         public CommonDbContext(DbContextOptions<CommonDbContext> options) : base(options)
         {
-                
+
         }
 
         public DbSet<entity.User> User { get; set; }
@@ -34,6 +34,48 @@ namespace  Defra.PTS.Checker.Repositories
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Application>()
+                .HasOne(a => a.Pet)
+                .WithMany()
+                .HasForeignKey(a => a.PetId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Application>()
+                .HasOne(a => a.User)
+                .WithMany()
+                .HasForeignKey(a => a.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Application>()
+                .HasOne(a => a.Owner)
+                .WithMany()
+                .HasForeignKey(a => a.OwnerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Application>()
+                .HasOne(a => a.OwnerAddress)
+                .WithMany()
+                .HasForeignKey(a => a.OwnerAddressId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TravelDocument>()
+               .HasOne(td => td.Application)
+               .WithMany()
+               .HasForeignKey(td => td.ApplicationId)
+               .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TravelDocument>()
+                .HasOne(td => td.Pet)
+                .WithMany()
+                .HasForeignKey(td => td.PetId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TravelDocument>()
+                .HasOne(td => td.Owner)
+                .WithMany()
+                .HasForeignKey(td => td.OwnerId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Route>()
               .HasOne(r => r.DeparturePortNavigation)
