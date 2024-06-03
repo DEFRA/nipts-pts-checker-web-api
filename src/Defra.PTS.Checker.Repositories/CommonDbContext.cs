@@ -58,6 +58,84 @@ namespace  Defra.PTS.Checker.Repositories
               .WithMany(r => r.Checkers)
               .HasForeignKey(c => c.RoleId)
               .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CheckOutcome>()
+              .HasOne(co => co.OutcomeNavigation)
+              .WithMany()
+              .HasForeignKey(co => co.Outcome)
+              .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CheckOutcome>()
+                .HasOne(co => co.ODTypeNavigation)
+                .WithMany()
+                .HasForeignKey(co => co.ODType)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CheckOutcome>()
+                .HasOne(co => co.VCFailBreedActualNavigation)
+                .WithMany()
+                .HasForeignKey(co => co.VCFailBreedActual)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CheckOutcome>()
+                .HasOne(co => co.PDBreedNavigation)
+                .WithMany()
+                .HasForeignKey(co => co.PDBreed)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CheckOutcome>()
+                .HasOne(co => co.VCFailColourActualNavigation)
+                .WithMany()
+                .HasForeignKey(co => co.VCFailColourActual)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CheckOutcome>()
+                .HasOne(co => co.PDColourNavigation)
+                .WithMany()
+                .HasForeignKey(co => co.PDColour)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CheckSummary>()
+              .HasOne(cs => cs.CheckOutcome)
+              .WithMany()
+              .HasForeignKey(cs => cs.CheckOutcomeId)
+              .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CheckSummary>()
+                .HasOne(cs => cs.Owner)
+                .WithMany()
+                .HasForeignKey(cs => cs.OwnerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CheckSummary>()
+                .HasOne(cs => cs.Application)
+                .WithMany()
+                .HasForeignKey(cs => cs.ApplicationId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CheckSummary>()
+                .HasOne(cs => cs.TravelDocument)
+                .WithMany()
+                .HasForeignKey(cs => cs.TravelDocumentId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CheckSummary>()
+                .HasOne(cs => cs.RouteNavigation)
+                .WithMany()
+                .HasForeignKey(cs => cs.RouteId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CheckSummary>()
+                .HasOne(cs => cs.Checker)
+                .WithMany()
+                .HasForeignKey(cs => cs.CheckerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CheckSummary>()
+                .HasOne(cs => cs.LinkedCheck)
+                .WithMany()
+                .HasForeignKey(cs => cs.LinkedCheckId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
 
     }

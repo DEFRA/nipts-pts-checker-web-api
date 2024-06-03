@@ -16,5 +16,6 @@ namespace Defra.PTS.Checker.Entities
         [MaxLength(300)]
         [Column("Type")]
         public string Type { get; set; }
+
     }
 }
