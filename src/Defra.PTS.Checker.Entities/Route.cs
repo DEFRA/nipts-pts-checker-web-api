@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Defra.PTS.Checker.Entities
 {
-    [ExcludeFromCodeCoverageAttribute]
+    [ExcludeFromCodeCoverage]
     [Table("Route")]
     public class Route
     {
@@ -23,23 +20,25 @@ namespace Defra.PTS.Checker.Entities
         public string RouteName { get; set; }
 
         [Required]
-        [ForeignKey("DeparturePort")]
-        [Column("DeparturePort")]
-        public int DeparturePort { get; set; }
+        [Column("DeparturePortId")]
+        public int DeparturePortId { get; set; }
 
         [Required]
-        [ForeignKey("ArrivalPort")]
-        [Column("ArrivalPort")]
-        public int ArrivalPort { get; set; }
+        [Column("ArrivalPortId")]
+        public int ArrivalPortId { get; set; }
 
         [Required]
-        [ForeignKey("Operator")]
-        [Column("Operator")]
-        public int Operator { get; set; }
+        [Column("OperatorId")]
+        public int OperatorId { get; set; }
 
         // Navigation properties
+        [ForeignKey("DeparturePortId")]
         public virtual Port DeparturePortNavigation { get; set; }
+
+        [ForeignKey("ArrivalPortId")]
         public virtual Port ArrivalPortNavigation { get; set; }
+
+        [ForeignKey("OperatorId")]
         public virtual Operator OperatorNavigation { get; set; }
     }
 }

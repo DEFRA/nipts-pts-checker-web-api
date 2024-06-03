@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Defra.PTS.Checker.Entities;
+using Microsoft.EntityFrameworkCore;
 using System.Diagnostics.CodeAnalysis;
 using entity = Defra.PTS.Checker.Entities;
 
@@ -29,5 +30,29 @@ namespace  Defra.PTS.Checker.Repositories
         public DbSet<entity.PasengerType> PasengerType { get; set; }
         public DbSet<entity.CheckOutcome> CheckOutcome { get; set; }
         public DbSet<entity.CheckSummary> CheckSummary { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Route>()
+              .HasOne(r => r.DeparturePortNavigation)
+              .WithMany(p => p.DepartureRoutes)
+              .HasForeignKey(r => r.DeparturePortId)
+              .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Route>()
+                .HasOne(r => r.ArrivalPortNavigation)
+                .WithMany(p => p.ArrivalRoutes)
+                .HasForeignKey(r => r.ArrivalPortId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Route>()
+                .HasOne(r => r.OperatorNavigation)
+                .WithMany(o => o.Routes)
+                .HasForeignKey(r => r.OperatorId)
+                .OnDelete(DeleteBehavior.Restrict);
+        }
+
     }
 }
