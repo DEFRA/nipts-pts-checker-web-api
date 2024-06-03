@@ -16,5 +16,7 @@ namespace Defra.PTS.Checker.Entities
         [MaxLength(300)]
         [Column("RoleName")]
         public string RoleName { get; set; }
+
+        public virtual ICollection<Checker> Checkers { get; set; }
     }
 }

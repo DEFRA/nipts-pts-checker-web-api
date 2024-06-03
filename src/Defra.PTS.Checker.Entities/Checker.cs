@@ -1,10 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Defra.PTS.Checker.Entities
 {
-    [ExcludeFromCodeCoverageAttribute]
+    [ExcludeFromCodeCoverage]
     [Table("Checker")]
     public class Checker
     {
@@ -28,11 +29,11 @@ namespace Defra.PTS.Checker.Entities
         public string LastName { get; set; }
 
         [Required]
-        [ForeignKey("Role")]
-        [Column("Role")]
-        public int Role { get; set; }
+        [Column("RoleId")]
+        public int RoleId { get; set; }
 
         // Navigation property
+        [ForeignKey("RoleId")]
         public virtual Role RoleNavigation { get; set; }
     }
 }
