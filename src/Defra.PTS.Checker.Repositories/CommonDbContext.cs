@@ -27,5 +27,7 @@ namespace  Defra.PTS.Checker.Repositories
         public DbSet<entity.Checker> Checker { get; set; }
         public DbSet<entity.Outcome> Outcome { get; set; }
         public DbSet<entity.PasengerType> PasengerType { get; set; }
+        public DbSet<entity.CheckOutcome> CheckOutcome { get; set; }
+        public DbSet<entity.CheckSummary> CheckSummary { get; set; }
     }
 }
