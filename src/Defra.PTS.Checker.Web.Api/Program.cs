@@ -13,7 +13,12 @@ using System.Reflection;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.AddUserSecrets(Assembly.GetExecutingAssembly(), true);
-builder.Configuration.AddJsonFile("appsettings.json", true, true).AddEnvironmentVariables();
+#if DEBUG
+                builder.Configuration.AddJsonFile("appsettings.Development.json", true, true);
+#endif
+
+builder.Configuration.AddEnvironmentVariables();
+
 
 // Add services to the container.
 builder.Services
