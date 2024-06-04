@@ -29,22 +29,15 @@ namespace Defra.PTS.Checker.Entities
         public Guid TravelDocumentId { get; set; }
 
         [MaxLength(15)]
-        public string ChipNumber { get; set; }
+        public string? ChipNumber { get; set; }
 
-        public Guid OwnerId { get; set; }
+        public bool? CheckOutcome { get; set; }
 
         public Guid CheckOutcomeId { get; set; }
 
-        public bool? PTDFailStatusAwaitingApproval { get; set; }
-
-        public bool? PTDFailStatusUnsuccessfulRevokedSuspended { get; set; }
-
         // Navigation properties
         [ForeignKey("CheckOutcomeId")]
-        public virtual CheckOutcome CheckOutcome { get; set; }
-
-        [ForeignKey("OwnerId")]
-        public virtual Owner Owner { get; set; }
+        public virtual CheckOutcome? CkOutcomeId { get; set; }      
 
         [ForeignKey("ApplicationId")]
         public virtual Application Application { get; set; }
