@@ -13,7 +13,7 @@ using System.Reflection;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.AddUserSecrets(Assembly.GetExecutingAssembly(), true);
-builder.Configuration.AddJsonFile("appsettings.json", true, true);
+builder.Configuration.AddJsonFile("appsettings.json", true, true).AddEnvironmentVariables();
 
 // Add services to the container.
 builder.Services
@@ -27,6 +27,7 @@ builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 
 
 if (string.IsNullOrEmpty(builder.Configuration.GetConnectionString("sql_db")))
