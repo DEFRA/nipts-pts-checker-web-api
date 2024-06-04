@@ -13,7 +13,7 @@ using System.Reflection;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.AddUserSecrets(Assembly.GetExecutingAssembly(), true);
-builder.Configuration.AddJsonFile("appsettings.json", true, true).AddEnvironmentVariables();
+builder.Configuration.AddJsonFile("appsettings.json", true, true);
 
 // Add services to the container.
 builder.Services
@@ -29,7 +29,6 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 
-throw new InvalidOperationException("SQL Database Connection string" + builder.Configuration.GetConnectionString("sql_db"));
 if (string.IsNullOrEmpty(builder.Configuration.GetConnectionString("sql_db")))
 {
     throw new InvalidOperationException("Missing connection string for the database within configuration");
