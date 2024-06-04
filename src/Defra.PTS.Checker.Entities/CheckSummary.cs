@@ -37,7 +37,7 @@ namespace Defra.PTS.Checker.Entities
 
         // Navigation properties
         [ForeignKey("CheckOutcomeId")]
-        public virtual CheckOutcome CkOutcomeId { get; set; }      
+        public virtual CheckOutcome? CkOutcomeId { get; set; }      
 
         [ForeignKey("ApplicationId")]
         public virtual Application Application { get; set; }
