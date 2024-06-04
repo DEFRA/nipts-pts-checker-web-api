@@ -12,9 +12,6 @@ namespace Defra.PTS.Checker.Entities
     {
         [Key]
         public Guid Id { get; set; }
-
-        public bool? GBCheck { get; set; }
-        public bool? CheckOutcomeValue { get; set; }
         public bool? PTDFailNoPTD { get; set; }
         public bool? PTDFailStatusAwaitingApproval { get; set; }
         public bool? PTDFailStatusUnsuccessfulRevokedSuspended { get; set; }
