@@ -6,7 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace Defra.PTS.Checker.Repositories.Implementation
 {
     [ExcludeFromCodeCoverage]
-    public class ColourRepository : Repository<entity.Color>, IColourRepository
+    public class ColourRepository : Repository<entity.Colour>, IColourRepository
     {
         private CommonDbContext colourContext
         {
