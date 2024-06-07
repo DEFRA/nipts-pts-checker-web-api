@@ -85,9 +85,9 @@ namespace Defra.PTS.Checker.Entities
         public virtual Breed PDBreedNavigation { get; set; }
 
         [ForeignKey("VCFailColourActual")]
-        public virtual Color VCFailColourActualNavigation { get; set; }
+        public virtual Colour VCFailColourActualNavigation { get; set; }
 
         [ForeignKey("PDColour")]
-        public virtual Color PDColourNavigation { get; set; }
+        public virtual Colour PDColourNavigation { get; set; }
     }
 }
