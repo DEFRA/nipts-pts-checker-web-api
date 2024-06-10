@@ -23,11 +23,11 @@ namespace Defra.PTS.Checker.Entities
         [Required]
         public Guid ApplicationId { get; set; }
 
-        public byte[] QrCode { get; set; }
+        public byte[]? QrCode { get; set; }
 
         [Required]
         [MaxLength(20)]
-        public string DocumentReferenceNumber { get; set; }
+        public string? DocumentReferenceNumber { get; set; }
 
         public bool? IsLifeTime { get; set; }
 
@@ -48,17 +48,17 @@ namespace Defra.PTS.Checker.Entities
         public DateTime? UpdatedOn { get; set; } = DateTime.UtcNow;
 
         [MaxLength(300)]
-        public string DocumentSignedBy { get; set; }
+        public string? DocumentSignedBy { get; set; }
 
         // Navigation properties
         [ForeignKey("ApplicationId")]
-        public virtual Application Application { get; set; }
+        public virtual Application? Application { get; set; }
 
         [ForeignKey("PetId")]
-        public virtual Pet Pet { get; set; }
+        public virtual Pet? Pet { get; set; }
 
         [ForeignKey("OwnerId")]
-        public virtual Owner Owner { get; set; }
+        public virtual Owner? Owner { get; set; }
 
     }
 }

@@ -15,6 +15,7 @@ namespace Defra.PTS.Checker.Services.Implementation
     {
         private ILogger<ApplicationService> _log;
         private readonly IApplicationRepository _applicationRepository;
+
         public ApplicationService(ILogger<ApplicationService> log, IApplicationRepository applicationRepository)
         {
             _log = log; 
@@ -22,16 +23,9 @@ namespace Defra.PTS.Checker.Services.Implementation
         }
         public Task<Application> GetApplicationById(Guid id)
         {
-            _log.LogInformation("Running inside method {0}", "GetApplication");
+            _log.LogInformation("Running inside method {0}", "GetApplicationById");
             var application = _applicationRepository.GetApplicationById(id);
             return application;
         }
-
-        //public Task<IEnumerable<Application>> GetAllApplications()
-        //{
-        //    _log.LogInformation("Running inside method {0}", "GetAllApplications");
-        //    var applications = _applicationRepository.GetAll();
-        //    return Task.FromResult(applications);
-        //}
     }
 }

@@ -27,7 +27,15 @@ namespace Defra.PTS.Checker.Repositories.Implementation
                 .Include(a => a.Pet)
                 .Include(a => a.Owner)
                 .Include(a => a.Pet)
+                .Include(a => a.Pet.Breed)
+                .Include(a => a.Pet.Colour)
                 .FirstOrDefaultAsync(a => a.Id == applicationId);
+        }
+
+        public async Task<entity.TravelDocument> GetTravelDocumentByApplicationId(Guid applicationId)
+        {
+            return await commonContext.TravelDocument
+                .FirstOrDefaultAsync(a => a.ApplicationId == applicationId);
         }
 
         public async Task<bool> PerformHealthCheckLogic()

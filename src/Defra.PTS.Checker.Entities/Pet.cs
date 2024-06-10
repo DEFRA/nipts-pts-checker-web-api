@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
@@ -31,5 +32,11 @@ namespace Defra.PTS.Checker.Entities
         public DateTime? CreatedOn { get; set; }
         public Guid? UpdatedBy { get; set; }
         public DateTime? UpdatedOn { get; set; }
+        // Navigation properties
+        [ForeignKey("BreedId")]
+        public virtual Breed? Breed { get; set; }
+        // Navigation properties
+        [ForeignKey("ColourId")]
+        public virtual Colour? Colour { get; set; }
     }
 }
