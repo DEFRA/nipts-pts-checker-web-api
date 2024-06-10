@@ -23,7 +23,11 @@ namespace Defra.PTS.Checker.Repositories.Implementation
 
         public async Task<entity.Application> GetApplicationById(Guid applicationId)
         {
-            return await commonContext.Application.FirstOrDefaultAsync(a => a.Id == applicationId);
+            return await commonContext.Application
+                .Include(a => a.Pet)
+                .Include(a => a.Owner)
+                .Include(a => a.Pet)
+                .FirstOrDefaultAsync(a => a.Id == applicationId);
         }
 
         public async Task<bool> PerformHealthCheckLogic()
