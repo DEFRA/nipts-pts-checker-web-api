@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Defra.PTS.Checker.Entities
 {
-    [ExcludeFromCodeCoverageAttribute]
+    [ExcludeFromCodeCoverage]
     public class Pet
     {
         public Guid Id { get; set; }

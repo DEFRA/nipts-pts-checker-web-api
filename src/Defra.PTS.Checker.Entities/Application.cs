@@ -5,7 +5,6 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Defra.PTS.Checker.Entities
 {
-    [ExcludeFromCodeCoverage]
     [Table("Application")]
     public class Application
     {

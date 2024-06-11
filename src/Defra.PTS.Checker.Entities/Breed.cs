@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Defra.PTS.Checker.Entities
 {
-    [ExcludeFromCodeCoverageAttribute]
+    [ExcludeFromCodeCoverage]
     public class Breed
     {
         public int Id { get; set; }

@@ -2,7 +2,6 @@
 
 namespace Defra.PTS.Checker.Entities
 {
-    [ExcludeFromCodeCoverageAttribute]
     public class ApplicationDetail
     {
         public string? Status { get; set; }
