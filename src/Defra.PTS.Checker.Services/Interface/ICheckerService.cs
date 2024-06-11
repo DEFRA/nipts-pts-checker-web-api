@@ -2,6 +2,6 @@
 {
     public interface ICheckerService
     {
-        Task<object> CheckMicrochipNumberAsync(string microchipNumber);
+        Task<object?> CheckMicrochipNumberAsync(string microchipNumber);
     }
 }

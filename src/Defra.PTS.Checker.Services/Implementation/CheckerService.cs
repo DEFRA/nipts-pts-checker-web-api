@@ -1,7 +1,6 @@
 ﻿using Defra.PTS.Checker.Services.Enums;
 using Defra.PTS.Checker.Repositories.Interface;
 using Defra.PTS.Checker.Services.Interface;
-using Microsoft.Extensions.Logging;
 
 namespace Defra.PTS.Checker.Services.Implementation
 {
@@ -18,7 +17,7 @@ namespace Defra.PTS.Checker.Services.Implementation
             _travelDocumentRepository = travelDocumentRepository;
         }
 
-        public async Task<object> CheckMicrochipNumberAsync(string microchipNumber)
+        public async Task<object?> CheckMicrochipNumberAsync(string microchipNumber)
         {
             var pets = await _petRepository.GetByMicrochipNumberAsync(microchipNumber);
             if (!pets.Any())
