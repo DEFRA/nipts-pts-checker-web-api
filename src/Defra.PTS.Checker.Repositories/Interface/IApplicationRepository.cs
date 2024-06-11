@@ -9,8 +9,6 @@ namespace Defra.PTS.Checker.Repositories.Interface
 
         Task<Application> GetApplicationById(Guid applicationId);
 
-        Task<VwApplication?> GetApplicationByPTDNumber(string ptdNumber);
-
         Task<bool> PerformHealthCheckLogic();
 
         Application? GetMostRecentApplication(Guid petId);

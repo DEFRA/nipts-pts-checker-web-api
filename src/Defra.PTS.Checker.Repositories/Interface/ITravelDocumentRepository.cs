@@ -10,6 +10,7 @@ namespace  Defra.PTS.Checker.Repositories.Interface
         Task<TravelDocument> GetTravelDocumentByReferenceNumber(string referenceNumber);   
         Task<IEnumerable<TravelDocument>> GetByPetIdAsync(Guid petId);
         Task<TravelDocument?> GetTravelDocumentByApplicationIdAsync(Guid applicationId);
+
         Task<TravelDocument> GetTravelDocumentByPTDNumber(string ptdNumber);
     }
 }

@@ -43,17 +43,16 @@ namespace Defra.PTS.Checker.Repositories.Implementation
 
         public async Task<TravelDocument> GetTravelDocumentByPTDNumber(string ptdNumber)
         {
-            ArgumentNullException.ThrowIfNull(travelDocumentContext);
+            ArgumentNullException.ThrowIfNull(_context);
             ArgumentNullException.ThrowIfNull(ptdNumber);
 
-            var query = travelDocumentContext.TravelDocument
-                    .Include(t => t.Application)
-                    .Include(t => t.Owner)
-                    .Include(t => t.Pet)
-                    .Include(t => t.Pet!.Breed)
-                    .Include(t => t.Pet!.Colour);
-
-            return await query.SingleOrDefaultAsync(x => x.DocumentReferenceNumber.ToLower() == ptdNumber.ToLower());
+            return await _context!.TravelDocument
+                        .Include(t => t.Application)
+                        .Include(t => t.Owner)
+                        .Include(t => t.Pet)
+                        .Include(t => t.Pet!.Breed)
+                        .Include(t => t.Pet!.Colour)
+                        .SingleOrDefaultAsync(x => x.DocumentReferenceNumber == ptdNumber) ?? null!;
         }
 
         public async Task<IEnumerable<TravelDocument>> GetByPetIdAsync(Guid petId)
