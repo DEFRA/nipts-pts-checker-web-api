@@ -20,32 +20,36 @@ public class CheckerController : ControllerBase
     }
 
     /// <summary>
-    /// POST /checker/checkPTDNumber
+    /// Retrieves a specific application by PTD Number
     /// </summary>
-    /// <param name="model"></param>
-    /// <returns></returns>
+    /// <param name="model">The request</param>
+    /// <returns>An approved application</returns>
     /// <remarks>
+    /// Returns the application details for the specified Pet Travel Document Number
+    /// 
     /// Sample request:
     ///
     ///     POST /checker/checkPTDNumber
     ///     {
-    ///        "ptdNumber": "ABCXYZ"
+    ///        "ptdNumber": "GB826CD186E"
     ///     }
     ///
     /// </remarks>
+    /// <response code="200">Ok: Returns the approved application</response>
+    /// <response code="400">Bad Request: PTD Number is not provided or is not valid</response>
+    /// <response code="404">Not Found: There is no application matching this PTD number</response>
+    /// <response code="500">Internal Server Error: An error has occurred</response>
     [HttpPost]
     [Route("checkPTDNumber")]
-    [ProducesResponseType(typeof(VwApplication), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(SearchByPTDNumberResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(IDictionary<string, string>), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     [SwaggerOperation(
             OperationId = "checkPTDNumber",
-            Tags = new[] { "Checker" },
-            Summary = "Retrieves a specific application by PTD Number",
-            Description = "Returns the application details for the specified Pet Travel Document Number"
+            Tags = new[] { "Checker" }
         )]
-    public async Task<IActionResult> SearchApplicationByPTDNumber([FromBody] SearchByPTDNumberModel model)
+    public async Task<IActionResult> SearchApplicationByPTDNumber([FromBody, SwaggerRequestBody("The PTD Numberd", Required = true)] SearchByPTDNumberRequest model)
     {
         try
         {
@@ -60,7 +64,11 @@ public class CheckerController : ControllerBase
                 return new NotFoundObjectResult("PTD Number not found");
             }
 
-            return new OkObjectResult(application);
+            var response = new SearchByPTDNumberResponse
+            {
+            };
+
+            return new OkObjectResult(response);
         }
         catch (Exception ex)
         {

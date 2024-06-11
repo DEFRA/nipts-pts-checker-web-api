@@ -46,6 +46,10 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.EnableAnnotations();
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "PTS Checker API", Version = "v1" });
+
+    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlFilePath = Path.Combine(AppContext.BaseDirectory, xmlFilename);
+    c.IncludeXmlComments(xmlFilePath);
 });
 
 //var secretClient = builder.Services.AddKeyVault(builder.Configuration);
