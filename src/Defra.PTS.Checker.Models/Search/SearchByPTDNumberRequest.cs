@@ -7,7 +7,6 @@ using System.Diagnostics.CodeAnalysis;
 namespace Defra.PTS.Checker.Models.Search;
 
 [ExcludeFromCodeCoverage]
-//[SwaggerSchema(Required = new[] { "Search by PTD Number" })]
 [SwaggerSchemaFilter(typeof(SearchByPTDNumberSchemaFilter))]
 public class SearchByPTDNumberRequest : IValidatableObject
 {

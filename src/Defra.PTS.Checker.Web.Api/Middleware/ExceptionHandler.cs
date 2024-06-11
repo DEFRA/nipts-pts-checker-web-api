@@ -1,6 +1,6 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using Newtonsoft.Json;
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
-using System.Text.Json;
 
 namespace Defra.PTS.Checker.Web.Api.Middleware;
 
@@ -33,34 +33,38 @@ public class ExceptionHandler
         context.Response.ContentType = "application/json";
         var response = context.Response;
 
-        var exceptionModel = new ExceptionModel();
-        
+        var exceptionModel = new ExceptionModel
+        {
+            Title = "Internal server error",
+            TraceId = context.TraceIdentifier
+        };
+
         switch (exception)
         {
             case ApplicationException ex:
                 if (ex.Message.Contains("Invalid Token"))
                 {
-                    response.StatusCode = exceptionModel.StatusCode = (int)HttpStatusCode.Forbidden;
-                    exceptionModel.StatusCode = (int)HttpStatusCode.Forbidden;
+                    response.StatusCode = (int)HttpStatusCode.Forbidden;
+                    exceptionModel.Status = (int)HttpStatusCode.Forbidden;
                 }
                 else
                 {
                     response.StatusCode = (int)HttpStatusCode.BadRequest;
-                    exceptionModel.StatusCode = (int)HttpStatusCode.BadRequest;
+                    exceptionModel.Status = (int)HttpStatusCode.BadRequest;
                 }
 
-                exceptionModel.Message = ex.Message;
+                exceptionModel.Error = ex.Message;
                 break;
             default:
                 response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                exceptionModel.StatusCode = (int)HttpStatusCode.InternalServerError;
-                exceptionModel.Message = $"Internal server error: {exception.Message}";
+                exceptionModel.Status = (int)HttpStatusCode.InternalServerError;
+                exceptionModel.Error = exception.Message;
                 break;
         }
 
         _logger.LogError(exception, exception.Message);
-        
-        var result = JsonSerializer.Serialize(exceptionModel);
+
+        var result = JsonConvert.SerializeObject(exceptionModel);
         await context.Response.WriteAsync(result);
     }
 }

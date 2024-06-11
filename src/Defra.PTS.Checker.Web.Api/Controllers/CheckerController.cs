@@ -156,11 +156,6 @@ public class CheckerController : ControllerBase
 
         return new OkObjectResult(response);
     }
-
-    public class MicrochipCheckRequest
-    {
-        public string? MicrochipNumber { get; set; }
-    }
 }
 
 public class MicrochipCheckRequest

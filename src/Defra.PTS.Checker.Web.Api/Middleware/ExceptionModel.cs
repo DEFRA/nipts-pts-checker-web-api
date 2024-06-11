@@ -1,7 +1,18 @@
-﻿namespace Defra.PTS.Checker.Web.Api.Middleware;
+﻿using Newtonsoft.Json;
+
+namespace Defra.PTS.Checker.Web.Api.Middleware;
 
 public class ExceptionModel
 {
-    public int StatusCode { get; set; }
-    public string? Message { get; set; }
+    [JsonProperty("status")]
+    public int Status { get; set; }
+
+    [JsonProperty("title")]
+    public string Title { get; set; }
+
+    [JsonProperty("traceId")] 
+    public string TraceId { get; set; }
+
+    [JsonProperty("error")]
+    public string? Error { get; set; }
 }
