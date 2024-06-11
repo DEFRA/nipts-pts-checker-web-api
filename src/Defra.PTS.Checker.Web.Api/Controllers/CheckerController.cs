@@ -1,10 +1,7 @@
 ﻿using Defra.PTS.Checker.Entities;
-using Defra.PTS.Checker.Models;
 using Defra.PTS.Checker.Models.Enums;
 using Defra.PTS.Checker.Services.Interface;
-using Defra.Trade.Address.V1.ApiClient.Model;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.Management.CosmosDB.Fluent.Models;
 
 namespace Defra.PTS.Checker.Web.Api.Controllers
 {
@@ -94,7 +91,7 @@ namespace Defra.PTS.Checker.Web.Api.Controllers
 
     public class MicrochipCheckRequest
     {
-        public string MicrochipNumber { get; set; }
+        public string? MicrochipNumber { get; set; }
     }
 }
 
