@@ -31,9 +31,22 @@ namespace Defra.PTS.Checker.Repositories
         public DbSet<entity.CheckOutcome> CheckOutcome { get; set; }
         public DbSet<entity.CheckSummary> CheckSummary { get; set; }
 
+
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Pet>()
+           .HasOne(p => p.Breed)
+           .WithMany()
+           .HasForeignKey(p => p.BreedId);
+
+            modelBuilder.Entity<Pet>()
+                .HasOne(p => p.Colour)
+                .WithMany()
+                .HasForeignKey(p => p.ColourId);
+
 
             modelBuilder.Entity<Application>()
                 .HasOne(a => a.Pet)

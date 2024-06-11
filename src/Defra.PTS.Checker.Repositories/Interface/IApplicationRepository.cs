@@ -1,11 +1,15 @@
-﻿using entity = Defra.PTS.Checker.Entities;
+﻿using Defra.PTS.Checker.Entities;
 
 namespace Defra.PTS.Checker.Repositories.Interface
 {
-    public interface IApplicationRepository : IRepository<entity.Application>
+    public interface IApplicationRepository : IRepository<Application>
     {
-        Task<entity.Application> GetApplicationById(Guid applicationId);
+        Task<Application> GetApplicationById(Guid applicationId);
 
         Task<bool> PerformHealthCheckLogic();
+
+        Application? GetMostRecentApplication(Guid petId);
+
+        Task<IEnumerable<Application>> GetApplicationsByPetIdAsync(Guid petId);
     }
 }

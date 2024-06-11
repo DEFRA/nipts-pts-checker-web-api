@@ -50,7 +50,17 @@ builder.Services.AddSwaggerGen(c =>
 //var secretClient = builder.Services.AddKeyVault(builder.Configuration);
 //builder.Services.AddSingleton(secretClient);
 
-
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyHeader();
+        policy.WithOrigins("https://localhost:56967","http://localhost:56968",
+            $"https://{builder.Configuration["Auth0:Domain"]}");
+        policy.AllowAnyMethod();
+        policy.AllowCredentials();
+    });
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

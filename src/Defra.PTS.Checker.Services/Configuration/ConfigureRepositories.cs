@@ -19,6 +19,10 @@ namespace Defra.PTS.Configuration
                 context.UseSqlServer(conn);
             });
             services.AddScoped<DbContext, CommonDbContext>();
+            services.AddTransient<IPetRepository, PetRepository>();
+            services.AddTransient<IBreedRepository, BreedRepository>();
+            services.AddTransient<IColourRepository, ColourRepository>();
+            services.AddTransient<ITravelDocumentRepository, TravelDocumentRepository>();
             services.AddTransient<IApplicationRepository, ApplicationRepository>();
             services.AddTransient<ISailingRepository, SailingRepository>();
             services.AddTransient(typeof(IRepository<>), typeof(Repository<>));

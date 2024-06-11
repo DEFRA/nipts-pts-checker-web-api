@@ -20,6 +20,7 @@ namespace Defra.PTS.Checker.Web.Api.Configuration
             services.AddTransient<IColourService, ColourService>();
             services.AddTransient<IOwnerService, OwnerService>();
             services.AddTransient<IAddressLookupService, AddressLookupService>();
+            services.AddTransient<ICheckerService, CheckerService>();
             services.AddTransient<ISailingService, SailingService>();
 
             services.AddTransient<IPlacesApi>((provider) =>

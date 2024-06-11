@@ -59,6 +59,5 @@ namespace Defra.PTS.Checker.Entities
 
         [ForeignKey("OwnerId")]
         public virtual Owner Owner { get; set; }
-
     }
 }
