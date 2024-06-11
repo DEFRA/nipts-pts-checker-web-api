@@ -13,7 +13,7 @@ namespace Defra.PTS.Checker.Services.Implementation
 {
     public class TravelDocumentService : ITravelDocumentService
     {
-        private ILogger<TravelDocumentService> _log;
+        private readonly ILogger<TravelDocumentService> _log;
         private readonly ITravelDocumentRepository _travelDocumentRepository;
 
         public TravelDocumentService(ILogger<TravelDocumentService> log, ITravelDocumentRepository travelDocumentRepository)

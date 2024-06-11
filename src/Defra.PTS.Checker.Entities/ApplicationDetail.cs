@@ -7,7 +7,7 @@ namespace Defra.PTS.Checker.Entities
         public string? Status { get; set; }
         public string? DocumentReferenceNumber { get; set; }
         public DateTime? DateOfIssue { get; set; }
-        public Guid ReferenceNumber { get; set; }
+        public Guid? ReferenceNumber { get; set; }
         public DateTime? DateOfApplication { get; set; }
         public string? MicrochipNumber { get; set; }
         public DateTime? MicrochippedDate { get; set; }
@@ -16,7 +16,7 @@ namespace Defra.PTS.Checker.Entities
         public string? BreedName { get; set; }
         public string? SexOfPet { get; set; }
         public DateTime? DateOfBirthOfPet { get; set; }
-        public string ColourOfPet { get; set; }
+        public string? ColourOfPet { get; set; }
         public string? UniqueFeaturesOfPet { get; set; }
 
     }
