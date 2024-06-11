@@ -1,5 +1,6 @@
 
 using Defra.PTS.Checker.Web.Api.Configuration;
+using Defra.PTS.Checker.Web.Api.Middleware;
 using Defra.PTS.Configuration;
 using Defra.Trade.Common.AppConfig;
 using Defra.Trade.Common.Security.Authentication.Infrastructure;
@@ -70,5 +71,7 @@ app.UseHttpsRedirection();
 //app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseMiddleware<ExceptionHandler>();
 
 app.Run();

@@ -13,14 +13,14 @@ public class SearchByPTDNumberRequest : IValidatableObject
 {
     [SwaggerSchema("The pet travel document number")]
     [Required(ErrorMessage = "PTD number is required")]
-    [StringLength(20, ErrorMessage = "PTD Number length can't be more than 20 characters")]
+    [StringLength(20, ErrorMessage = "PTD number must be 20 characters or less")]
     public string PTDNumber {  get; set; } = string.Empty;
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
         if (!string.IsNullOrWhiteSpace(PTDNumber) && !PTDNumber.ToLower().StartsWith(ApiConstants.PTDNumberPrefix.ToLower()))
         {
-            yield return new ValidationResult($"PTD Number must start with {ApiConstants.PTDNumberPrefix}", new[] { nameof(PTDNumber) });
+            yield return new ValidationResult($"PTD number must start with {ApiConstants.PTDNumberPrefix}", new[] { nameof(PTDNumber) });
         }
     }
 }
