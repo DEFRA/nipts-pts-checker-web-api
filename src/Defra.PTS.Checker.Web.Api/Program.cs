@@ -52,10 +52,6 @@ builder.Services.AddSwaggerGen(c =>
     c.IncludeXmlComments(xmlFilePath);
 });
 
-//var secretClient = builder.Services.AddKeyVault(builder.Configuration);
-//builder.Services.AddSingleton(secretClient);
-
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

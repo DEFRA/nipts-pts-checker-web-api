@@ -2,9 +2,22 @@
 
 namespace Defra.PTS.Checker.Entities
 {
-    [ExcludeFromCodeCoverageAttribute]
     public class ApplicationDetail
     {
-        public Guid ApplicationId { get; set; }
+        public string? Status { get; set; }
+        public string? DocumentReferenceNumber { get; set; }
+        public DateTime? DateOfIssue { get; set; }
+        public Guid? ReferenceNumber { get; set; }
+        public DateTime? DateOfApplication { get; set; }
+        public string? MicrochipNumber { get; set; }
+        public DateTime? MicrochippedDate { get; set; }
+        public string? PetName { get; set; }
+        public string? SpeciesOfPet { get; set; }
+        public string? BreedName { get; set; }
+        public string? SexOfPet { get; set; }
+        public DateTime? DateOfBirthOfPet { get; set; }
+        public string? ColourOfPet { get; set; }
+        public string? UniqueFeaturesOfPet { get; set; }
+
     }
 }

@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace Defra.PTS.Checker.Services.Interface
 {
-    public interface IApplicationService
+    public interface ITravelDocumentService
     {
-        Task<Application> GetApplicationById(Guid id);
+        Task<TravelDocument> GetTravelDocumentByReferenceNumber(string referenceNumber);
     }
 }

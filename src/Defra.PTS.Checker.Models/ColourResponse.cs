@@ -2,7 +2,7 @@
 
 namespace Defra.PTS.Checker.Models
 {
-    [ExcludeFromCodeCoverageAttribute]
+    [ExcludeFromCodeCoverage]
     public class ColourResponse
     {
         public int? Id { get; set; }

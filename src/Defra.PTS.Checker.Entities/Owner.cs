@@ -2,7 +2,7 @@
 
 namespace Defra.PTS.Checker.Entities
 {
-    [ExcludeFromCodeCoverageAttribute]
+    [ExcludeFromCodeCoverage]
     public class Owner
     {       
         public Guid Id { get; set; }
