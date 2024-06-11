@@ -17,7 +17,7 @@ namespace Defra.PTS.Checker.Web.Api.Configuration
             services            
             .Configure<ApimInternalSettings>(configuration.GetSection(ApimInternalSettings.OptionsName));
             services.AddTransient<IApplicationService, ApplicationService>();
-            services.AddTransient<IColorService, ColorService>();
+            services.AddTransient<IColourService, ColourService>();
             services.AddTransient<IOwnerService, OwnerService>();
             services.AddTransient<IAddressLookupService, AddressLookupService>();
             services.AddTransient<ISailingService, SailingService>();
