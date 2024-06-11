@@ -1,4 +1,5 @@
-﻿using entity = Defra.PTS.Checker.Entities;
+﻿
+using Defra.PTS.Checker.Entities;
 using Defra.PTS.Checker.Repositories.Interface;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
@@ -9,23 +10,18 @@ using System;
 namespace Defra.PTS.Checker.Repositories.Implementation
 {
     [ExcludeFromCodeCoverage]
-    public class ApplicationRepository : Repository<entity.Application>, IApplicationRepository
+    public class ApplicationRepository : Repository<Application>, IApplicationRepository
     {
-        private CommonDbContext commonContext
-        {
-            get
-            {
-                return _dbContext as CommonDbContext;
-            }
-        }
+        private readonly CommonDbContext _context;
 
         public ApplicationRepository(DbContext dbContext) : base(dbContext)
         {
+            _context = dbContext as CommonDbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }
 
-        public async Task<entity.Application> GetApplicationById(Guid applicationId)
+        public async Task<Application> GetApplicationById(Guid applicationId)
         {
-            return await commonContext.Application
+            return await _context.Application
                 .Include(a => a.Pet)
                 .Include(a => a.Owner)
                 .Include(a => a.Pet)
@@ -34,9 +30,9 @@ namespace Defra.PTS.Checker.Repositories.Implementation
                 .FirstOrDefaultAsync(a => a.Id == applicationId) ?? null!;
         }
 
-        public async Task<entity.TravelDocument> GetTravelDocumentByApplicationId(Guid applicationId)
+        public async Task<TravelDocument> GetTravelDocumentByApplicationId(Guid applicationId)
         {
-            return await commonContext.TravelDocument
+            return await _context.TravelDocument
                 .FirstOrDefaultAsync(a => a.ApplicationId == applicationId) ?? null!;
         }
 
@@ -52,18 +48,50 @@ namespace Defra.PTS.Checker.Repositories.Implementation
 
         public async Task<bool> PerformHealthCheckLogic()
         {
-            // Attempt to open a connection to the database
-            await _dbContext.Database.OpenConnectionAsync();
+            await _context.Database.OpenConnectionAsync();
+            var isConnected = _context.Database.GetDbConnection().State == ConnectionState.Open;
+            await _context.Database.CloseConnectionAsync();
+            return isConnected;
+        }
 
-            // Check if the connection is open
-            if (_dbContext.Database.GetDbConnection().State == ConnectionState.Open)
+        public Application? GetMostRecentApplication(Guid petId)
+        {
+            var applications = _context.Application
+                                        .Where(e => e.PetId == petId)
+                                        .Select(e => new Application
+                                        {
+                                            Id = e.Id,
+                                            ReferenceNumber = e.ReferenceNumber,
+                                            DateOfApplication = e.DateOfApplication,
+                                            Status = e.Status ?? "AWAITING VERIFICATION",
+                                            DateAuthorised = e.DateAuthorised ?? DateTime.MinValue,
+                                            DateRejected = e.DateRejected ?? DateTime.MinValue,
+                                            DateRevoked = e.DateRevoked ?? DateTime.MinValue
+                                        })
+                                        .ToList();
+
+            if (!applications.Any())
             {
-                return true;
+                throw new ArgumentNullException(nameof(applications), "No applications found for the specified PetId.");
             }
-            else
-            {
-                return false;
-            }
+
+            var mostRecentApplication = applications
+                .OrderByDescending(a => new DateTime?[]
+                {
+                        a.DateAuthorised,
+                        a.DateRejected,
+                        a.DateRevoked
+                }.Where(d => d.HasValue).Max() ?? DateTime.MinValue)
+                .FirstOrDefault();
+
+            return mostRecentApplication;
+        }
+
+        public async Task<IEnumerable<Application>> GetApplicationsByPetIdAsync(Guid petId)
+        {
+            return await _context.Application
+                .Where(a => a.PetId == petId)
+                .ToListAsync();
         }
     }
 }
