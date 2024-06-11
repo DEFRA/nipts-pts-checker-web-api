@@ -21,9 +21,9 @@ builder.Configuration.AddEnvironmentVariables();
 
 
 // Add services to the container.
-builder.Services
-    .AddTradeAppConfiguration(builder.Configuration)
-    .AddApimAuthentication(builder.Configuration.GetSection(ApimSettings.InternalApim));
+//builder.Services
+//    .AddTradeAppConfiguration(builder.Configuration)
+//    .AddApimAuthentication(builder.Configuration.GetSection(ApimSettings.InternalApim));
 
 var settings = builder.Configuration.ConfigureTradeAppConfiguration(true, "RemosSignUpService:Sentinel");
 
@@ -46,10 +46,11 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.EnableAnnotations();
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "PTS Checker API", Version = "v1" });
+    c.UseInlineDefinitionsForEnums();
 
-    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    var xmlFilePath = Path.Combine(AppContext.BaseDirectory, xmlFilename);
-    c.IncludeXmlComments(xmlFilePath);
+    //var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    //var xmlFilePath = Path.Combine(AppContext.BaseDirectory, xmlFilename);
+    //c.IncludeXmlComments(xmlFilePath);
 });
 
 var app = builder.Build();
@@ -66,7 +67,7 @@ app.UseSwaggerUI(c =>
 
 app.UseHttpsRedirection();
 
-app.UseAuthorization();
+//app.UseAuthorization();
 
 app.MapControllers();
 

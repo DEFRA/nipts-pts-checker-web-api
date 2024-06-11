@@ -28,5 +28,11 @@ namespace Defra.PTS.Checker.Services.Implementation
             var travelDocument = _travelDocumentRepository.GetTravelDocumentByReferenceNumber(referenceNumber);
             return travelDocument;
         }
+
+        public Task<TravelDocument> GetTravelDocumentByPTDNumber(string ptdNumber)
+        {
+            return _travelDocumentRepository.GetTravelDocumentByPTDNumber(ptdNumber);
+        }
+
     }
 }

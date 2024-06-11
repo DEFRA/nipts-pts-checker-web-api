@@ -1,4 +1,5 @@
-﻿using entity = Defra.PTS.Checker.Entities;
+﻿using Defra.PTS.Checker.Entities;
+using entity = Defra.PTS.Checker.Entities;
 
 namespace  Defra.PTS.Checker.Repositories.Interface
 {
@@ -6,5 +7,6 @@ namespace  Defra.PTS.Checker.Repositories.Interface
     {
         Task<entity.TravelDocument> GetTravelDocument(Guid? applicationId, Guid? ownerId, Guid? petId);
         Task<entity.TravelDocument> GetTravelDocumentByReferenceNumber(string referenceNumber);
+        Task<TravelDocument> GetTravelDocumentByPTDNumber(string ptdNumber);
     }
 }

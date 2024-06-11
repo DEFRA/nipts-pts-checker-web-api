@@ -1,7 +1,8 @@
-﻿using entity = Defra.PTS.Checker.Entities;
+﻿using Defra.PTS.Checker.Entities;
 using Defra.PTS.Checker.Repositories.Interface;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics.CodeAnalysis;
+using entity = Defra.PTS.Checker.Entities;
 
 namespace Defra.PTS.Checker.Repositories.Implementation
 {
@@ -35,6 +36,21 @@ namespace Defra.PTS.Checker.Repositories.Implementation
                 .Include(t => t.Pet!.Breed)
                 .Include(t => t.Pet!.Colour)
                 .FirstOrDefaultAsync(a => a.DocumentReferenceNumber == referenceNumber) ?? null!;
+        }
+
+        public async Task<TravelDocument> GetTravelDocumentByPTDNumber(string ptdNumber)
+        {
+            ArgumentNullException.ThrowIfNull(travelDocumentContext);
+            ArgumentNullException.ThrowIfNull(ptdNumber);
+
+            var query = travelDocumentContext.TravelDocument
+                    .Include(t => t.Application)
+                    .Include(t => t.Owner)
+                    .Include(t => t.Pet)
+                    .Include(t => t.Pet!.Breed)
+                    .Include(t => t.Pet!.Colour);
+
+            return await query.SingleOrDefaultAsync(x => x.DocumentReferenceNumber.ToLower() == ptdNumber.ToLower());
         }
     }
 }
