@@ -12,12 +12,10 @@ namespace Defra.PTS.Checker.Web.Api.Controllers
     [ApiController]
     public class CheckerController : ControllerBase
     {
-        private readonly IApplicationService _applicationService;
         private readonly ITravelDocumentService _travelDocumentService;
 
-        public CheckerController(IApplicationService applicationService, ITravelDocumentService travelDocumentService)
+        public CheckerController(ITravelDocumentService travelDocumentService)
         {
-            _applicationService = applicationService;
             _travelDocumentService = travelDocumentService;
         }
 
@@ -37,16 +35,16 @@ namespace Defra.PTS.Checker.Web.Api.Controllers
             if (response == null)
                 return NotFound();
 
-            var sexOfPet = (PetGenderType)response.Pet.SexId;
+            var sexOfPet = (PetGenderType)response.Pet!.SexId;
             var speciesOfPet = (PetSpeciesType)response.Pet.SpeciesId;
 
             var applicationDetails = new ApplicationDetail
             {
                 ReferenceNumber = response.ApplicationId,
-                DateOfApplication = response?.Application.DateOfApplication,
+                DateOfApplication = response.Application!.DateOfApplication,
                 DocumentReferenceNumber = response.DocumentReferenceNumber,
-                Status = response?.Application.Status,
-                DateOfIssue = response?.DateOfIssue,
+                Status = response.Application!.Status,
+                DateOfIssue = response.DateOfIssue,
                 PetName = response.Pet?.Name,
                 DateOfBirthOfPet = response.Pet?.DOB,
                 MicrochipNumber = response.Pet?.MicrochipNumber,
@@ -55,7 +53,7 @@ namespace Defra.PTS.Checker.Web.Api.Controllers
                 SpeciesOfPet = speciesOfPet.ToString(),
                 UniqueFeaturesOfPet = response.Pet?.UniqueFeatureDescription,
                 BreedName = response.Pet?.Breed?.Name, 
-                ColourOfPet = response.Pet?.Colour?.Name
+                ColourOfPet = response.Pet!.Colour!.Name
         };
 
             return Ok(applicationDetails);

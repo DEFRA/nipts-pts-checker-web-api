@@ -18,15 +18,13 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
     public class CheckerControllerTests
     {
         private Mock<ITravelDocumentService>? _travelDocumentServiceMock;
-        private Mock<IApplicationService>? _applicationServiceMock;
         private CheckerController? _controller;
 
         [SetUp]
         public void SetUp()
         {
             _travelDocumentServiceMock = new Mock<ITravelDocumentService>();
-            _applicationServiceMock = new Mock<IApplicationService>();
-            _controller = new CheckerController(_applicationServiceMock.Object, _travelDocumentServiceMock.Object);
+            _controller = new CheckerController(_travelDocumentServiceMock.Object);
         }
 
         [Test]
@@ -112,7 +110,6 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
             };
 
             _travelDocumentServiceMock.Setup(service => service.GetTravelDocumentByReferenceNumber(It.IsAny<string>())).ReturnsAsync(travelDocument);
-            _applicationServiceMock.Setup(service => service.GetApplicationById(It.IsAny<Guid>())).ReturnsAsync(application);
 
             // Act
             var result = await _controller.CheckApplicationNumber("GB123");
