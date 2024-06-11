@@ -17,9 +17,9 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
     [TestFixture]
     public class CheckerControllerTests
     {
-        private Mock<ITravelDocumentService> _travelDocumentServiceMock;
-        private Mock<IApplicationService> _applicationServiceMock;
-        private CheckerController _controller;
+        private Mock<ITravelDocumentService>? _travelDocumentServiceMock;
+        private Mock<IApplicationService>? _applicationServiceMock;
+        private CheckerController? _controller;
 
         [SetUp]
         public void SetUp()

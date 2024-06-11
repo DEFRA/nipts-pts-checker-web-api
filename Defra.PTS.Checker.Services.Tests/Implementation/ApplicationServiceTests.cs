@@ -16,9 +16,9 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
     [TestFixture]
     public class ApplicationServiceTests
     {
-        private Mock<IApplicationRepository> _applicationRepositoryMock;
-        private Mock<ILogger<ApplicationService>> _loggerMock;
-        private ApplicationService _applicationService;
+        private Mock<IApplicationRepository>? _applicationRepositoryMock;
+        private Mock<ILogger<ApplicationService>>? _loggerMock;
+        private ApplicationService? _applicationService;
 
         [SetUp]
         public void SetUp()

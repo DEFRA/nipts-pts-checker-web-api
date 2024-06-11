@@ -16,9 +16,9 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
     [TestFixture]
     public class TravelDocumentServiceTests
     {
-        private Mock<ITravelDocumentRepository> _travelDocumentRepositoryMock;
-        private Mock<ILogger<TravelDocumentService>> _loggerMock;
-        private TravelDocumentService _travelDocumentService;
+        private Mock<ITravelDocumentRepository>? _travelDocumentRepositoryMock;
+        private Mock<ILogger<TravelDocumentService>>? _loggerMock;
+        private TravelDocumentService? _travelDocumentService;
 
         [SetUp]
         public void SetUp()
