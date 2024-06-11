@@ -303,7 +303,7 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
             var request = new MicrochipCheckRequest { MicrochipNumber = string.Empty };
 
             // Act
-            var result = await _controller.CheckMicrochipNumber(request);
+            var result = await _controller!.CheckMicrochipNumber(request);
 
             // Assert
             Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
@@ -317,11 +317,10 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
         {
             // Arrange
             var request = new MicrochipCheckRequest { MicrochipNumber = "1234567890" };
-            _checkerServiceMock.Setup(service => service.CheckMicrochipNumberAsync(request.MicrochipNumber))
-                .ReturnsAsync((object)null);
+            _checkerServiceMock!.Setup(service => service.CheckMicrochipNumberAsync(request!.MicrochipNumber)).ReturnsAsync((object?)null!);
 
             // Act
-            var result = await _controller.CheckMicrochipNumber(request);
+            var result = await _controller!.CheckMicrochipNumber(request);
 
             // Assert
             Assert.That(result, Is.InstanceOf<NotFoundObjectResult>());
@@ -335,11 +334,11 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
             // Arrange
             var request = new MicrochipCheckRequest { MicrochipNumber = "1234567890" };
             var response = new { PetDetails = "Details" };
-            _checkerServiceMock.Setup(service => service.CheckMicrochipNumberAsync(request.MicrochipNumber))
+            _checkerServiceMock!.Setup(service => service.CheckMicrochipNumberAsync(request.MicrochipNumber))
                 .ReturnsAsync(response);
 
             // Act
-            var result = await _controller.CheckMicrochipNumber(request);
+            var result = await _controller!.CheckMicrochipNumber(request);
 
             // Assert
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
@@ -353,11 +352,11 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
         {
             // Arrange
             var request = new MicrochipCheckRequest { MicrochipNumber = "1234567890" };
-            _checkerServiceMock.Setup(service => service.CheckMicrochipNumberAsync(request.MicrochipNumber))
+            _checkerServiceMock!.Setup(service => service.CheckMicrochipNumberAsync(request.MicrochipNumber))
                 .ThrowsAsync(new Exception("Test exception"));
 
             // Act
-            var result = await _controller.CheckMicrochipNumber(request);
+            var result = await _controller!.CheckMicrochipNumber(request);
 
             // Assert
             Assert.That(result, Is.InstanceOf<ObjectResult>());

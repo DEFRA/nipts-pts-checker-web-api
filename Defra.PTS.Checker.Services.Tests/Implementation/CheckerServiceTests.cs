@@ -9,10 +9,10 @@ namespace Defra.PTS.Checker.Tests.Services
     [TestFixture]
     public class CheckerServiceTests
     {
-        private Mock<IPetRepository> _petRepositoryMock;
-        private Mock<IApplicationRepository> _applicationRepositoryMock;
-        private Mock<ITravelDocumentRepository> _travelDocumentRepositoryMock;
-        private CheckerService _checkerService;
+        private Mock<IPetRepository>? _petRepositoryMock;
+        private Mock<IApplicationRepository>? _applicationRepositoryMock;
+        private Mock<ITravelDocumentRepository>? _travelDocumentRepositoryMock;
+        private CheckerService? _checkerService;
 
         [SetUp]
         public void SetUp()
@@ -33,11 +33,11 @@ namespace Defra.PTS.Checker.Tests.Services
         {
             // Arrange
             string microchipNumber = "1234567890";
-            _petRepositoryMock.Setup(repo => repo.GetByMicrochipNumberAsync(microchipNumber))
+            _petRepositoryMock!.Setup(repo => repo.GetByMicrochipNumberAsync(microchipNumber))
                 .ReturnsAsync(new List<Pet>());
 
             // Act
-            var result = await _checkerService.CheckMicrochipNumberAsync(microchipNumber);
+            var result = await _checkerService!.CheckMicrochipNumberAsync(microchipNumber);
 
             // Assert
             Assert.That(result, Is.Null);
@@ -53,14 +53,14 @@ namespace Defra.PTS.Checker.Tests.Services
             {
                 new Pet { Id = Guid.NewGuid(), Name = "Fido", MicrochipNumber = microchipNumber }
             };
-            _petRepositoryMock.Setup(repo => repo.GetByMicrochipNumberAsync(microchipNumber))
+            _petRepositoryMock!.Setup(repo => repo.GetByMicrochipNumberAsync(microchipNumber))
                 .ReturnsAsync(pets);
 
-            _applicationRepositoryMock.Setup(repo => repo.GetMostRecentApplication(It.IsAny<Guid>()))
-                .Returns((Application)null);
+            _applicationRepositoryMock!.Setup(repo => repo.GetMostRecentApplication(It.IsAny<Guid>()))
+                .Returns((Application?)null);
 
             // Act
-            var result = await _checkerService.CheckMicrochipNumberAsync(microchipNumber);
+            var result = await _checkerService!.CheckMicrochipNumberAsync(microchipNumber);
 
             // Assert
             Assert.That(result, Is.Null);
@@ -78,17 +78,17 @@ namespace Defra.PTS.Checker.Tests.Services
             var application = new Application { Id = Guid.NewGuid(), PetId = Guid.NewGuid(), ReferenceNumber = "APP123" };
             var travelDocument = new TravelDocument { Id = Guid.NewGuid(), DocumentReferenceNumber = "TD123" };
 
-            _petRepositoryMock.Setup(repo => repo.GetByMicrochipNumberAsync(microchipNumber))
+            _petRepositoryMock!.Setup(repo => repo.GetByMicrochipNumberAsync(microchipNumber))
                 .ReturnsAsync(pets);
 
-            _applicationRepositoryMock.Setup(repo => repo.GetMostRecentApplication(It.IsAny<Guid>()))
+            _applicationRepositoryMock!.Setup(repo => repo.GetMostRecentApplication(It.IsAny<Guid>()))
                 .Returns(application);
 
-            _travelDocumentRepositoryMock.Setup(repo => repo.GetTravelDocumentByApplicationIdAsync(It.IsAny<Guid>()))
+            _travelDocumentRepositoryMock!.Setup(repo => repo.GetTravelDocumentByApplicationIdAsync(It.IsAny<Guid>()))
                 .ReturnsAsync(travelDocument);
 
             // Act
-            var result = await _checkerService.CheckMicrochipNumberAsync(microchipNumber);
+            var result = await _checkerService!.CheckMicrochipNumberAsync(microchipNumber);
 
             // Assert
             Assert.That(result, Is.Not.Null);            
@@ -109,17 +109,17 @@ namespace Defra.PTS.Checker.Tests.Services
             };
             var application = new Application { Id = Guid.NewGuid(), PetId = Guid.NewGuid(), ReferenceNumber = "APP123" };
 
-            _petRepositoryMock.Setup(repo => repo.GetByMicrochipNumberAsync(microchipNumber))
+            _petRepositoryMock!.Setup(repo => repo.GetByMicrochipNumberAsync(microchipNumber))
                 .ReturnsAsync(pets);
 
-            _applicationRepositoryMock.Setup(repo => repo.GetMostRecentApplication(It.IsAny<Guid>()))
+            _applicationRepositoryMock!.Setup(repo => repo.GetMostRecentApplication(It.IsAny<Guid>()))
                 .Returns(application);
 
-            _travelDocumentRepositoryMock.Setup(repo => repo.GetTravelDocumentByApplicationIdAsync(It.IsAny<Guid>()))
-                .ReturnsAsync((TravelDocument)null);
+            _travelDocumentRepositoryMock!.Setup(repo => repo.GetTravelDocumentByApplicationIdAsync(It.IsAny<Guid>()))
+                .ReturnsAsync((TravelDocument?)null);
 
             // Act
-            var result = await _checkerService.CheckMicrochipNumberAsync(microchipNumber);
+            var result = await _checkerService!.CheckMicrochipNumberAsync(microchipNumber);
 
             // Assert
             // Assert
