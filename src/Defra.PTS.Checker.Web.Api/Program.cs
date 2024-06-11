@@ -47,10 +47,6 @@ builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "PTS Checker API", Version = "v1" });
 });
 
-//var secretClient = builder.Services.AddKeyVault(builder.Configuration);
-//builder.Services.AddSingleton(secretClient);
-
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

@@ -13,14 +13,14 @@ namespace Defra.PTS.Checker.Services.Implementation
     public class ColourService : IColourService
     {
         private readonly IRepository<Colour> _colourRepository;
-        private ILogger<ApplicationService> _log;
-        public ColourService(ILogger<ApplicationService> log,IRepository<Colour> colourRepository)
+        private ILogger<ColourService> _log;
+        public ColourService(ILogger<ColourService> log, IRepository<Colour> colourRepository)
         {
             _log = log;
             _colourRepository = colourRepository;
         }
 
-        public Task<IEnumerable<Colour>> GetColour()
+        public Task<IEnumerable<Colour>> GetAllColours()
         {
             _log.LogInformation("Running inside method {0}", "GetColour");
             var colours = _colourRepository.GetAll();

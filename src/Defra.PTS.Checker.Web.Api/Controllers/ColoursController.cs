@@ -21,7 +21,7 @@ namespace Defra.PTS.Checker.Web.Api.Controllers
         [ProducesResponseType(typeof(ColourResponse), StatusCodes.Status200OK)]        
         public async Task<IActionResult> GetAllColours()
         {
-            var response = await _colour.GetColour();
+            var response = await _colour.GetAllColours();
 
             return response == null
                 ? NotFound()
