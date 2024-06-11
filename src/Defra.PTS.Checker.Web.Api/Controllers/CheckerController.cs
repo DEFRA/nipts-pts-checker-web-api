@@ -114,7 +114,7 @@ public class CheckerController : ControllerBase
         var document = await _travelDocumentService.GetTravelDocumentByPTDNumber(model.PTDNumber);
         if (document == null)
         {
-            return new NotFoundObjectResult("Application or travel document not found");
+            return new NotFoundObjectResult("Application not found");
         }
 
         var response = new SearchByPTDNumberResponse
@@ -132,22 +132,6 @@ public class CheckerController : ControllerBase
             SpeciesId = (PetSpeciesType)document.Pet.SpeciesId,
             UniqueFeatureDescription = document.Pet?.UniqueFeatureDescription ?? string.Empty,
         };
-
-        //var response = new SearchByPTDNumberResponse
-        //{
-        //    DocumentReferenceNumber = "GB826CD186E",
-        //    DateOfIssue = DateTime.Now.Date,
-        //    MicrochipNumber = "123456789012345",
-        //    Status = "Approved",
-        //    DOB = DateTime.Now.AddDays(-60).Date,
-        //    Colour = "Black",
-        //    Breed = "Afghan Hound",
-        //    MicrochippedDate = DateTime.Now.AddDays(-90).Date,
-        //    Name = "Toto",
-        //    Sex = PetGenderType.Male,
-        //    SpeciesId = PetSpeciesType.Dog,
-        //    UniqueFeatureDescription = "White star on his chest",
-        //};
 
         return new OkObjectResult(response);
     }
