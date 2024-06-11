@@ -41,9 +41,9 @@ namespace Defra.PTS.Checker.Web.Api.Controllers
             var applicationDetails = new ApplicationDetail
             {
                 ReferenceNumber = response.ApplicationId,
-                DateOfApplication = response.Application!.DateOfApplication,
+                DateOfApplication = response.Application?.DateOfApplication,
                 DocumentReferenceNumber = response.DocumentReferenceNumber,
-                Status = response.Application!.Status,
+                Status = response.Application?.Status,
                 DateOfIssue = response.DateOfIssue,
                 PetName = response.Pet?.Name,
                 DateOfBirthOfPet = response.Pet?.DOB,
@@ -53,7 +53,7 @@ namespace Defra.PTS.Checker.Web.Api.Controllers
                 SpeciesOfPet = speciesOfPet.ToString(),
                 UniqueFeaturesOfPet = response.Pet?.UniqueFeatureDescription,
                 BreedName = response.Pet?.Breed?.Name, 
-                ColourOfPet = response.Pet!.Colour!.Name
+                ColourOfPet = response.Pet?.Colour?.Name!
         };
 
             return Ok(applicationDetails);
