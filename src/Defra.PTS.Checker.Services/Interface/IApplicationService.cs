@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Defra.PTS.Checker.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,5 +10,6 @@ namespace Defra.PTS.Checker.Services.Interface
     public interface IApplicationService
     {
         string GetApplication();
+        Task<VwApplication?> GetApplicationByPTDNumber(string ptdNumber);
     }
 }

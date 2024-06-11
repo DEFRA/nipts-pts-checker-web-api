@@ -44,6 +44,7 @@ builder.Services.AddDefraRepositoriesServices(connection);
 builder.Services.AddDefraApiServices(builder.Configuration);
 builder.Services.AddSwaggerGen(c =>
 {
+    c.EnableAnnotations();
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "PTS Checker API", Version = "v1" });
 });
 

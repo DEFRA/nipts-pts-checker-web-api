@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Defra.PTS.Checker.Web.Api</RootNamespace>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,6 +13,10 @@
     <PackageReference Include="Defra.Trade.Common" Version="3.0.0" />
     <PackageReference Include="Defra.Trade.Common.Security" Version="2.0.5" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.6.2" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="6.6.2" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.6.2" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.6.2" />
   </ItemGroup>
 
   <ItemGroup>

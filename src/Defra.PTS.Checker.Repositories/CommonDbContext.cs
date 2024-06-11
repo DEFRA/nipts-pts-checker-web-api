@@ -30,6 +30,7 @@ namespace Defra.PTS.Checker.Repositories
         public DbSet<entity.PasengerType> PasengerType { get; set; }
         public DbSet<entity.CheckOutcome> CheckOutcome { get; set; }
         public DbSet<entity.CheckSummary> CheckSummary { get; set; }
+        public DbSet<entity.VwApplication> VwApplications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

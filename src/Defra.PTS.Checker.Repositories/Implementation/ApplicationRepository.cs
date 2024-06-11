@@ -3,6 +3,8 @@ using Defra.PTS.Checker.Repositories.Interface;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
+using Defra.PTS.Checker.Entities;
+using System;
 
 namespace Defra.PTS.Checker.Repositories.Implementation
 {
@@ -24,6 +26,16 @@ namespace Defra.PTS.Checker.Repositories.Implementation
         public async Task<entity.Application> GetApplicationById(Guid applicationId)
         {
             return await commonContext.Application.FirstOrDefaultAsync(a => a.Id == applicationId);
+        }
+
+        public async Task<VwApplication?> GetApplicationByPTDNumber(string ptdNumber)
+        {
+            if (string.IsNullOrEmpty(ptdNumber))
+            {
+                return null;
+            }
+
+            return await commonContext.VwApplications.FirstOrDefaultAsync(c => c.DocumentReferenceNumber.ToLower() == ptdNumber.ToLower());
         }
 
         public async Task<bool> PerformHealthCheckLogic()
