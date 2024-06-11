@@ -111,48 +111,43 @@ public class CheckerController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        if (model.PTDNumber.EndsWith("NotFound"))
+        var document = await _travelDocumentService.GetTravelDocumentByPTDNumber(model.PTDNumber);
+        if (document == null)
         {
-            return new NotFoundObjectResult($"Application not found");
+            return new NotFoundObjectResult("Application or travel document not found");
         }
-
-        //var document = await _travelDocumentService.GetTravelDocumentByReferenceNumber(model.PTDNumber);
-        //if (document == null)
-        //{
-        //    return new NotFoundObjectResult("Application not found");
-        //}
-
-        //var response = new SearchByPTDNumberResponse
-        //{
-        //    DocumentReferenceNumber = document.DocumentReferenceNumber ?? string.Empty,
-        //    DateOfIssue = document.DateOfIssue,
-        //    MicrochipNumber = document.Pet?.MicrochipNumber ?? string.Empty,
-        //    Status = document.Application?.Status ?? string.Empty,
-        //    DOB = document.Pet?.DOB,
-        //    Colour = document.Pet?.Colour?.Name ?? string.Empty,
-        //    Breed = document.Pet?.Breed?.Name ?? string.Empty,
-        //    MicrochippedDate = document.Pet?.MicrochippedDate,
-        //    Name = document.Pet?.Name ?? string.Empty,
-        //    Sex = PetGenderType.Male,
-        //    SpeciesId = PetSpeciesType.None,
-        //    UniqueFeatureDescription = document.Pet?.UniqueFeatureDescription,
-        //};
 
         var response = new SearchByPTDNumberResponse
         {
-            DocumentReferenceNumber = "GB826CD186E",
-            DateOfIssue = DateTime.Now.Date,
-            MicrochipNumber = "123456789012345",
-            Status = "Approved",
-            DOB = DateTime.Now.AddDays(-60).Date,
-            Colour = "Black",
-            Breed = "Afghan Hound",
-            MicrochippedDate = DateTime.Now.AddDays(-90).Date,
-            Name = "Toto",
-            Sex = PetGenderType.Male,
-            SpeciesId = PetSpeciesType.Dog,
-            UniqueFeatureDescription = "White star on his chest",
+            DocumentReferenceNumber = document.DocumentReferenceNumber ?? string.Empty,
+            DateOfIssue = document.DateOfIssue,
+            MicrochipNumber = document.Pet?.MicrochipNumber ?? string.Empty,
+            Status = document.Application?.Status ?? string.Empty,
+            DOB = document.Pet?.DOB,
+            Colour = document.Pet?.Colour?.Name ?? string.Empty,
+            Breed = document.Pet?.Breed?.Name ?? string.Empty,
+            MicrochippedDate = document.Pet?.MicrochippedDate,
+            Name = document.Pet?.Name ?? string.Empty,
+            Sex = (PetGenderType)document.Pet.SexId,
+            SpeciesId = (PetSpeciesType)document.Pet.SpeciesId,
+            UniqueFeatureDescription = document.Pet?.UniqueFeatureDescription ?? string.Empty,
         };
+
+        //var response = new SearchByPTDNumberResponse
+        //{
+        //    DocumentReferenceNumber = "GB826CD186E",
+        //    DateOfIssue = DateTime.Now.Date,
+        //    MicrochipNumber = "123456789012345",
+        //    Status = "Approved",
+        //    DOB = DateTime.Now.AddDays(-60).Date,
+        //    Colour = "Black",
+        //    Breed = "Afghan Hound",
+        //    MicrochippedDate = DateTime.Now.AddDays(-90).Date,
+        //    Name = "Toto",
+        //    Sex = PetGenderType.Male,
+        //    SpeciesId = PetSpeciesType.Dog,
+        //    UniqueFeatureDescription = "White star on his chest",
+        //};
 
         return new OkObjectResult(response);
     }
