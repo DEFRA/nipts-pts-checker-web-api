@@ -77,10 +77,10 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
                 Pet = pet
             };
 
-            _travelDocumentRepositoryMock.Setup(repo => repo.GetTravelDocumentByReferenceNumber(It.IsAny<string>())).ReturnsAsync(travelDocument);
+            _travelDocumentRepositoryMock!.Setup(repo => repo.GetTravelDocumentByReferenceNumber(It.IsAny<string>())).ReturnsAsync(travelDocument);
 
             // Act
-            var result = await _travelDocumentService.GetTravelDocumentByReferenceNumber("GB123");
+            var result = await _travelDocumentService!.GetTravelDocumentByReferenceNumber("GB123");
 
             // Assert
             Assert.That(result, Is.Not.Null);

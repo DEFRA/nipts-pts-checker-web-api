@@ -13,7 +13,7 @@ namespace Defra.PTS.Checker.Services.Implementation
 {
     public class ApplicationService : IApplicationService
     {
-        private ILogger<ApplicationService> _log;
+        private readonly ILogger<ApplicationService> _log;
         private readonly IApplicationRepository _applicationRepository;
 
         public ApplicationService(ILogger<ApplicationService> log, IApplicationRepository applicationRepository)

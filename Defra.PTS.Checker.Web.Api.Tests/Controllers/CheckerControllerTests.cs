@@ -109,32 +109,32 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
                 Pet = pet
             };
 
-            _travelDocumentServiceMock.Setup(service => service.GetTravelDocumentByReferenceNumber(It.IsAny<string>())).ReturnsAsync(travelDocument);
+            _travelDocumentServiceMock!.Setup(service => service.GetTravelDocumentByReferenceNumber(It.IsAny<string>())).ReturnsAsync(travelDocument);
 
             // Act
-            var result = await _controller.CheckApplicationNumber("GB123");
+            var result = await _controller!.CheckApplicationNumber("GB123");
 
             // Assert
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
             var okResult = result as OkObjectResult;
             Assert.That(okResult, Is.Not.Null);
-            Assert.That(okResult.StatusCode, Is.EqualTo(200));
+            Assert.That(okResult!.StatusCode, Is.EqualTo(200));
         }
 
         [Test]
         public async Task GetApplicationDetailsById_ValidIdButNoApplication_ReturnsNotFoundResult()
         {
             // Arrange
-            _travelDocumentServiceMock.Setup(service => service.GetTravelDocumentByReferenceNumber(It.IsAny<string>())).ReturnsAsync((TravelDocument)null);
+            _travelDocumentServiceMock!.Setup(service => service.GetTravelDocumentByReferenceNumber(It.IsAny<string>()))!.ReturnsAsync((TravelDocument)null!);
 
             // Act
-            var result = await _controller.CheckApplicationNumber("GB123");
+            var result = await _controller!.CheckApplicationNumber("GB123");
 
             // Assert
             Assert.That(result, Is.InstanceOf<NotFoundResult>());
             var notFoundResult = result as NotFoundResult;
             Assert.That(notFoundResult, Is.Not.Null);
-            Assert.That(notFoundResult.StatusCode, Is.EqualTo(404));
+            Assert.That(notFoundResult!.StatusCode, Is.EqualTo(404));
         }
 
         [Test]
@@ -142,13 +142,13 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
         {
             // Arrange
             // Act
-            var result = await _controller.CheckApplicationNumber("123");
+            var result = await _controller!.CheckApplicationNumber("123");
 
             // Assert
             Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
             var badRequestResult = result as BadRequestObjectResult;
             Assert.That(badRequestResult, Is.Not.Null);
-            Assert.That(badRequestResult.StatusCode, Is.EqualTo(400));
+            Assert.That(badRequestResult!.StatusCode, Is.EqualTo(400));
         }
     }
 }

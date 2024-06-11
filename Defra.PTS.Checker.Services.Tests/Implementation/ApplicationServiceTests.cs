@@ -86,10 +86,10 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
               OwnerAddress = address
             };
 
-            _applicationRepositoryMock.Setup(repo => repo.GetApplicationById(It.IsAny<Guid>())).ReturnsAsync(application);
+            _applicationRepositoryMock!.Setup(repo => repo.GetApplicationById(It.IsAny<Guid>())).ReturnsAsync(application);
 
             // Act
-            var result = await _applicationService.GetApplicationById(guid);
+            var result = await _applicationService!.GetApplicationById(guid);
 
             // Assert
             Assert.That(result, Is.Not.Null);
