@@ -23,13 +23,13 @@ namespace Defra.PTS.Checker.Web.Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<IActionResult> CheckApplicationNumber(string referenceNumber)
+        public async Task<IActionResult> CheckApplicationNumber([FromBody] ApplicationNumberCheckRequest request)
         {
 
-            if (!referenceNumber.StartsWith("GB") || referenceNumber.Length > 20)
+            if (string.IsNullOrEmpty(request.ApplicationNumber) || !request.ApplicationNumber.StartsWith("GB") || request.ApplicationNumber.Length > 20)
                 return BadRequest(ModelState);
 
-            var response = await _travelDocumentService.GetTravelDocumentByReferenceNumber(referenceNumber);
+            var response = await _travelDocumentService.GetTravelDocumentByReferenceNumber(request.ApplicationNumber);
 
             if (response == null)
                 return NotFound();
@@ -53,7 +53,7 @@ namespace Defra.PTS.Checker.Web.Api.Controllers
                 UniqueFeaturesOfPet = response.Pet?.UniqueFeatureDescription,
                 BreedName = response.Pet?.Breed?.Name, 
                 ColourOfPet = response.Pet?.Colour?.Name!
-        };
+            };
 
             return Ok(applicationDetails);
         }
@@ -92,6 +92,11 @@ namespace Defra.PTS.Checker.Web.Api.Controllers
     public class MicrochipCheckRequest
     {
         public string? MicrochipNumber { get; set; }
+    }
+
+    public class ApplicationNumberCheckRequest
+    {
+        public string? ApplicationNumber { get; set; }
     }
 }
 

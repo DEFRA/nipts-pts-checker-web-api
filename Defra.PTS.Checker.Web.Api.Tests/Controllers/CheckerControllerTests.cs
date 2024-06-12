@@ -105,10 +105,15 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
                 Pet = pet
             };
 
+            var request = new ApplicationNumberCheckRequest
+            { 
+                ApplicationNumber = "GB123"
+            };
+
             _travelDocumentServiceMock!.Setup(service => service.GetTravelDocumentByReferenceNumber(It.IsAny<string>())).ReturnsAsync(travelDocument);
 
             // Act
-            var result = await _controller!.CheckApplicationNumber("GB123");
+            var result = await _controller!.CheckApplicationNumber(request);
 
             // Assert
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
@@ -123,8 +128,13 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
             // Arrange
             _travelDocumentServiceMock!.Setup(service => service.GetTravelDocumentByReferenceNumber(It.IsAny<string>()))!.ReturnsAsync((TravelDocument)null!);
 
+            var request = new ApplicationNumberCheckRequest
+            {
+                ApplicationNumber = "GB123"
+            };
+
             // Act
-            var result = await _controller!.CheckApplicationNumber("GB123");
+            var result = await _controller!.CheckApplicationNumber(request);
 
             // Assert
             Assert.That(result, Is.InstanceOf<NotFoundResult>());
@@ -137,8 +147,12 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
         public async Task GetApplicationDetailsById_InvalidId_ReturnsBadRequestResult()
         {
             // Arrange
+            var request = new ApplicationNumberCheckRequest
+            {
+                ApplicationNumber = "123"
+            };
             // Act
-            var result = await _controller!.CheckApplicationNumber("123");
+            var result = await _controller!.CheckApplicationNumber(request);
 
             // Assert
             Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
