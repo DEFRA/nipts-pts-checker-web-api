@@ -19,7 +19,7 @@ namespace Defra.PTS.Checker.Web.Api.Controllers
             _travelDocumentService = travelDocumentService;
         }
 
-        [HttpGet]
+        [HttpPost]
         [ProducesResponseType(typeof(ApplicationDetail), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
