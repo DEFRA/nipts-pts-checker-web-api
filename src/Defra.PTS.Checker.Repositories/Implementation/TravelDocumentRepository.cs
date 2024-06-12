@@ -1,4 +1,3 @@
-﻿
 ﻿using Defra.PTS.Checker.Entities;
 using Defra.PTS.Checker.Repositories.Interface;
 using Microsoft.EntityFrameworkCore;
@@ -37,6 +36,20 @@ namespace Defra.PTS.Checker.Repositories.Implementation
                 .Include(t => t.Pet!.Breed)
                 .Include(t => t.Pet!.Colour)
                 .FirstOrDefaultAsync(a => a.DocumentReferenceNumber == referenceNumber) ?? null!;
+        }
+
+        public async Task<TravelDocument> GetTravelDocumentByPTDNumber(string ptdNumber)
+        {
+            ArgumentNullException.ThrowIfNull(_context);
+            ArgumentNullException.ThrowIfNull(ptdNumber);
+
+            return await _context!.TravelDocument
+                        .Include(t => t.Application)
+                        .Include(t => t.Owner)
+                        .Include(t => t.Pet)
+                        .Include(t => t.Pet!.Breed)
+                        .Include(t => t.Pet!.Colour)
+                        .SingleOrDefaultAsync(x => x.DocumentReferenceNumber == ptdNumber) ?? null!;
         }
 
         public async Task<IEnumerable<TravelDocument>> GetByPetIdAsync(Guid petId)

@@ -1,4 +1,6 @@
 ﻿using Defra.PTS.Checker.Entities;
+using Defra.PTS.Checker.Models.Constants;
+using Defra.PTS.Checker.Models.Search;
 using Defra.PTS.Checker.Services.Interface;
 using Defra.PTS.Checker.Web.Api.Controllers;
 using Microsoft.AspNetCore.Http;
@@ -27,6 +29,219 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
         public async Task GetApplicationDetailsById_ReturnsOkResult()
         {
             // Arrange
+            var travelDocument = GetTravelDocument();
+
+            var request = new ApplicationNumberCheckRequest
+            { 
+                ApplicationNumber = "GB123"
+            };
+
+            _travelDocumentServiceMock!.Setup(service => service.GetTravelDocumentByReferenceNumber(It.IsAny<string>())).ReturnsAsync(travelDocument);
+
+            // Act
+            var result = await _controller!.CheckApplicationNumber(request);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+            var okResult = result as OkObjectResult;
+            Assert.That(okResult, Is.Not.Null);
+            Assert.That(okResult!.StatusCode, Is.EqualTo(200));
+        }
+
+        [Test]
+        public async Task GetApplicationDetailsById_ValidIdButNoApplication_ReturnsNotFoundResult()
+        {
+            // Arrange
+            _travelDocumentServiceMock!.Setup(service => service.GetTravelDocumentByReferenceNumber(It.IsAny<string>()))!.ReturnsAsync((TravelDocument)null!);
+
+            var request = new ApplicationNumberCheckRequest
+            {
+                ApplicationNumber = "GB123"
+            };
+
+            // Act
+            var result = await _controller!.CheckApplicationNumber(request);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<NotFoundResult>());
+            var notFoundResult = result as NotFoundResult;
+            Assert.That(notFoundResult, Is.Not.Null);
+            Assert.That(notFoundResult!.StatusCode, Is.EqualTo(404));
+        }
+
+        [Test]
+        public async Task GetApplicationDetailsById_InvalidId_ReturnsBadRequestResult()
+        {
+            // Arrange
+            var request = new ApplicationNumberCheckRequest
+            {
+                ApplicationNumber = "123"
+            };
+            // Act
+            var result = await _controller!.CheckApplicationNumber(request);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+            var badRequestResult = result as BadRequestObjectResult;
+            Assert.That(badRequestResult, Is.Not.Null);
+            Assert.That(badRequestResult!.StatusCode, Is.EqualTo(400));
+        }
+
+        [Test]
+        public async Task GetApplicationByPTDNumber_ValidRequest_ReturnsOkResult()
+        {
+            // Arrange
+            var travelDocument = GetTravelDocument();
+
+            _travelDocumentServiceMock!.Setup(service => service.GetTravelDocumentByPTDNumber(It.IsAny<string>())).ReturnsAsync(travelDocument);
+
+            var request = new SearchByPtdNumberRequest
+            {
+                PTDNumber = $"{ApiConstants.PTDNumberPrefix}ABCXYZ123",
+            };
+
+            // Act
+            var result = await _controller!.GetApplicationByPTDNumber(request);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+
+            var objectResult = result as OkObjectResult;
+            Assert.That(objectResult, Is.Not.Null);
+            Assert.That(objectResult!.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
+        }
+
+        [Test]
+        public async Task GetApplicationByPTDNumber_ValidRequestButNoApplication_ReturnsNotFoundResult()
+        {
+            // Arrange
+            var request = new SearchByPtdNumberRequest
+            {
+                PTDNumber = $"{ApiConstants.PTDNumberPrefix}ABCXYZ123",
+            };
+
+            _travelDocumentServiceMock!.Setup(service => service.GetTravelDocumentByPTDNumber(It.IsAny<string>()))!.ReturnsAsync((TravelDocument)null!);
+
+            // Act
+            var result = await _controller!.GetApplicationByPTDNumber(request);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<NotFoundObjectResult>());
+
+            var objectResult = result as NotFoundObjectResult;
+            Assert.That(objectResult, Is.Not.Null);
+            Assert.That(objectResult!.StatusCode, Is.EqualTo(StatusCodes.Status404NotFound));
+        }
+
+
+        [Test]
+        public async Task GetApplicationByPTDNumber_InvalidRequest_ReturnsBadRequestResult()
+        {
+            // Arrange
+            var request = new SearchByPtdNumberRequest
+            {
+                 PTDNumber = string.Empty,
+            };
+
+            // Act
+            _controller!.ModelState.AddModelError("PTDNumber", "PTDNumber is required");
+            var result = await _controller!.GetApplicationByPTDNumber(request);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+
+            var objectResult = result as BadRequestObjectResult;
+            Assert.That(objectResult, Is.Not.Null);
+            Assert.That(objectResult!.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
+        }
+
+        [Test]
+        public void GetApplicationByPTDNumber_Exception_ReturnsInternalServerError()
+        {
+            // Arrange
+            var request = new SearchByPtdNumberRequest
+            {
+                PTDNumber = $"{ApiConstants.PTDNumberPrefix}ABCXYZ123",
+            };
+
+            _travelDocumentServiceMock!.Setup(service => service.GetTravelDocumentByPTDNumber(request.PTDNumber))
+                .ThrowsAsync(new Exception("Mock Exception"));
+
+            // Assert
+            Assert.ThrowsAsync<Exception>(async () => await _controller!.GetApplicationByPTDNumber(request));
+        }
+
+
+        [Test]
+        public async Task CheckMicrochipNumber_MicrochipNumberIsNullOrEmpty_ReturnsBadRequest()
+        {
+            // Arrange
+            var request = new MicrochipCheckRequest { MicrochipNumber = string.Empty };
+
+            // Act
+            var result = await _controller!.CheckMicrochipNumber(request);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+            var badRequestResult = result as BadRequestObjectResult;
+            Assert.That(badRequestResult, Is.Not.Null);
+            Assert.That(badRequestResult!.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
+        }
+
+        [Test]
+        public async Task CheckMicrochipNumber_ServiceReturnsNull_ReturnsNotFound()
+        {
+            // Arrange
+            var request = new MicrochipCheckRequest { MicrochipNumber = "1234567890" };
+            _checkerServiceMock!.Setup(service => service.CheckMicrochipNumberAsync(request!.MicrochipNumber)).ReturnsAsync((object?)null!);
+
+            // Act
+            var result = await _controller!.CheckMicrochipNumber(request);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<NotFoundObjectResult>());
+            var notFoundResult = result as NotFoundObjectResult;
+            Assert.That(notFoundResult!.StatusCode, Is.EqualTo(StatusCodes.Status404NotFound));
+        }
+
+        [Test]
+        public async Task CheckMicrochipNumber_ServiceReturnsResponse_ReturnsOk()
+        {
+            // Arrange
+            var request = new MicrochipCheckRequest { MicrochipNumber = "1234567890" };
+            var response = new { PetDetails = "Details" };
+            _checkerServiceMock!.Setup(service => service.CheckMicrochipNumberAsync(request.MicrochipNumber))
+                .ReturnsAsync(response);
+
+            // Act
+            var result = await _controller!.CheckMicrochipNumber(request);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+            var OkObjectResult = result as OkObjectResult;
+            Assert.That(OkObjectResult, Is.Not.Null);
+            Assert.That(OkObjectResult!.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
+        }
+
+        [Test]
+        public async Task CheckMicrochipNumber_ServiceThrowsException_ReturnsInternalServerError()
+        {
+            // Arrange
+            var request = new MicrochipCheckRequest { MicrochipNumber = "1234567890" };
+            _checkerServiceMock!.Setup(service => service.CheckMicrochipNumberAsync(request.MicrochipNumber))
+                .ThrowsAsync(new Exception("Test exception"));
+
+            // Act
+            var result = await _controller!.CheckMicrochipNumber(request);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<ObjectResult>());
+            var ObjectResult = result as ObjectResult;
+            Assert.That(ObjectResult!.StatusCode, Is.EqualTo(StatusCodes.Status500InternalServerError));
+        }
+
+        private static TravelDocument GetTravelDocument()
+        {
             var guid = Guid.Parse("F567CDDA-DC72-4865-C18A-08DC12AE079D");
             var date = DateTime.Now;
             var qr = new byte[] { 1 };
@@ -105,128 +320,7 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
                 Pet = pet
             };
 
-            var request = new ApplicationNumberCheckRequest
-            { 
-                ApplicationNumber = "GB123"
-            };
-
-            _travelDocumentServiceMock!.Setup(service => service.GetTravelDocumentByReferenceNumber(It.IsAny<string>())).ReturnsAsync(travelDocument);
-
-            // Act
-            var result = await _controller!.CheckApplicationNumber(request);
-
-            // Assert
-            Assert.That(result, Is.InstanceOf<OkObjectResult>());
-            var okResult = result as OkObjectResult;
-            Assert.That(okResult, Is.Not.Null);
-            Assert.That(okResult!.StatusCode, Is.EqualTo(200));
-        }
-
-        [Test]
-        public async Task GetApplicationDetailsById_ValidIdButNoApplication_ReturnsNotFoundResult()
-        {
-            // Arrange
-            _travelDocumentServiceMock!.Setup(service => service.GetTravelDocumentByReferenceNumber(It.IsAny<string>()))!.ReturnsAsync((TravelDocument)null!);
-
-            var request = new ApplicationNumberCheckRequest
-            {
-                ApplicationNumber = "GB123"
-            };
-
-            // Act
-            var result = await _controller!.CheckApplicationNumber(request);
-
-            // Assert
-            Assert.That(result, Is.InstanceOf<NotFoundResult>());
-            var notFoundResult = result as NotFoundResult;
-            Assert.That(notFoundResult, Is.Not.Null);
-            Assert.That(notFoundResult!.StatusCode, Is.EqualTo(404));
-        }
-
-        [Test]
-        public async Task GetApplicationDetailsById_InvalidId_ReturnsBadRequestResult()
-        {
-            // Arrange
-            var request = new ApplicationNumberCheckRequest
-            {
-                ApplicationNumber = "123"
-            };
-            // Act
-            var result = await _controller!.CheckApplicationNumber(request);
-
-            // Assert
-            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
-            var badRequestResult = result as BadRequestObjectResult;
-            Assert.That(badRequestResult, Is.Not.Null);
-            Assert.That(badRequestResult!.StatusCode, Is.EqualTo(400));
-        }
-
-        [Test]
-        public async Task CheckMicrochipNumber_MicrochipNumberIsNullOrEmpty_ReturnsBadRequest()
-        {
-            // Arrange
-            var request = new MicrochipCheckRequest { MicrochipNumber = string.Empty };
-
-            // Act
-            var result = await _controller!.CheckMicrochipNumber(request);
-
-            // Assert
-            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
-            var badRequestResult = result as BadRequestObjectResult;
-            Assert.That(badRequestResult, Is.Not.Null);
-            Assert.That(badRequestResult!.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
-        }
-
-        [Test]
-        public async Task CheckMicrochipNumber_ServiceReturnsNull_ReturnsNotFound()
-        {
-            // Arrange
-            var request = new MicrochipCheckRequest { MicrochipNumber = "1234567890" };
-            _checkerServiceMock!.Setup(service => service.CheckMicrochipNumberAsync(request!.MicrochipNumber)).ReturnsAsync((object?)null!);
-
-            // Act
-            var result = await _controller!.CheckMicrochipNumber(request);
-
-            // Assert
-            Assert.That(result, Is.InstanceOf<NotFoundObjectResult>());
-            var notFoundResult = result as NotFoundObjectResult;
-            Assert.That(notFoundResult!.StatusCode, Is.EqualTo(StatusCodes.Status404NotFound));
-        }
-
-        [Test]
-        public async Task CheckMicrochipNumber_ServiceReturnsResponse_ReturnsOk()
-        {
-            // Arrange
-            var request = new MicrochipCheckRequest { MicrochipNumber = "1234567890" };
-            var response = new { PetDetails = "Details" };
-            _checkerServiceMock!.Setup(service => service.CheckMicrochipNumberAsync(request.MicrochipNumber))
-                .ReturnsAsync(response);
-
-            // Act
-            var result = await _controller!.CheckMicrochipNumber(request);
-
-            // Assert
-            Assert.That(result, Is.InstanceOf<OkObjectResult>());
-            var OkObjectResult = result as OkObjectResult;
-            Assert.That(OkObjectResult, Is.Not.Null);
-            Assert.That(OkObjectResult!.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
-        }
-
-        [Test]
-        public async Task CheckMicrochipNumber_ServiceThrowsException_ReturnsInternalServerError()
-        {
-            // Arrange
-            var request = new MicrochipCheckRequest { MicrochipNumber = "1234567890" };
-            _checkerServiceMock!.Setup(service => service.CheckMicrochipNumberAsync(request.MicrochipNumber))
-                .ThrowsAsync(new Exception("Test exception"));
-
-            // Act
-            var result = await _controller!.CheckMicrochipNumber(request);
-
-            // Assert
-            Assert.That(result, Is.InstanceOf<ObjectResult>());
-            var ObjectResult = result as ObjectResult;
-            Assert.That(ObjectResult!.StatusCode, Is.EqualTo(StatusCodes.Status500InternalServerError));
+            return travelDocument;
         }
     }
 }
