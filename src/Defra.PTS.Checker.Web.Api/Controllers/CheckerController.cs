@@ -20,18 +20,18 @@ public class CheckerController : ControllerBase
         _checkerService = checkerService;
     }
 
-    [HttpPost]
+    [HttpPost("checkApplicationNumber")]
     [ProducesResponseType(typeof(ApplicationDetail), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
     [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-    public async Task<IActionResult> CheckApplicationNumber(string referenceNumber)
+    public async Task<IActionResult> CheckApplicationNumber([FromBody] ApplicationNumberCheckRequest request)
     {
-        if (!referenceNumber.StartsWith("GB") || referenceNumber.Length > 20)
+        if (string.IsNullOrEmpty(request.ApplicationNumber) || !request.ApplicationNumber.StartsWith("GB") || request.ApplicationNumber.Length > 20)
             return BadRequest(ModelState);
 
 
-        var response = await _travelDocumentService.GetTravelDocumentByReferenceNumber(referenceNumber);
+        var response = await _travelDocumentService.GetTravelDocumentByReferenceNumber(request.ApplicationNumber);
 
         if (response == null)
             return NotFound();
@@ -141,6 +141,11 @@ public class CheckerController : ControllerBase
 public class MicrochipCheckRequest
 {
     public string? MicrochipNumber { get; set; }
+}
+
+public class ApplicationNumberCheckRequest
+{
+    public string? ApplicationNumber { get; set; }
 }
 
 
