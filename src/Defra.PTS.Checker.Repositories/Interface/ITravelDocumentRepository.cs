@@ -1,8 +1,6 @@
 ﻿using Defra.PTS.Checker.Entities;
-using entity = Defra.PTS.Checker.Entities;
-using Defra.PTS.Checker.Entities;
 
-namespace  Defra.PTS.Checker.Repositories.Interface
+namespace Defra.PTS.Checker.Repositories.Interface
 {
     public interface ITravelDocumentRepository :  IRepository<TravelDocument>
     {

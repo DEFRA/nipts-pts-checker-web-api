@@ -4,8 +4,6 @@ using Defra.PTS.Checker.Repositories.Interface;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
-using Defra.PTS.Checker.Entities;
-using System;
 
 namespace Defra.PTS.Checker.Repositories.Implementation
 {

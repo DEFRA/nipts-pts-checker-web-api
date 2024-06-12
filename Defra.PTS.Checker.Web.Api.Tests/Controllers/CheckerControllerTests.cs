@@ -142,7 +142,7 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
         }
 
         [Test]
-        public async Task GetApplicationByPTDNumber_Exception_ReturnsInternalServerError()
+        public void GetApplicationByPTDNumber_Exception_ReturnsInternalServerError()
         {
             // Arrange
             var request = new SearchByPTDNumberRequest

@@ -131,7 +131,7 @@ public class CheckerController : ControllerBase
             Colour = pet.Colour?.Name ?? string.Empty,
             Sex = (PetGenderType)pet.SexId,
             SpeciesId = (PetSpeciesType)pet.SpeciesId,
-            UniqueFeatureDescription = pet?.UniqueFeatureDescription ?? string.Empty,
+            UniqueFeatureDescription = pet.UniqueFeatureDescription ?? string.Empty,
         };
 
         return new OkObjectResult(response);
@@ -140,7 +140,7 @@ public class CheckerController : ControllerBase
 
 public class MicrochipCheckRequest
 {
-    public string MicrochipNumber { get; set; }
+    public string? MicrochipNumber { get; set; }
 }
 
 
