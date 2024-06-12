@@ -1,18 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
+using System.Text.Json.Serialization;
 
-namespace Defra.PTS.Checker.Models.Enums
+namespace Defra.PTS.Checker.Models.Enums;
+
+[JsonConverter(typeof(JsonStringEnumConverter))]
+
+public enum PetGenderType
 {
-    public enum PetGenderType
-    {
-        [Description("Male")]
-        Male = 1,
+    [Description("Male")]
+    Male = 1,
 
-        [Description("Female")]
-        Female = 2
-    }
+    [Description("Female")]
+    Female = 2
 }

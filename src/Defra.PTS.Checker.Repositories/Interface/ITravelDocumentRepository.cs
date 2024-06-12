@@ -1,6 +1,6 @@
 ﻿using Defra.PTS.Checker.Entities;
 
-namespace  Defra.PTS.Checker.Repositories.Interface
+namespace Defra.PTS.Checker.Repositories.Interface
 {
     public interface ITravelDocumentRepository :  IRepository<TravelDocument>
     {
@@ -8,5 +8,7 @@ namespace  Defra.PTS.Checker.Repositories.Interface
         Task<TravelDocument> GetTravelDocumentByReferenceNumber(string referenceNumber);   
         Task<IEnumerable<TravelDocument>> GetByPetIdAsync(Guid petId);
         Task<TravelDocument?> GetTravelDocumentByApplicationIdAsync(Guid applicationId);
+
+        Task<TravelDocument> GetTravelDocumentByPTDNumber(string ptdNumber);
     }
 }

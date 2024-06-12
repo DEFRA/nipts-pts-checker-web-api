@@ -1,5 +1,6 @@
 
 using Defra.PTS.Checker.Web.Api.Configuration;
+using Defra.PTS.Checker.Web.Api.Middleware;
 using Defra.PTS.Configuration;
 using Defra.Trade.Common.AppConfig;
 using Defra.Trade.Common.Security.Authentication.Infrastructure;
@@ -44,12 +45,12 @@ builder.Services.AddDefraRepositoriesServices(connection);
 builder.Services.AddDefraApiServices(builder.Configuration);
 builder.Services.AddSwaggerGen(c =>
 {
+    c.EnableAnnotations();
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "PTS Checker API", Version = "v1" });
+    c.UseInlineDefinitionsForEnums();
 });
 
 var app = builder.Build();
-
-// Configure the HTTP request pipeline.
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>
@@ -57,12 +58,13 @@ app.UseSwaggerUI(c =>
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "PTS Checker API v1");
 });
 
-
-
+// Configure the HTTP request pipeline.
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseMiddleware<ExceptionHandler>();
 
 app.Run();
