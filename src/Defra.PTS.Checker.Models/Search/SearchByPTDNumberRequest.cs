@@ -7,8 +7,8 @@ using System.Diagnostics.CodeAnalysis;
 namespace Defra.PTS.Checker.Models.Search;
 
 [ExcludeFromCodeCoverage]
-[SwaggerSchemaFilter(typeof(SearchByPTDNumberSchemaFilter))]
-public class SearchByPTDNumberRequest : IValidatableObject
+[SwaggerSchemaFilter(typeof(SearchByPtdNumberSchemaFilter))]
+public class SearchByPtdNumberRequest : IValidatableObject
 {
     [SwaggerSchema("The pet travel document number")]
     [Required(ErrorMessage = "PTD number is required")]

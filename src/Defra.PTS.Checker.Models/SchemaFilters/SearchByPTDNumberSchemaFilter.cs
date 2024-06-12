@@ -6,7 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace Defra.PTS.Checker.Models.SchemaFilters;
 
 [ExcludeFromCodeCoverage]
-public class SearchByPTDNumberSchemaFilter : ISchemaFilter
+public class SearchByPtdNumberSchemaFilter : ISchemaFilter
 {
     public void Apply(OpenApiSchema schema, SchemaFilterContext context)
     {

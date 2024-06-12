@@ -9,6 +9,7 @@ using Defra.Trade.Common.Security.AzureKeyVault.Configuration;
 using Microsoft.Azure.Management.Storage.Fluent.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -68,3 +69,10 @@ app.MapControllers();
 app.UseMiddleware<ExceptionHandler>();
 
 app.Run();
+
+
+[ExcludeFromCodeCoverage]
+partial class Program
+{
+
+}

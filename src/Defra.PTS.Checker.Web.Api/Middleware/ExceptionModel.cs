@@ -1,7 +1,9 @@
 ﻿using Newtonsoft.Json;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Defra.PTS.Checker.Web.Api.Middleware;
 
+[ExcludeFromCodeCoverage]
 public class ExceptionModel
 {
     [JsonProperty("status")]
