@@ -18,7 +18,7 @@ namespace Defra.PTS.Checker.Web.Api.Controllers
             _checkerService = checkerService;
         }
 
-        [HttpPost]
+        [HttpPost("checkApplicationNumber")]
         [ProducesResponseType(typeof(ApplicationDetail), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
