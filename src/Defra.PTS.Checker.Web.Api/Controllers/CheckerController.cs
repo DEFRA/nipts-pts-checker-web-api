@@ -117,20 +117,23 @@ public class CheckerController : ControllerBase
             return new NotFoundObjectResult("Application not found");
         }
 
+        var pet = document.Pet ?? new Pet();
+        var application = document.Application ?? new Application();
+
         var response = new SearchByPTDNumberResponse
         {
             DocumentReferenceNumber = document.DocumentReferenceNumber ?? string.Empty,
             DateOfIssue = document.DateOfIssue,
-            MicrochipNumber = document.Pet?.MicrochipNumber ?? string.Empty,
-            Status = document.Application?.Status ?? string.Empty,
-            DOB = document.Pet?.DOB,
-            Colour = document.Pet?.Colour?.Name ?? string.Empty,
-            Breed = document.Pet?.Breed?.Name ?? string.Empty,
-            MicrochippedDate = document.Pet?.MicrochippedDate,
-            Name = document.Pet?.Name ?? string.Empty,
-            Sex = (PetGenderType)document.Pet.SexId,
-            SpeciesId = (PetSpeciesType)document.Pet.SpeciesId,
-            UniqueFeatureDescription = document.Pet?.UniqueFeatureDescription ?? string.Empty,
+            MicrochipNumber = pet.MicrochipNumber ?? string.Empty,
+            Status = application.Status ?? string.Empty,
+            DOB = pet.DOB,
+            Colour = pet.Colour?.Name ?? string.Empty,
+            Breed = pet.Breed?.Name ?? string.Empty,
+            MicrochippedDate = pet.MicrochippedDate,
+            Name = pet.Name ?? string.Empty,
+            Sex = (PetGenderType)pet.SexId,
+            SpeciesId = (PetSpeciesType)pet.SpeciesId,
+            UniqueFeatureDescription = pet?.UniqueFeatureDescription ?? string.Empty,
         };
 
         return new OkObjectResult(response);

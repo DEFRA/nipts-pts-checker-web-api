@@ -8,10 +8,10 @@ public class ExceptionModel
     public int Status { get; set; }
 
     [JsonProperty("title")]
-    public string Title { get; set; }
+    public string? Title { get; set; }
 
     [JsonProperty("traceId")] 
-    public string TraceId { get; set; }
+    public string? TraceId { get; set; }
 
     [JsonProperty("error")]
     public string? Error { get; set; }

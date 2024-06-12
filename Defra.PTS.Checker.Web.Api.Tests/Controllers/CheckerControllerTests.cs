@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using NUnit.Framework;
-using System.Security.Claims;
 
 namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
 {
