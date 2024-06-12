@@ -1,16 +1,10 @@
 ﻿using Defra.PTS.Checker.Entities;
-using Defra.PTS.Checker.Models;
 using Defra.PTS.Checker.Services.Interface;
 using Defra.PTS.Checker.Web.Api.Controllers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
 {
@@ -18,13 +12,15 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
     public class CheckerControllerTests
     {
         private Mock<ITravelDocumentService>? _travelDocumentServiceMock;
+        private Mock<ICheckerService>? _checkerServiceMock;
         private CheckerController? _controller;
 
         [SetUp]
         public void SetUp()
         {
             _travelDocumentServiceMock = new Mock<ITravelDocumentService>();
-            _controller = new CheckerController(_travelDocumentServiceMock.Object);
+            _checkerServiceMock = new Mock<ICheckerService>();
+            _controller = new CheckerController(_travelDocumentServiceMock.Object, _checkerServiceMock.Object);
         }
 
         [Test]
@@ -149,6 +145,74 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
             var badRequestResult = result as BadRequestObjectResult;
             Assert.That(badRequestResult, Is.Not.Null);
             Assert.That(badRequestResult!.StatusCode, Is.EqualTo(400));
+        }
+
+        [Test]
+        public async Task CheckMicrochipNumber_MicrochipNumberIsNullOrEmpty_ReturnsBadRequest()
+        {
+            // Arrange
+            var request = new MicrochipCheckRequest { MicrochipNumber = string.Empty };
+
+            // Act
+            var result = await _controller!.CheckMicrochipNumber(request);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+            var badRequestResult = result as BadRequestObjectResult;
+            Assert.That(badRequestResult, Is.Not.Null);
+            Assert.That(badRequestResult!.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
+        }
+
+        [Test]
+        public async Task CheckMicrochipNumber_ServiceReturnsNull_ReturnsNotFound()
+        {
+            // Arrange
+            var request = new MicrochipCheckRequest { MicrochipNumber = "1234567890" };
+            _checkerServiceMock!.Setup(service => service.CheckMicrochipNumberAsync(request!.MicrochipNumber)).ReturnsAsync((object?)null!);
+
+            // Act
+            var result = await _controller!.CheckMicrochipNumber(request);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<NotFoundObjectResult>());
+            var notFoundResult = result as NotFoundObjectResult;
+            Assert.That(notFoundResult!.StatusCode, Is.EqualTo(StatusCodes.Status404NotFound));
+        }
+
+        [Test]
+        public async Task CheckMicrochipNumber_ServiceReturnsResponse_ReturnsOk()
+        {
+            // Arrange
+            var request = new MicrochipCheckRequest { MicrochipNumber = "1234567890" };
+            var response = new { PetDetails = "Details" };
+            _checkerServiceMock!.Setup(service => service.CheckMicrochipNumberAsync(request.MicrochipNumber))
+                .ReturnsAsync(response);
+
+            // Act
+            var result = await _controller!.CheckMicrochipNumber(request);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+            var OkObjectResult = result as OkObjectResult;
+            Assert.That(OkObjectResult, Is.Not.Null);
+            Assert.That(OkObjectResult!.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
+        }
+
+        [Test]
+        public async Task CheckMicrochipNumber_ServiceThrowsException_ReturnsInternalServerError()
+        {
+            // Arrange
+            var request = new MicrochipCheckRequest { MicrochipNumber = "1234567890" };
+            _checkerServiceMock!.Setup(service => service.CheckMicrochipNumberAsync(request.MicrochipNumber))
+                .ThrowsAsync(new Exception("Test exception"));
+
+            // Act
+            var result = await _controller!.CheckMicrochipNumber(request);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<ObjectResult>());
+            var ObjectResult = result as ObjectResult;
+            Assert.That(ObjectResult!.StatusCode, Is.EqualTo(StatusCodes.Status500InternalServerError));
         }
     }
 }

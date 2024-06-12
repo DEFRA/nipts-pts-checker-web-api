@@ -1,5 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 
@@ -40,18 +39,18 @@ namespace Defra.PTS.Checker.Entities
         public virtual CheckOutcome? CkOutcomeId { get; set; }      
 
         [ForeignKey("ApplicationId")]
-        public virtual Application Application { get; set; }
+        public virtual Application? Application { get; set; }
 
         [ForeignKey("TravelDocumentId")]
-        public virtual TravelDocument TravelDocument { get; set; }
+        public virtual TravelDocument? TravelDocument { get; set; }
 
         [ForeignKey("RouteId")]
-        public virtual Route RouteNavigation { get; set; }
+        public virtual Route? RouteNavigation { get; set; }
 
         [ForeignKey("CheckerId")]
-        public virtual Checker Checker { get; set; }
+        public virtual Checker? Checker { get; set; }
 
         [ForeignKey("LinkedCheckId")]
-        public virtual CheckSummary LinkedCheck { get; set; }
+        public virtual CheckSummary? LinkedCheck { get; set; }
     }
 }

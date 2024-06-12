@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 
@@ -17,7 +15,7 @@ namespace Defra.PTS.Checker.Entities
         [Required]
         [MaxLength(300)]
         [Column("RouteName")]
-        public string RouteName { get; set; }
+        public string? RouteName { get; set; }
 
         [Required]
         [Column("DeparturePortId")]
@@ -33,12 +31,12 @@ namespace Defra.PTS.Checker.Entities
 
         // Navigation properties
         [ForeignKey("DeparturePortId")]
-        public virtual Port DeparturePortNavigation { get; set; }
+        public virtual Port? DeparturePortNavigation { get; set; }
 
         [ForeignKey("ArrivalPortId")]
-        public virtual Port ArrivalPortNavigation { get; set; }
+        public virtual Port? ArrivalPortNavigation { get; set; }
 
         [ForeignKey("OperatorId")]
-        public virtual Operator OperatorNavigation { get; set; }
+        public virtual Operator? OperatorNavigation { get; set; }
     }
 }
