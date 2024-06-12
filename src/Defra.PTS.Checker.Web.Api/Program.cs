@@ -72,7 +72,7 @@ app.Run();
 
 
 [ExcludeFromCodeCoverage]
-partial class Program
+static partial class Program
 {
 
 }
