@@ -30,12 +30,6 @@ namespace Defra.PTS.Checker.Repositories.Implementation
                 .FirstOrDefaultAsync(a => a.Id == applicationId) ?? null!;
         }
 
-        public async Task<TravelDocument> GetTravelDocumentByApplicationId(Guid applicationId)
-        {
-            return await _context.TravelDocument
-                .FirstOrDefaultAsync(a => a.ApplicationId == applicationId) ?? null!;
-        }
-
         public async Task<bool> PerformHealthCheckLogic()
         {
             await _context.Database.OpenConnectionAsync();

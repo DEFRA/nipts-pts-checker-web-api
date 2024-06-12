@@ -30,6 +30,13 @@ public class CheckerController : ControllerBase
 
         if (!referenceNumber.StartsWith("GB") || referenceNumber.Length > 20)
             return BadRequest(ModelState);
+        [HttpPost]
+        [ProducesResponseType(typeof(ApplicationDetail), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<IActionResult> CheckApplicationNumber(string referenceNumber)
+        {
 
         var response = await _travelDocumentService.GetTravelDocumentByReferenceNumber(referenceNumber);
 
