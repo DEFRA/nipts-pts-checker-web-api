@@ -81,7 +81,7 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
 
             _travelDocumentServiceMock!.Setup(service => service.GetTravelDocumentByPTDNumber(It.IsAny<string>())).ReturnsAsync(travelDocument);
 
-            var request = new SearchByPTDNumberRequest
+            var request = new SearchByPtdNumberRequest
             {
                 PTDNumber = $"{ApiConstants.PTDNumberPrefix}ABCXYZ123",
             };
@@ -101,7 +101,7 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
         public async Task GetApplicationByPTDNumber_ValidRequestButNoApplication_ReturnsNotFoundResult()
         {
             // Arrange
-            var request = new SearchByPTDNumberRequest
+            var request = new SearchByPtdNumberRequest
             {
                 PTDNumber = $"{ApiConstants.PTDNumberPrefix}ABCXYZ123",
             };
@@ -124,7 +124,7 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
         public async Task GetApplicationByPTDNumber_InvalidRequest_ReturnsBadRequestResult()
         {
             // Arrange
-            var request = new SearchByPTDNumberRequest
+            var request = new SearchByPtdNumberRequest
             {
                  PTDNumber = string.Empty,
             };
@@ -145,7 +145,7 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
         public void GetApplicationByPTDNumber_Exception_ReturnsInternalServerError()
         {
             // Arrange
-            var request = new SearchByPTDNumberRequest
+            var request = new SearchByPtdNumberRequest
             {
                 PTDNumber = $"{ApiConstants.PTDNumberPrefix}ABCXYZ123",
             };
@@ -226,7 +226,7 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
             Assert.That(ObjectResult!.StatusCode, Is.EqualTo(StatusCodes.Status500InternalServerError));
         }
 
-        private TravelDocument GetTravelDocument()
+        private static TravelDocument GetTravelDocument()
         {
             var guid = Guid.Parse("F567CDDA-DC72-4865-C18A-08DC12AE079D");
             var date = DateTime.Now;

@@ -92,7 +92,7 @@ public class CheckerController : ControllerBase
 
     [HttpPost]
     [Route("checkPTDNumber")]
-    [SwaggerResponse(StatusCodes.Status200OK, "OK: Returns the approved application", typeof(SearchByPTDNumberResponse))]
+    [SwaggerResponse(StatusCodes.Status200OK, "OK: Returns the approved application", typeof(SearchByPtdNumberResponse))]
     [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request: PTD Number is not provided or is not valid", typeof(IDictionary<string, string>))]
     [SwaggerResponse(StatusCodes.Status404NotFound, "Not Found: There is no application matching this PTD number")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error: An error has occurred")]
@@ -102,7 +102,7 @@ public class CheckerController : ControllerBase
             Summary = "Retrieves a specific application by PTD Number",
             Description = "Returns the application details for the specified Pet Travel Document Number"
         )]
-    public async Task<IActionResult> GetApplicationByPTDNumber([FromBody, SwaggerRequestBody("The search payload", Required = true)] SearchByPTDNumberRequest model)
+    public async Task<IActionResult> GetApplicationByPTDNumber([FromBody, SwaggerRequestBody("The search payload", Required = true)] SearchByPtdNumberRequest model)
     {
         if (!ModelState.IsValid)
         {
@@ -118,7 +118,7 @@ public class CheckerController : ControllerBase
         var pet = document.Pet ?? new Pet();
         var application = document.Application ?? new Application();
 
-        var response = new SearchByPTDNumberResponse
+        var response = new SearchByPtdNumberResponse
         {
             DocumentReferenceNumber = document.DocumentReferenceNumber ?? string.Empty,
             DateOfIssue = document.DateOfIssue,

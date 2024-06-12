@@ -7,8 +7,8 @@ using System.Diagnostics.CodeAnalysis;
 namespace Defra.PTS.Checker.Models.Search;
 
 [ExcludeFromCodeCoverage]
-[SwaggerSchemaFilter(typeof(SearchByPTDNumberResponseSchemaFilter))]
-public class SearchByPTDNumberResponse
+[SwaggerSchemaFilter(typeof(SearchByPtdNumberResponseSchemaFilter))]
+public class SearchByPtdNumberResponse
 {
     /// <summary>
     /// Document Reference Number
@@ -70,6 +70,6 @@ public class SearchByPTDNumberResponse
     /// <summary>
     /// Pet Unique Feature
     /// </summary>
-    public string UniqueFeatureDescription = string.Empty;
+    public string UniqueFeatureDescription { get; set; } = string.Empty;
 }
 
