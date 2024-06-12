@@ -20,23 +20,16 @@ public class CheckerController : ControllerBase
         _checkerService = checkerService;
     }
 
-    [HttpGet]
+    [HttpPost]
     [ProducesResponseType(typeof(ApplicationDetail), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
     [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
     public async Task<IActionResult> CheckApplicationNumber(string referenceNumber)
     {
-
         if (!referenceNumber.StartsWith("GB") || referenceNumber.Length > 20)
             return BadRequest(ModelState);
-        [HttpPost]
-        [ProducesResponseType(typeof(ApplicationDetail), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<IActionResult> CheckApplicationNumber(string referenceNumber)
-        {
+
 
         var response = await _travelDocumentService.GetTravelDocumentByReferenceNumber(referenceNumber);
 
@@ -98,8 +91,6 @@ public class CheckerController : ControllerBase
     }
 
     [HttpPost]
-    [Consumes("application/json")]
-    [Produces("application/json")]
     [Route("checkPTDNumber")]
     [SwaggerResponse(StatusCodes.Status200OK, "OK: Returns the approved application", typeof(SearchByPTDNumberResponse))]
     [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request: PTD Number is not provided or is not valid", typeof(IDictionary<string, string>))]
@@ -131,13 +122,13 @@ public class CheckerController : ControllerBase
         {
             DocumentReferenceNumber = document.DocumentReferenceNumber ?? string.Empty,
             DateOfIssue = document.DateOfIssue,
-            MicrochipNumber = pet.MicrochipNumber ?? string.Empty,
             Status = application.Status ?? string.Empty,
-            DOB = pet.DOB,
-            Colour = pet.Colour?.Name ?? string.Empty,
-            Breed = pet.Breed?.Name ?? string.Empty,
+            MicrochipNumber = pet.MicrochipNumber ?? string.Empty,
             MicrochippedDate = pet.MicrochippedDate,
             Name = pet.Name ?? string.Empty,
+            Breed = pet.Breed?.Name ?? string.Empty,
+            DOB = pet.DOB,
+            Colour = pet.Colour?.Name ?? string.Empty,
             Sex = (PetGenderType)pet.SexId,
             SpeciesId = (PetSpeciesType)pet.SpeciesId,
             UniqueFeatureDescription = pet?.UniqueFeatureDescription ?? string.Empty,
