@@ -17,15 +17,13 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
     public class TravelDocumentServiceTests
     {
         private Mock<ITravelDocumentRepository>? _travelDocumentRepositoryMock;
-        private Mock<ILogger<TravelDocumentService>>? _loggerMock;
         private TravelDocumentService? _travelDocumentService;
 
         [SetUp]
         public void SetUp()
         {
             _travelDocumentRepositoryMock = new Mock<ITravelDocumentRepository>();
-            _loggerMock = new Mock<ILogger<TravelDocumentService>>();
-            _travelDocumentService = new TravelDocumentService(_loggerMock.Object, _travelDocumentRepositoryMock.Object);
+            _travelDocumentService = new TravelDocumentService(_travelDocumentRepositoryMock.Object);
         }
 
         [Test]
@@ -77,10 +75,10 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
                 Pet = pet
             };
 
-            _travelDocumentRepositoryMock!.Setup(repo => repo.GetTravelDocumentByReferenceNumber(It.IsAny<string>())).ReturnsAsync(travelDocument);
+            _travelDocumentRepositoryMock!.Setup(repo => repo.GetTravelDocumentByPTDNumber(It.IsAny<string>())).ReturnsAsync(travelDocument);
 
             // Act
-            var result = await _travelDocumentService!.GetTravelDocumentByReferenceNumber("GB123");
+            var result = await _travelDocumentService!.GetTravelDocumentByPTDNumber("GB123");
 
             // Assert
             Assert.That(result, Is.Not.Null);

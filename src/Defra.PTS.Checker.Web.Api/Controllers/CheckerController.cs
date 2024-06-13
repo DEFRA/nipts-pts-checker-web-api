@@ -12,40 +12,52 @@ namespace Defra.PTS.Checker.Web.Api.Controllers;
 public class CheckerController : ControllerBase
 {
     private readonly ITravelDocumentService _travelDocumentService;
+    private readonly IApplicationService _applicationService;
     private readonly ICheckerService _checkerService;
 
-    public CheckerController(ITravelDocumentService travelDocumentService, ICheckerService checkerService)
+    public CheckerController(ITravelDocumentService travelDocumentService, IApplicationService applicationService, ICheckerService checkerService)
     {
         _travelDocumentService = travelDocumentService;
+        _applicationService = applicationService;
         _checkerService = checkerService;
     }
 
     [HttpPost("checkApplicationNumber")]
-    [ProducesResponseType(typeof(ApplicationDetail), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
-    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+    [SwaggerResponse(StatusCodes.Status200OK, "OK: Returns the requested application", typeof(ApplicationDetail))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request: Application reference number is not provided or is not valid", typeof(IDictionary<string, string>))]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Not Found: There is no application matching this reference number")]
+    [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error: An error has occurred")]
+    [SwaggerOperation(
+            OperationId = "CheckApplicationNumber",
+            Tags = new[] { "Checker" },
+            Summary = "Retrieves a specific application by Reference Number",
+            Description = "Returns the application details for the specified Application Number"
+        )]
     public async Task<IActionResult> CheckApplicationNumber([FromBody] ApplicationNumberCheckRequest request)
     {
-        if (string.IsNullOrEmpty(request.ApplicationNumber) || !request.ApplicationNumber.StartsWith("GB") || request.ApplicationNumber.Length > 20)
+        if (string.IsNullOrEmpty(request.ApplicationNumber) || request.ApplicationNumber.Length > 20)
             return BadRequest(ModelState);
 
+        var response = await _applicationService.GetApplicationByReferenceNumber(request.ApplicationNumber);
 
-        var response = await _travelDocumentService.GetTravelDocumentByReferenceNumber(request.ApplicationNumber);
 
         if (response == null)
-            return NotFound();
+            return new NotFoundObjectResult("Application not found");
+
+
+        var travelDocument = _travelDocumentService.GetTravelDocumentByApplicationId(response.Id).Result;
 
         var sexOfPet = (PetGenderType)response.Pet!.SexId;
         var speciesOfPet = (PetSpeciesType)response.Pet.SpeciesId;
 
+
         var applicationDetails = new ApplicationDetail
         {
-            ReferenceNumber = response.ApplicationId,
-            DateOfApplication = response.Application?.DateOfApplication,
-            DocumentReferenceNumber = response.DocumentReferenceNumber,
-            Status = response.Application?.Status,
-            DateOfIssue = response.DateOfIssue,
+            ReferenceNumber = response.Id,
+            DateOfApplication = response.DateOfApplication,
+            DocumentReferenceNumber = travelDocument.DocumentReferenceNumber,
+            Status = response.Status,
+            DateOfIssue = travelDocument.DateOfIssue,
             PetName = response.Pet?.Name,
             DateOfBirthOfPet = response.Pet?.DOB,
             MicrochipNumber = response.Pet?.MicrochipNumber,
@@ -57,7 +69,7 @@ public class CheckerController : ControllerBase
             ColourOfPet = response.Pet?.Colour?.Name!
         };
 
-        return Ok(applicationDetails);
+        return new OkObjectResult(applicationDetails);
     }
 
     [HttpPost("checkMicrochipNumber")]

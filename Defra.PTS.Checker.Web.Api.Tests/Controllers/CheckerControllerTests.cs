@@ -1,4 +1,5 @@
 ﻿using Defra.PTS.Checker.Entities;
+using Defra.PTS.Checker.Models;
 using Defra.PTS.Checker.Models.Constants;
 using Defra.PTS.Checker.Models.Search;
 using Defra.PTS.Checker.Services.Interface;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using NUnit.Framework;
+using System;
 
 namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
 {
@@ -14,6 +16,7 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
     public class CheckerControllerTests
     {
         private Mock<ITravelDocumentService>? _travelDocumentServiceMock;
+        private Mock<IApplicationService>? _applicationServiceMock;
         private Mock<ICheckerService>? _checkerServiceMock;
         private CheckerController? _controller;
 
@@ -21,8 +24,9 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
         public void SetUp()
         {
             _travelDocumentServiceMock = new Mock<ITravelDocumentService>();
+            _applicationServiceMock = new Mock<IApplicationService>();
             _checkerServiceMock = new Mock<ICheckerService>();
-            _controller = new CheckerController(_travelDocumentServiceMock.Object, _checkerServiceMock.Object);
+            _controller = new CheckerController(_travelDocumentServiceMock.Object, _applicationServiceMock.Object, _checkerServiceMock.Object);
         }
 
         [Test]
@@ -31,12 +35,16 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
             // Arrange
             var request = new ApplicationNumberCheckRequest
             {
-                ApplicationNumber = "GB123"
+                ApplicationNumber = "UHXU1"
             };
+
+            var application = GetApplication();
 
             var travelDocument = GetTravelDocument();
 
-            _travelDocumentServiceMock!.Setup(service => service.GetTravelDocumentByReferenceNumber(It.IsAny<string>())).ReturnsAsync(travelDocument);
+            _applicationServiceMock!.Setup(service => service.GetApplicationByReferenceNumber(It.IsAny<string>())).ReturnsAsync(application);
+            _travelDocumentServiceMock!.Setup(service => service.GetTravelDocumentByApplicationId(It.IsAny<Guid>())).ReturnsAsync(travelDocument);
+
 
             // Act
             var result = await _controller!.CheckApplicationNumber(request);
@@ -54,10 +62,10 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
             // Arrange
             var request = new ApplicationNumberCheckRequest 
             { 
-                ApplicationNumber = "GB123" 
+                ApplicationNumber = "UZHR2" 
             };
 
-            _travelDocumentServiceMock!.Setup(service => service.GetTravelDocumentByReferenceNumber(It.IsAny<string>()))!.ReturnsAsync((TravelDocument)null!);
+            _applicationServiceMock!.Setup(service => service.GetApplicationByReferenceNumber(It.IsAny<string>()))!.ReturnsAsync((Entities.Application)null!);
 
             // Act
             var result = await _controller!.CheckApplicationNumber(request);
@@ -75,7 +83,7 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
             // Arrange
             var request = new ApplicationNumberCheckRequest
             {
-                ApplicationNumber = "123"
+                ApplicationNumber = ""
             };
 
             // Act
@@ -322,6 +330,64 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
             };
 
             return travelDocument;
+        }
+
+        private static Entities.Application GetApplication()
+        {
+            var guid = Guid.Parse("F567CDDA-DC72-4865-C18A-08DC12AE079D");
+            var date = DateTime.Now;
+
+            var pet = new Pet
+            {
+                Name = "Kitsu"
+            };
+
+            var owner = new Entities.Owner
+            {
+                FullName = "Dean",
+                CharityName = "Special Effect"
+            };
+
+            var user = new Entities.User
+            {
+                FirstName = "tester"
+            };
+
+            var address = new Entities.Address
+            {
+                AddressLineOne = "1 Test Lane"
+            };
+
+            var application = new Entities.Application
+            {
+                Id = guid,
+                PetId = guid,
+                DynamicId = guid,
+                OwnerAddressId = guid,
+                OwnerId = guid,
+                UserId = guid,
+                Owner = owner,
+                User = user,
+                Pet = pet,
+                CreatedOn = date,
+                DateAuthorised = date,
+                DateOfApplication = date,
+                DateRejected = date,
+                DateRevoked = date,
+                UpdatedOn = date,
+                Status = "In Test",
+                CreatedBy = guid,
+                UpdatedBy = guid,
+                OwnerNewName = "Newman",
+                IsConsentAgreed = true,
+                IsDeclarationSigned = true,
+                IsPrivacyPolicyAgreed = true,
+                OwnerNewTelephone = "123",
+                ReferenceNumber = "GB123",
+                OwnerAddress = address
+            };
+
+            return application;
         }
     }
 }
