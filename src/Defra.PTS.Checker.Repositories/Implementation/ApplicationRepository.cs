@@ -2,6 +2,7 @@
 using Defra.PTS.Checker.Entities;
 using Defra.PTS.Checker.Repositories.Interface;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
 
@@ -26,6 +27,17 @@ namespace Defra.PTS.Checker.Repositories.Implementation
                 .Include(a => a.Pet!.Breed)
                 .Include(a => a.Pet!.Colour)
                 .FirstOrDefaultAsync(a => a.Id == applicationId) ?? null!;
+        }
+
+        public async Task<Application> GetApplicationByReferenceNumber(string referenceNumber)
+        {
+            return await _context.Application
+                .Include(a => a.Pet)
+                .Include(a => a.Owner)
+                .Include(a => a.Pet)
+                .Include(a => a.Pet!.Breed)
+                .Include(a => a.Pet!.Colour)
+                .FirstOrDefaultAsync(a => a.ReferenceNumber == referenceNumber) ?? null!;
         }
 
         public async Task<bool> PerformHealthCheckLogic()

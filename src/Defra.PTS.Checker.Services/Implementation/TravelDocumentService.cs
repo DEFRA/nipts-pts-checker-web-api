@@ -13,25 +13,23 @@ namespace Defra.PTS.Checker.Services.Implementation
 {
     public class TravelDocumentService : ITravelDocumentService
     {
-        private readonly ILogger<TravelDocumentService> _log;
         private readonly ITravelDocumentRepository _travelDocumentRepository;
 
-        public TravelDocumentService(ILogger<TravelDocumentService> log, ITravelDocumentRepository travelDocumentRepository)
+        public TravelDocumentService(ITravelDocumentRepository travelDocumentRepository)
         {
-            _log = log;
             _travelDocumentRepository = travelDocumentRepository;
-        }
-
-        public Task<TravelDocument> GetTravelDocumentByReferenceNumber(string referenceNumber)
-        {
-            _log.LogInformation("Running inside method {0}", "GetTravelDocumentByReferenceNumber");
-            var travelDocument = _travelDocumentRepository.GetTravelDocumentByReferenceNumber(referenceNumber);
-            return travelDocument;
         }
 
         public Task<TravelDocument> GetTravelDocumentByPTDNumber(string ptdNumber)
         {
             return _travelDocumentRepository.GetTravelDocumentByPTDNumber(ptdNumber);
+        }
+
+        public async Task<TravelDocument> GetTravelDocumentByApplicationId(Guid applicationId)
+        {
+            var travelDocument = await _travelDocumentRepository.GetTravelDocumentByApplicationIdAsync(applicationId);
+
+            return travelDocument!;
         }
 
     }

@@ -27,5 +27,12 @@ namespace Defra.PTS.Checker.Services.Implementation
             var application = _applicationRepository.GetApplicationById(id);
             return application;
         }
+
+        public Task<Application> GetApplicationByReferenceNumber(string referenceNumber)
+        {
+            _log.LogInformation("Running inside method {0}", "GetApplicationByReferenceNumber");
+            var application = _applicationRepository.GetApplicationByReferenceNumber(referenceNumber);
+            return application;
+        }
     }
 }
