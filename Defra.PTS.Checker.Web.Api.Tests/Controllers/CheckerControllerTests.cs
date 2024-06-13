@@ -71,8 +71,8 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
             var result = await _controller!.CheckApplicationNumber(request);
 
             // Assert
-            Assert.That(result, Is.InstanceOf<NotFoundResult>());
-            var notFoundResult = result as NotFoundResult;
+            Assert.That(result, Is.InstanceOf<NotFoundObjectResult>());
+            var notFoundResult = result as NotFoundObjectResult;
             Assert.That(notFoundResult, Is.Not.Null);
             Assert.That(notFoundResult!.StatusCode, Is.EqualTo(404));
         }
