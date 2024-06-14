@@ -42,7 +42,7 @@ public class CheckerService : ICheckerService
                     {
                         TravelDocumentId = travelDocument.Id,
                         TravelDocumentReferenceNumber = travelDocument.DocumentReferenceNumber,
-                        TravelDocumentCreatedOn = travelDocument.CreatedOn,
+                        TravelDocumentDateOfIssue = travelDocument.DateOfIssue,
                         TravelDocumentValidityStartDate = travelDocument.ValidityStartDate,
                         TravelDocumentValidityEndDate = travelDocument.ValidityEndDate,
                         TravelDocumentStatusId = travelDocument.StatusId
