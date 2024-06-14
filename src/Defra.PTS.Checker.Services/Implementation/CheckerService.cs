@@ -1,41 +1,42 @@
-﻿using Defra.PTS.Checker.Services.Enums;
+﻿using Defra.PTS.Checker.Entities;
 using Defra.PTS.Checker.Repositories.Interface;
+using Defra.PTS.Checker.Services.Enums;
 using Defra.PTS.Checker.Services.Interface;
+using Microsoft.Extensions.Logging;
 
-namespace Defra.PTS.Checker.Services.Implementation
+public class CheckerService : ICheckerService
 {
-    public class CheckerService : ICheckerService
-    {
-        private readonly IPetRepository _petRepository;
-        private readonly IApplicationRepository _applicationRepository;
-        private readonly ITravelDocumentRepository _travelDocumentRepository;
+    private readonly IPetRepository _petRepository;
+    private readonly IApplicationRepository _applicationRepository;
+    private readonly ITravelDocumentRepository _travelDocumentRepository;
+    private readonly ILogger<CheckerService> _logger;
 
-        public CheckerService(IPetRepository petRepository, IApplicationRepository applicationRepository, ITravelDocumentRepository travelDocumentRepository)
+    public CheckerService(
+        IPetRepository petRepository,
+        IApplicationRepository applicationRepository,
+        ITravelDocumentRepository travelDocumentRepository,
+        ILogger<CheckerService> logger)
+    {
+        _petRepository = petRepository;
+        _applicationRepository = applicationRepository;
+        _travelDocumentRepository = travelDocumentRepository;
+        _logger = logger;
+    }
+
+    public async Task<object?> CheckMicrochipNumberAsync(string microchipNumber)
+    {
+        var pets = await _petRepository.GetByMicrochipNumberAsync(microchipNumber);
+        if (!pets.Any())
         {
-            _petRepository = petRepository;
-            _applicationRepository = applicationRepository;
-            _travelDocumentRepository = travelDocumentRepository;
+            return null;
         }
 
-        public async Task<object?> CheckMicrochipNumberAsync(string microchipNumber)
+        foreach (var pet in pets)
         {
-            var pets = await _petRepository.GetByMicrochipNumberAsync(microchipNumber);
-            if (!pets.Any())
+            var mostRelevantApplication = await GetMostRelevantApplication(pet.Id);
+            if (mostRelevantApplication != null)
             {
-                return null;
-            }
-
-            var petDetails = new List<object>();
-
-            foreach (var pet in pets)
-            {
-                var mostRecentApplication = _applicationRepository.GetMostRecentApplication(pet.Id);
-                if (mostRecentApplication == null)
-                {
-                    continue;
-                }
-
-                var travelDocument = await _travelDocumentRepository.GetTravelDocumentByApplicationIdAsync(mostRecentApplication.Id);
+                var travelDocument = await _travelDocumentRepository.GetTravelDocumentByApplicationIdAsync(mostRelevantApplication.Id);
                 var travelDocumentDetail = travelDocument != null
                     ? new
                     {
@@ -65,22 +66,73 @@ namespace Defra.PTS.Checker.Services.Implementation
                     },
                     Application = new
                     {
-                        mostRecentApplication.Id,
-                        mostRecentApplication.ReferenceNumber,
-                        mostRecentApplication.DateOfApplication,
-                        mostRecentApplication.Status,
-                        mostRecentApplication.DateAuthorised,
-                        mostRecentApplication.DateRejected,
-                        mostRecentApplication.DateRevoked
+                        mostRelevantApplication.Id,
+                        mostRelevantApplication.ReferenceNumber,
+                        mostRelevantApplication.DateOfApplication,
+                        mostRelevantApplication.Status,
+                        mostRelevantApplication.DateAuthorised,
+                        mostRelevantApplication.DateRejected,
+                        mostRelevantApplication.DateRevoked
                     },
                     TravelDocument = travelDocumentDetail
                 };
 
-                petDetails.Add(petDetail);
+                return petDetail;
             }
-
-            return petDetails.Any() ? petDetails : null;
         }
 
+        return null;
     }
+
+    private async Task<Application?> GetMostRelevantApplication(Guid petId)
+    {
+        var applications = await _applicationRepository.GetApplicationsByPetIdAsync(petId);
+
+        if (applications.Any())
+        {
+            _logger.LogInformation("Applications found for pet ID: {PetId}. Details: {Applications}", petId, applications);
+        }
+        else
+        {
+            _logger.LogWarning("No applications found for pet ID: {PetId}", petId);
+            return null;
+        }
+
+        // Separate ordering for DateAuthorised and DateRevoked
+        var authorisedOrRevokedApplication = applications
+            .Where(a => a.Status == "Authorised" || a.Status == "Revoked")
+            .OrderByDescending(a => a.DateAuthorised)
+            .ThenByDescending(a => a.DateRevoked)
+            .FirstOrDefault();
+
+        if (authorisedOrRevokedApplication != null)
+        {
+            _logger.LogInformation("Most relevant authorised or revoked application for pet ID: {PetId} is: {Application}", petId, authorisedOrRevokedApplication);
+            return authorisedOrRevokedApplication;
+        }
+
+        var awaitingVerificationApplication = applications
+            .Where(a => a.Status == "Awaiting Verification")
+            .OrderByDescending(a => a.CreatedOn)
+            .FirstOrDefault();
+
+        if (awaitingVerificationApplication != null)
+        {
+            _logger.LogInformation("Most relevant awaiting verification application for pet ID: {PetId} is: {Application}", petId, awaitingVerificationApplication);
+            return awaitingVerificationApplication;
+        }
+
+        var rejectedApplication = applications
+            .Where(a => a.Status == "Rejected")
+            .OrderByDescending(a => a.DateRejected)
+            .FirstOrDefault();
+
+        if (rejectedApplication != null)
+        {
+            _logger.LogInformation("Most relevant rejected application for pet ID: {PetId} is: {Application}", petId, rejectedApplication);
+        }
+
+        return rejectedApplication;
+    }
+
 }
