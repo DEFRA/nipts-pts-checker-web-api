@@ -3,6 +3,9 @@ using Defra.PTS.Checker.Repositories.Interface;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Defra.PTS.Checker.Tests.Services
 {
@@ -32,7 +35,7 @@ namespace Defra.PTS.Checker.Tests.Services
         }
 
         [Test]
-        public async Task CheckMicrochipNumberAsync_PetNotFound_ReturnsNull()
+        public async Task CheckMicrochipNumberAsync_PetNotFound_ReturnsPetNotFoundError()
         {
             // Arrange
             string microchipNumber = "1234567890";
@@ -43,11 +46,13 @@ namespace Defra.PTS.Checker.Tests.Services
             var result = await _checkerService!.CheckMicrochipNumberAsync(microchipNumber);
 
             // Assert
-            Assert.That(result, Is.Null);
+            Assert.That(result, Is.Not.Null);
+            var error = result!.GetType().GetProperty("error")!.GetValue(result, null);
+            Assert.That(error, Is.EqualTo("Pet not found"));
         }
 
         [Test]
-        public async Task CheckMicrochipNumberAsync_PetFound_NoRecentApplication_ReturnsNull()
+        public async Task CheckMicrochipNumberAsync_PetFound_NoRecentApplication_ReturnsApplicationNotFoundError()
         {
             // Arrange
             string microchipNumber = "1234567890";
@@ -65,7 +70,9 @@ namespace Defra.PTS.Checker.Tests.Services
             var result = await _checkerService!.CheckMicrochipNumberAsync(microchipNumber);
 
             // Assert
-            Assert.That(result, Is.Null);
+            Assert.That(result, Is.Not.Null);
+            var error = result!.GetType().GetProperty("error")!.GetValue(result, null);
+            Assert.That(error, Is.EqualTo("Application not found"));
         }
 
         [Test]
@@ -84,23 +91,7 @@ namespace Defra.PTS.Checker.Tests.Services
                 PetId = petId,
                 ReferenceNumber = "APP123",
                 DateAuthorised = DateTime.Now,
-                Status = "Authorised"
-            };
-            var applicationRejected = new Application
-            {
-                Id = Guid.NewGuid(),
-                PetId = petId,
-                ReferenceNumber = "APP124",
-                DateRejected = DateTime.Now.AddDays(-1),
-                Status = "Rejected"
-            };
-            var applicationRevoked = new Application
-            {
-                Id = Guid.NewGuid(),
-                PetId = petId,
-                ReferenceNumber = "APP125",
-                DateRevoked = DateTime.Now.AddDays(-2),
-                Status = "Revoked"
+                Status = "authorised"
             };
             var travelDocument = new TravelDocument
             {
@@ -112,7 +103,7 @@ namespace Defra.PTS.Checker.Tests.Services
                 .ReturnsAsync(pets);
 
             _applicationRepositoryMock!.Setup(repo => repo.GetApplicationsByPetIdAsync(It.IsAny<Guid>()))
-                .ReturnsAsync(new List<Application> { applicationAuthorised, applicationRejected, applicationRevoked });
+                .ReturnsAsync(new List<Application> { applicationAuthorised });
 
             _travelDocumentRepositoryMock!.Setup(repo => repo.GetTravelDocumentByApplicationIdAsync(It.IsAny<Guid>()))
                 .ReturnsAsync(travelDocument);
@@ -157,30 +148,14 @@ namespace Defra.PTS.Checker.Tests.Services
                 PetId = petId,
                 ReferenceNumber = "APP123",
                 DateAuthorised = DateTime.Now,
-                Status = "Authorised"
-            };
-            var applicationRejected = new Application
-            {
-                Id = Guid.NewGuid(),
-                PetId = petId,
-                ReferenceNumber = "APP124",
-                DateRejected = DateTime.Now.AddDays(-1),
-                Status = "Rejected"
-            };
-            var applicationRevoked = new Application
-            {
-                Id = Guid.NewGuid(),
-                PetId = petId,
-                ReferenceNumber = "APP125",
-                DateRevoked = DateTime.Now.AddDays(-2),
-                Status = "Revoked"
+                Status = "authorised"
             };
 
             _petRepositoryMock!.Setup(repo => repo.GetByMicrochipNumberAsync(microchipNumber))
                 .ReturnsAsync(pets);
 
             _applicationRepositoryMock!.Setup(repo => repo.GetApplicationsByPetIdAsync(It.IsAny<Guid>()))
-                .ReturnsAsync(new List<Application> { applicationAuthorised, applicationRejected, applicationRevoked });
+                .ReturnsAsync(new List<Application> { applicationAuthorised });
 
             _travelDocumentRepositoryMock!.Setup(repo => repo.GetTravelDocumentByApplicationIdAsync(It.IsAny<Guid>()))
                 .ReturnsAsync((TravelDocument?)null);

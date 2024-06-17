@@ -3,6 +3,9 @@ using Defra.PTS.Checker.Repositories.Interface;
 using Defra.PTS.Checker.Services.Enums;
 using Defra.PTS.Checker.Services.Interface;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 public class CheckerService : ICheckerService
 {
@@ -28,14 +31,16 @@ public class CheckerService : ICheckerService
         var pets = await _petRepository.GetByMicrochipNumberAsync(microchipNumber);
         if (!pets.Any())
         {
-            return null;
+            return new { error = "Pet not found" };
         }
 
+        bool applicationFound = false;
         foreach (var pet in pets)
         {
-            var mostRelevantApplication = await GetMostRelevantApplication(pet.Id);
+            var mostRelevantApplication = await GetMostRelevantApplicationAsync(pet.Id);
             if (mostRelevantApplication != null)
             {
+                applicationFound = true;
                 var travelDocument = await _travelDocumentRepository.GetTravelDocumentByApplicationIdAsync(mostRelevantApplication.Id);
                 var travelDocumentDetail = travelDocument != null
                     ? new
@@ -66,7 +71,7 @@ public class CheckerService : ICheckerService
                     },
                     Application = new
                     {
-                        mostRelevantApplication.Id,
+                        ApplicationId = mostRelevantApplication.Id,
                         mostRelevantApplication.ReferenceNumber,
                         mostRelevantApplication.DateOfApplication,
                         mostRelevantApplication.Status,
@@ -81,26 +86,29 @@ public class CheckerService : ICheckerService
             }
         }
 
+        if (!applicationFound)
+        {
+            return new { error = "Application not found" };
+        }
+
         return null;
     }
 
-    private async Task<Application?> GetMostRelevantApplication(Guid petId)
+    private async Task<Application?> GetMostRelevantApplicationAsync(Guid petId)
     {
         var applications = await _applicationRepository.GetApplicationsByPetIdAsync(petId);
 
-        if (applications.Any())
-        {
-            _logger.LogInformation("Applications found for pet ID: {PetId}. Details: {Applications}", petId, applications);
-        }
-        else
+        if (!applications.Any())
         {
             _logger.LogWarning("No applications found for pet ID: {PetId}", petId);
             return null;
         }
 
+        _logger.LogInformation("Applications found for pet ID: {PetId}. Details: {Applications}", petId, applications);
+
         // Separate ordering for DateAuthorised and DateRevoked
         var authorisedOrRevokedApplication = applications
-            .Where(a => a.Status == "Authorised" || a.Status == "Revoked")
+            .Where(a => a.Status!.ToLower() == "authorised" || a.Status.ToLower() == "revoked")
             .OrderByDescending(a => a.DateAuthorised)
             .ThenByDescending(a => a.DateRevoked)
             .FirstOrDefault();
@@ -112,7 +120,7 @@ public class CheckerService : ICheckerService
         }
 
         var awaitingVerificationApplication = applications
-            .Where(a => a.Status == "Awaiting Verification")
+            .Where(a => a.Status!.ToLower() == "awaiting verification")
             .OrderByDescending(a => a.CreatedOn)
             .FirstOrDefault();
 
@@ -123,7 +131,7 @@ public class CheckerService : ICheckerService
         }
 
         var rejectedApplication = applications
-            .Where(a => a.Status == "Rejected")
+            .Where(a => a.Status!.ToLower() == "rejected")
             .OrderByDescending(a => a.DateRejected)
             .FirstOrDefault();
 
