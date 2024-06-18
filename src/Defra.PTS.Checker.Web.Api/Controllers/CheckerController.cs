@@ -35,8 +35,15 @@ public class CheckerController : ControllerBase
         )]
     public async Task<IActionResult> CheckApplicationNumber([FromBody] ApplicationNumberCheckRequest request)
     {
-        if (string.IsNullOrEmpty(request.ApplicationNumber) || request.ApplicationNumber.Length > 20)
-            return BadRequest(ModelState);
+        if (string.IsNullOrEmpty(request.ApplicationNumber))
+        {
+            return BadRequest(new { error = "Application number is required." });
+        }
+
+        if (request.ApplicationNumber.Length > 20)
+        {
+            return BadRequest(new { error = "Application number cannot exceed 20 characters." });
+        }
 
         var response = await _applicationService.GetApplicationByReferenceNumber(request.ApplicationNumber);
 
