@@ -181,5 +181,66 @@ namespace Defra.PTS.Checker.Tests.Services
             Assert.That(petName, Is.EqualTo("Fido"));
             Assert.That(applicationReferenceNumber, Is.EqualTo("APP123"));
         }
+
+        [Test]
+        public async Task CheckMicrochipNumberAsync_PetFound_MultipleApplications_ReturnsMostRelevantApplication()
+        {
+            // Arrange
+            string microchipNumber = "1234567890";
+            var petId = Guid.NewGuid();
+            var pets = new List<Pet>
+            {
+                new Pet { Id = petId, Name = "Fido", MicrochipNumber = microchipNumber }
+            };
+
+            var applicationAuthorised = new Application
+            {
+                Id = Guid.NewGuid(),
+                PetId = petId,
+                ReferenceNumber = "APP123",
+                DateAuthorised = DateTime.Now,
+                Status = "authorised"
+            };
+
+            var applicationRevoked = new Application
+            {
+                Id = Guid.NewGuid(),
+                PetId = petId,
+                ReferenceNumber = "APP124",
+                DateRevoked = DateTime.Now.AddDays(-1),
+                Status = "revoked"
+            };
+
+            var applicationAwaitingVerification = new Application
+            {
+                Id = Guid.NewGuid(),
+                PetId = petId,
+                ReferenceNumber = "APP125",
+                CreatedOn = DateTime.Now.AddDays(-2),
+                Status = "awaiting verification"
+            };
+
+            _petRepositoryMock!.Setup(repo => repo.GetByMicrochipNumberAsync(microchipNumber))
+                .ReturnsAsync(pets);
+
+            _applicationRepositoryMock!.Setup(repo => repo.GetApplicationsByPetIdAsync(It.IsAny<Guid>()))
+                .ReturnsAsync(new List<Application> { applicationRevoked, applicationAwaitingVerification, applicationAuthorised });
+
+            _travelDocumentRepositoryMock!.Setup(repo => repo.GetTravelDocumentByApplicationIdAsync(applicationAuthorised.Id))
+                .ReturnsAsync(new TravelDocument
+                {
+                    Id = Guid.NewGuid(),
+                    DocumentReferenceNumber = "TD123"
+                });
+
+            // Act
+            var result = await _checkerService!.CheckMicrochipNumberAsync(microchipNumber);
+
+            // Assert
+            Assert.That(result, Is.Not.Null);
+
+            // Extract
+
+        }
     }
 }
