@@ -7,6 +7,7 @@ using Defra.PTS.Checker.Web.Api.Controllers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using Newtonsoft.Json;
 using NUnit.Framework;
 using System;
 
@@ -77,13 +78,14 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
             Assert.That(notFoundResult!.StatusCode, Is.EqualTo(404));
         }
 
-        [Test]
-        public async Task GetApplicationDetailsById_InvalidId_ReturnsBadRequestResult()
+        [TestCase("", "Application number is required.")]
+        [TestCase("123456789012345678901", "Application number cannot exceed 20 characters.")]
+        public async Task GetApplicationDetailsById_InvalidId_ReturnsBadRequestResult(string applicationNumber, string expectedErrorMessage)
         {
             // Arrange
             var request = new ApplicationNumberCheckRequest
             {
-                ApplicationNumber = ""
+                ApplicationNumber = applicationNumber
             };
 
             // Act
@@ -94,6 +96,16 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
             var badRequestResult = result as BadRequestObjectResult;
             Assert.That(badRequestResult, Is.Not.Null);
             Assert.That(badRequestResult!.StatusCode, Is.EqualTo(400));
+
+            // Extract error from BadRequest result
+            var error = badRequestResult.Value;
+            Assert.That(error, Is.Not.Null);
+
+            // Convert the error to a dynamic object for easy access
+            var errorObj = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(JsonConvert.SerializeObject(error));
+            Assert.That(errorObj, Is.Not.Null);
+            Assert.That(errorObj!.ContainsKey("error"));
+            Assert.That(errorObj["error"], Is.EqualTo(expectedErrorMessage));
         }
 
         [Test]
