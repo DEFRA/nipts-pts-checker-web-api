@@ -202,7 +202,8 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
         {
             // Arrange
             var request = new MicrochipCheckRequest { MicrochipNumber = "1234567890" };
-            _checkerServiceMock!.Setup(service => service.CheckMicrochipNumberAsync(request!.MicrochipNumber)).ReturnsAsync((object?)null!);
+            _checkerServiceMock!.Setup(service => service.CheckMicrochipNumberAsync(request.MicrochipNumber))
+                               .ReturnsAsync((object?)null);
 
             // Act
             var result = await _controller!.CheckMicrochipNumber(request);
@@ -212,6 +213,7 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
             var notFoundResult = result as NotFoundObjectResult;
             Assert.That(notFoundResult!.StatusCode, Is.EqualTo(StatusCodes.Status404NotFound));
         }
+
 
         [Test]
         public async Task CheckMicrochipNumber_ServiceReturnsResponse_ReturnsOk()

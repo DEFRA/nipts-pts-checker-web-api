@@ -93,14 +93,27 @@ public class CheckerController : ControllerBase
                 return NotFound(new { error = "Application or travel document not found" });
             }
 
+            var errorProperty = response.GetType().GetProperty("error")?.GetValue(response, null) as string;
+            if (!string.IsNullOrEmpty(errorProperty))
+            {
+                if (errorProperty == "Pet not found" || errorProperty == "Application not found")
+                {
+                    return NotFound(new { error = errorProperty });
+                }
+                else
+                {
+                    return StatusCode(500, new { error = "An unexpected error occurred. Please try again later." });
+                }
+            }
 
-            return Ok(System.Text.Json.JsonSerializer.Serialize(response));
+            return Ok(response);
         }
         catch (Exception ex)
         {
             return StatusCode(500, new { error = "An error occurred during processing", details = ex.Message });
         }
     }
+
 
     [HttpPost]
     [Route("checkPTDNumber")]
