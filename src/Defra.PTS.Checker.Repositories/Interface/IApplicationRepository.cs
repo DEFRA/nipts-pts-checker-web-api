@@ -7,7 +7,7 @@ namespace Defra.PTS.Checker.Repositories.Interface
 
         Task<Application> GetApplicationById(Guid applicationId);
 
-        Task<Application> GetApplicationByReferenceNumber(string referenceNumber);
+        Task<Application?> GetApplicationByReferenceNumber(string referenceNumber);
 
         Task<bool> PerformHealthCheckLogic();
 

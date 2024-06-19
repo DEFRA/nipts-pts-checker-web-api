@@ -29,7 +29,7 @@ namespace Defra.PTS.Checker.Repositories.Implementation
                 .FirstOrDefaultAsync(a => a.Id == applicationId) ?? null!;
         }
 
-        public async Task<Application> GetApplicationByReferenceNumber(string referenceNumber)
+        public async Task<Application?> GetApplicationByReferenceNumber(string referenceNumber)
         {
             return await _context.Application
                 .Include(a => a.Pet)
@@ -37,7 +37,7 @@ namespace Defra.PTS.Checker.Repositories.Implementation
                 .Include(a => a.Pet)
                 .Include(a => a.Pet!.Breed)
                 .Include(a => a.Pet!.Colour)
-                .FirstOrDefaultAsync(a => a.ReferenceNumber == referenceNumber) ?? null!;
+                .FirstOrDefaultAsync(a => a.ReferenceNumber == referenceNumber);
         }
 
         public async Task<bool> PerformHealthCheckLogic()
