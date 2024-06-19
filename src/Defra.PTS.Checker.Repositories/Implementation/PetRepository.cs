@@ -24,8 +24,7 @@ namespace Defra.PTS.Checker.Repositories.Implementation
 
          
             return await _context.Pet
-            .Where(p => p.MicrochipNumber == microchipNumber)
-            .Where(p => p.Breed != null && p.Colour != null)
+            .Where(p => p.MicrochipNumber == microchipNumber)            
             .Include(p => p.Breed)
             .Include(p => p.Colour)
             .ToListAsync();
