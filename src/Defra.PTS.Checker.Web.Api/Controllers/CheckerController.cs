@@ -60,7 +60,7 @@ public class CheckerController : ControllerBase
 
         var applicationDetails = new ApplicationDetail
         {
-            ReferenceNumber = response.Id,
+            ReferenceNumber = response.ReferenceNumber,
             DateOfApplication = response.DateOfApplication,
             DocumentReferenceNumber = travelDocument.DocumentReferenceNumber,
             Status = response.Status,

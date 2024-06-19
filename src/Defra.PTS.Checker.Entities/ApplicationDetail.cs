@@ -8,7 +8,7 @@ namespace Defra.PTS.Checker.Entities
         public string? Status { get; set; }
         public string? DocumentReferenceNumber { get; set; }
         public DateTime? DateOfIssue { get; set; }
-        public Guid? ReferenceNumber { get; set; }
+        public string? ReferenceNumber { get; set; }
         public DateTime? DateOfApplication { get; set; }
         public string? MicrochipNumber { get; set; }
         public DateTime? MicrochippedDate { get; set; }
