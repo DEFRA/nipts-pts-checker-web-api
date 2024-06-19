@@ -32,7 +32,7 @@ namespace Defra.PTS.Checker.Services.Implementation
         {
             _log.LogInformation("Running inside method {0}", "GetApplicationByReferenceNumber");
             var application = _applicationRepository.GetApplicationByReferenceNumber(referenceNumber);
-            return application;
+            return application!;
         }
     }
 }

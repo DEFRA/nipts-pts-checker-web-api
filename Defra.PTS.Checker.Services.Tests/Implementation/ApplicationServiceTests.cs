@@ -110,5 +110,89 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             Assert.That(result.DateRevoked, Is.EqualTo(date));
             Assert.That(result.OwnerAddress, Is.EqualTo(address));
         }
+
+        [Test]
+        public async Task GetApplicationByReferenceNumber_ReturnsApplication()
+        {
+            // Arrange
+            var referenceNumber = "GB123";
+
+            var guid = Guid.Parse("F567CDDA-DC72-4865-C18A-08DC12AE079D");
+            var date = DateTime.Now;
+
+            var pet = new Pet
+            {
+                Name = "Kitsu"
+            };
+
+            var owner = new Owner
+            {
+                FullName = "Dean",
+                CharityName = "Special Effect"
+            };
+
+            var user = new User
+            {
+                FirstName = "tester"
+            };
+
+            var address = new Address
+            {
+                AddressLineOne = "1 Test Lane"
+            };
+
+            var application = new Application
+            {
+                Id = guid,
+                PetId = guid,
+                DynamicId = guid,
+                OwnerAddressId = guid,
+                OwnerId = guid,
+                UserId = guid,
+                Owner = owner,
+                User = user,
+                Pet = pet,
+                CreatedOn = date,
+                DateAuthorised = date,
+                DateOfApplication = date,
+                DateRejected = date,
+                DateRevoked = date,
+                UpdatedOn = date,
+                Status = "In Test",
+                CreatedBy = guid,
+                UpdatedBy = guid,
+                OwnerNewName = "Newman",
+                IsConsentAgreed = true,
+                IsDeclarationSigned = true,
+                IsPrivacyPolicyAgreed = true,
+                OwnerNewTelephone = "123",
+                ReferenceNumber = referenceNumber,
+                OwnerAddress = address
+            };
+
+            _applicationRepositoryMock!.Setup(repo => repo.GetApplicationByReferenceNumber(It.IsAny<string>())).ReturnsAsync(application);
+
+            // Act
+            var result = await _applicationService!.GetApplicationByReferenceNumber(referenceNumber);
+
+            // Assert
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.Id, Is.EqualTo(guid));
+            Assert.That(result.PetId, Is.EqualTo(guid));
+            Assert.That(result.DynamicId, Is.EqualTo(guid));
+            Assert.That(result.OwnerAddressId, Is.EqualTo(guid));
+            Assert.That(result.OwnerId, Is.EqualTo(guid));
+            Assert.That(result.UserId, Is.EqualTo(guid));
+            Assert.That(result.UserId, Is.EqualTo(guid));
+            Assert.That(result.IsConsentAgreed, Is.EqualTo(true));
+            Assert.That(result.IsDeclarationSigned, Is.EqualTo(true));
+            Assert.That(result.IsPrivacyPolicyAgreed, Is.EqualTo(true));
+            Assert.That(result.CreatedBy, Is.EqualTo(guid));
+            Assert.That(result.DateAuthorised, Is.EqualTo(date));
+            Assert.That(result.DateOfApplication, Is.EqualTo(date));
+            Assert.That(result.DateRejected, Is.EqualTo(date));
+            Assert.That(result.DateRevoked, Is.EqualTo(date));
+            Assert.That(result.OwnerAddress, Is.EqualTo(address));
+        }
     }
 }
