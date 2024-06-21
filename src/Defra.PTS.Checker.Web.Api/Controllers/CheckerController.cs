@@ -12,13 +12,11 @@ namespace Defra.PTS.Checker.Web.Api.Controllers;
 [ApiController]
 public class CheckerController : ControllerBase
 {
-    private readonly ITravelDocumentService _travelDocumentService;
     private readonly IApplicationService _applicationService;
     private readonly ICheckerService _checkerService;
 
-    public CheckerController(ITravelDocumentService travelDocumentService, IApplicationService applicationService, ICheckerService checkerService)
+    public CheckerController(IApplicationService applicationService, ICheckerService checkerService)
     {
-        _travelDocumentService = travelDocumentService;
         _applicationService = applicationService;
         _checkerService = checkerService;
     }

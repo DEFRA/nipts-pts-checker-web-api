@@ -17,7 +17,6 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
     [TestFixture]
     public class CheckerControllerTests
     {
-        private Mock<ITravelDocumentService>? _travelDocumentServiceMock;
         private Mock<IApplicationService>? _applicationServiceMock;
         private Mock<ICheckerService>? _checkerServiceMock;
         private CheckerController? _controller;
@@ -25,10 +24,9 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
         [SetUp]
         public void SetUp()
         {
-            _travelDocumentServiceMock = new Mock<ITravelDocumentService>();
             _applicationServiceMock = new Mock<IApplicationService>();
             _checkerServiceMock = new Mock<ICheckerService>();
-            _controller = new CheckerController(_travelDocumentServiceMock.Object, _applicationServiceMock.Object, _checkerServiceMock.Object);
+            _controller = new CheckerController(_applicationServiceMock.Object, _checkerServiceMock.Object);
         }
 
         [Test]
