@@ -28,7 +28,7 @@ public class CheckerController : ControllerBase
     [SwaggerResponse(StatusCodes.Status404NotFound, "Not Found: There is no application matching this reference number")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error: An error has occurred")]
     [SwaggerOperation(
-            OperationId = "CheckApplicationNumber",
+            OperationId = "checkApplicationNumber",
             Tags = new[] { "Checker" },
             Summary = "Retrieves a specific application by Reference Number",
             Description = "Returns the application details for the specified Application Number"

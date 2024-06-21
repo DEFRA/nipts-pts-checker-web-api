@@ -37,7 +37,7 @@ namespace Defra.PTS.Checker.Repositories.Implementation
                 .Include(a => a.Pet)
                 .Include(a => a.Pet!.Breed)
                 .Include(a => a.Pet!.Colour)
-                .FirstOrDefaultAsync(a => a.ReferenceNumber == referenceNumber);
+                .FirstOrDefaultAsync(a => a.ReferenceNumber!.ToLower() == referenceNumber.ToLower());
         }
 
         public async Task<bool> PerformHealthCheckLogic()
