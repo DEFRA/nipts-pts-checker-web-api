@@ -1,6 +1,7 @@
 ﻿using Defra.PTS.Checker.Entities;
 using Defra.PTS.Checker.Repositories.Implementation;
 using Defra.PTS.Checker.Repositories.Interface;
+using Defra.PTS.Checker.Services.Enums;
 using Defra.PTS.Checker.Services.Interface;
 using Microsoft.Extensions.Logging;
 using System;
@@ -20,9 +21,11 @@ namespace Defra.PTS.Checker.Services.Implementation
             _travelDocumentRepository = travelDocumentRepository;
         }
 
-        public Task<TravelDocument> GetTravelDocumentByPTDNumber(string ptdNumber)
+        public async Task<TravelDocument> GetTravelDocumentByPTDNumber(string ptdNumber)
         {
-            return _travelDocumentRepository.GetTravelDocumentByPTDNumber(ptdNumber);
+            var travelDocument = await _travelDocumentRepository.GetTravelDocumentByPTDNumber(ptdNumber);
+
+            return travelDocument!;
         }
 
         public async Task<TravelDocument> GetTravelDocumentByApplicationId(Guid applicationId)

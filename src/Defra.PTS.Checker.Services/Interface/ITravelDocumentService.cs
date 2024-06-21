@@ -9,7 +9,8 @@ namespace Defra.PTS.Checker.Services.Interface
 {
     public interface ITravelDocumentService
     {
-        Task<TravelDocument> GetTravelDocumentByPTDNumber(string ptdNumber);
         Task<TravelDocument> GetTravelDocumentByApplicationId(Guid applicationId);
+
+        Task<TravelDocument> GetTravelDocumentByPTDNumber(string ptdNumber);
     }
 }

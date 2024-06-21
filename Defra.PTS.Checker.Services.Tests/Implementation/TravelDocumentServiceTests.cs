@@ -1,14 +1,18 @@
 ﻿using Defra.PTS.Checker.Entities;
 using Defra.PTS.Checker.Repositories.Implementation;
 using Defra.PTS.Checker.Repositories.Interface;
+using Defra.PTS.Checker.Services.Enums;
 using Defra.PTS.Checker.Services.Implementation;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Newtonsoft.Json;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Defra.PTS.Checker.Services.Tests.Implementation
@@ -16,169 +20,72 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
     [TestFixture]
     public class TravelDocumentServiceTests
     {
-        private Mock<ITravelDocumentRepository>? _travelDocumentRepositoryMock;
-        private TravelDocumentService? _travelDocumentService;
+        private Mock<ITravelDocumentRepository>? _mockRepository;
+        private TravelDocumentService? _service;
 
         [SetUp]
         public void SetUp()
         {
-            _travelDocumentRepositoryMock = new Mock<ITravelDocumentRepository>();
-            _travelDocumentService = new TravelDocumentService(_travelDocumentRepositoryMock.Object);
+            _mockRepository = new Mock<ITravelDocumentRepository>();
+            _service = new TravelDocumentService(_mockRepository.Object);
         }
 
         [Test]
-        public async Task GetTravelDocumentByReferenceNumber_ReturnsDocument()
+        public async Task GetTravelDocumentByPTDNumber_ReturnsTravelDocument_WhenDocumentExists()
         {
             // Arrange
-            var guid = Guid.Parse("F567CDDA-DC72-4865-C18A-08DC12AE079D");
-            var date = DateTime.Now;
-            var qr = new byte[] { 1 };
-
-            var pet = new Pet
+            string ptdNumber = "PTD123";
+            var expectedTravelDocument = new TravelDocument
             {
-                Name = "Kitsu"
+                Id = Guid.NewGuid(),
+                DocumentReferenceNumber = "REF123",
+                DateOfIssue = new DateTime(2023, 1, 1),
+                ValidityStartDate = new DateTime(2023, 1, 1),
+                ValidityEndDate = new DateTime(2024, 1, 1),
+                StatusId = 1,
+                Pet = new Pet { Id = Guid.NewGuid(), Name = "Buddy" },
+                Application = new Application { Id = Guid.NewGuid(), ReferenceNumber = "APP123" }
             };
 
-            var owner = new Owner
-            {
-                FullName = "Dean",
-                CharityName = "Special Effect"
-            };
-
-            var application = new Application
-            {
-                Id = guid
-            };
-
-
-            var travelDocument = new TravelDocument
-            {
-                Id = guid,
-                DocumentReferenceNumber = "GB123",
-                IssuingAuthorityId = 2,
-                CreatedBy = guid,
-                DateOfIssue = date,
-                CreatedOn = date,
-                UpdatedOn = date,
-                ApplicationId = guid,
-                PetId = guid,
-                DocumentSignedBy = "test",
-                IsLifeTime = true,
-                UpdatedBy = guid,
-                OwnerId = guid,
-                StatusId = 3,
-                ValidityEndDate = date,
-                ValidityStartDate = date,
-                QrCode = qr,
-                Application = application, 
-                Owner = owner,
-                Pet = pet
-            };
-
-            _travelDocumentRepositoryMock!.Setup(repo => repo.GetTravelDocumentByPTDNumber(It.IsAny<string>())).ReturnsAsync(travelDocument);
+            _mockRepository.Setup(repo => repo.GetTravelDocumentByPTDNumber(ptdNumber))
+                           .ReturnsAsync(expectedTravelDocument);
 
             // Act
-            var result = await _travelDocumentService!.GetTravelDocumentByPTDNumber("GB123");
+            var result = await _service.GetTravelDocumentByPTDNumber(ptdNumber);
 
             // Assert
             Assert.That(result, Is.Not.Null);
-            Assert.That(result.Id, Is.EqualTo(guid));
-            Assert.That(result.PetId, Is.EqualTo(guid));
-            Assert.That(result.ApplicationId, Is.EqualTo(guid));
-            Assert.That(result.OwnerId, Is.EqualTo(guid));
-            Assert.That(result.StatusId, Is.EqualTo(3));
-            Assert.That(result.IssuingAuthorityId, Is.EqualTo(2));
-            Assert.That(result.DocumentReferenceNumber, Is.EqualTo("GB123"));
-            Assert.That(result.Owner, Is.EqualTo(owner));
-            Assert.That(result.Pet, Is.EqualTo(pet));
-            Assert.That(result.Application, Is.EqualTo(application));
-            Assert.That(result.DocumentSignedBy, Is.EqualTo("test"));
-            Assert.That(result.CreatedBy, Is.EqualTo(guid));
-            Assert.That(result.DateOfIssue, Is.EqualTo(date));
-            Assert.That(result.CreatedOn, Is.EqualTo(date));
-            Assert.That(result.UpdatedOn, Is.EqualTo(date));
-            Assert.That(result.IsLifeTime, Is.EqualTo(true));
-            Assert.That(result.UpdatedBy, Is.EqualTo(guid));
-            Assert.That(result.ValidityEndDate, Is.EqualTo(date));
-            Assert.That(result.ValidityStartDate, Is.EqualTo(date));
-            Assert.That(result.QrCode, Is.EqualTo(qr));
+            Assert.That(expectedTravelDocument, Is.EqualTo(result));
         }
+
+
         [Test]
-        public async Task GetTravelDocumentByPTDNumber_ReturnsDocument()
+        public async Task GetTravelDocumentByApplicationId_ReturnsTravelDocument_WhenDocumentExists()
         {
             // Arrange
-            var guid = Guid.Parse("F567CDDA-DC72-4865-C18A-08DC12AE079D");
-            var date = DateTime.Now;
-            var qr = new byte[] { 1 };
-
-            var pet = new Pet
+            Guid applicationId = Guid.NewGuid();
+            var expectedTravelDocument = new TravelDocument
             {
-                Name = "Kitsu"
+                Id = Guid.NewGuid(),
+                DocumentReferenceNumber = "REF123",
+                DateOfIssue = new DateTime(2023, 1, 1),
+                ValidityStartDate = new DateTime(2023, 1, 1),
+                ValidityEndDate = new DateTime(2024, 1, 1),
+                StatusId = 1,
+                Pet = new Pet { Id = Guid.NewGuid(), Name = "Buddy" },
+                Application = new Application { Id = Guid.NewGuid(), ReferenceNumber = "APP123" }
             };
 
-            var owner = new Owner
-            {
-                FullName = "Dean",
-                CharityName = "Special Effect"
-            };
-
-            var application = new Application
-            {
-                Id = guid
-            };
-
-
-            var travelDocument = new TravelDocument
-            {
-                Id = guid,
-                DocumentReferenceNumber = "GB123",
-                IssuingAuthorityId = 2,
-                CreatedBy = guid,
-                DateOfIssue = date,
-                CreatedOn = date,
-                UpdatedOn = date,
-                ApplicationId = guid,
-                PetId = guid,
-                DocumentSignedBy = "test",
-                IsLifeTime = true,
-                UpdatedBy = guid,
-                OwnerId = guid,
-                StatusId = 3,
-                ValidityEndDate = date,
-                ValidityStartDate = date,
-                QrCode = qr,
-                Application = application,
-                Owner = owner,
-                Pet = pet
-            };
-
-            _travelDocumentRepositoryMock!.Setup(repo => repo.GetTravelDocumentByPTDNumber(It.IsAny<string>())).ReturnsAsync(travelDocument);
+            _mockRepository.Setup(repo => repo.GetTravelDocumentByApplicationIdAsync(applicationId))
+                           .ReturnsAsync(expectedTravelDocument);
 
             // Act
-            var result = await _travelDocumentService!.GetTravelDocumentByPTDNumber("GB123");
+            var result = await _service.GetTravelDocumentByApplicationId(applicationId);
 
             // Assert
             Assert.That(result, Is.Not.Null);
-            Assert.That(result.Id, Is.EqualTo(guid));
-            Assert.That(result.PetId, Is.EqualTo(guid));
-            Assert.That(result.ApplicationId, Is.EqualTo(guid));
-            Assert.That(result.OwnerId, Is.EqualTo(guid));
-            Assert.That(result.StatusId, Is.EqualTo(3));
-            Assert.That(result.IssuingAuthorityId, Is.EqualTo(2));
-            Assert.That(result.DocumentReferenceNumber, Is.EqualTo("GB123"));
-            Assert.That(result.Owner, Is.EqualTo(owner));
-            Assert.That(result.Pet, Is.EqualTo(pet));
-            Assert.That(result.Application, Is.EqualTo(application));
-            Assert.That(result.DocumentSignedBy, Is.EqualTo("test"));
-            Assert.That(result.CreatedBy, Is.EqualTo(guid));
-            Assert.That(result.DateOfIssue, Is.EqualTo(date));
-            Assert.That(result.CreatedOn, Is.EqualTo(date));
-            Assert.That(result.UpdatedOn, Is.EqualTo(date));
-            Assert.That(result.IsLifeTime, Is.EqualTo(true));
-            Assert.That(result.UpdatedBy, Is.EqualTo(guid));
-            Assert.That(result.ValidityEndDate, Is.EqualTo(date));
-            Assert.That(result.ValidityStartDate, Is.EqualTo(date));
-            Assert.That(result.QrCode, Is.EqualTo(qr));
+            Assert.That(expectedTravelDocument, Is.EqualTo(result));
         }
+
     }
 }
