@@ -1,4 +1,5 @@
 ﻿using Defra.PTS.Checker.Models.Enums;
+using Defra.PTS.Checker.Models.Search;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
@@ -11,20 +12,24 @@ public class SearchByPtdNumberResponseSchemaFilter : ISchemaFilter
 {
     public void Apply(OpenApiSchema schema, SchemaFilterContext context)
     {
-        schema.Example = new OpenApiObject
+        if (context.Type == typeof(SearchResponse))
         {
-            ["documentReferenceNumber"] = new OpenApiString("GB826CD186E"),
-            ["dateOfIssue"] = new OpenApiDate(DateTime.Now.Date),
-            ["status"] = new OpenApiString("Approved"),
-            ["microchipNumber"] = new OpenApiString("123456789012345"),
-            ["microchippedDate"] = new OpenApiDate(DateTime.Now.AddDays(-60).Date),
-            ["name"] = new OpenApiString("Toto"),
-            ["breed"] = new OpenApiString("Afghan Hound"),
-            ["colour"] = new OpenApiString("Black"),
-            ["SpeciesId"] = new OpenApiString(PetSpeciesType.Dog.ToString()),
-            ["sex"] = new OpenApiString(PetGenderType.Male.ToString()),
-            ["dob"] = new OpenApiDate(DateTime.Now.AddDays(-90).Date),
-            ["uniqueFeatureDescription"] = new OpenApiString("White star on his chest")
-        };
+            // Customization logic goes here
+            schema.Description = "Description for SearchByPtdNumberResponse";
+
+            // For example, add custom properties or modify existing ones
+            if (schema.Properties.ContainsKey("TravelDocument"))
+            {
+                schema.Properties["TravelDocument"].Description = "The travel document details.";
+            }
+            if (schema.Properties.ContainsKey("Pet"))
+            {
+                schema.Properties["Pet"].Description = "The pet details.";
+            }
+            if (schema.Properties.ContainsKey("Application"))
+            {
+                schema.Properties["Application"].Description = "The application details.";
+            }
+        }
     }
 }
