@@ -49,7 +49,7 @@ public class CheckerController : ControllerBase
         if (response == null)
             return new NotFoundObjectResult("Application not found");
 
-        return Ok(System.Text.Json.JsonSerializer.Serialize(response));
+        return Ok(response);
     }
 
     [HttpPost("checkMicrochipNumber")]
@@ -120,7 +120,7 @@ public class CheckerController : ControllerBase
             return new NotFoundObjectResult("Application not found");
         }
 
-        return Ok(System.Text.Json.JsonSerializer.Serialize(application));
+        return Ok(application);
     }
 }
 
