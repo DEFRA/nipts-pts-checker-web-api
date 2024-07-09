@@ -126,7 +126,7 @@ extends:
     publishAPIMApi: 
       apiConfig: '**/api-config/pts-pet-checker-api.yml'
       apiProjectName: '$(APIName)'
-      apiTemplate: 'pts-pet-checker-api'
+      apiTemplate: 'pts-pet-checker'
     runHealthCheck: false
     qualityGate: ${{ parameters.qualityGate }}
     skipBuildTests: true
