@@ -39,6 +39,10 @@ templateParameters:
         keyVault:
           id: "/subscriptions/#{{ subscriptionId }}/resourceGroups/#{{ Environment.Name }}TRD#{{ nc-function-infrastructure }}#{{ nc-resource-resourcegroup }}1001/providers/Microsoft.KeyVault/vaults/#{{ Environment.Name }}TRD#{{ nc-function-infrastructure }}#{{ nc-resource-keyvault }}1001"
         secretName: "PTS#{{ nc-function-web }}#{{ nc-resource-appserviceplan }}1001-OAuth-ClientId"    
+    - name: roles
+      values: 
+        roleTradeTracesAdapterRead: "#{{ roleTradeTracesAdapterRead }}"
+        roleTradeTracesAdapterUpdate: "#{{ roleTradeTracesAdapterUpdate }}"
 outputLocation: publish-templates
 linked: false
 baseFileName: pts-pet-checker
