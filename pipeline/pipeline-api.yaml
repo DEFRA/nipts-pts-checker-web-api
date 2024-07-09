@@ -82,7 +82,7 @@ resources:
 
 variables:
   APIName: DEFRA_nipts-pts-checker-web-api
-
+  apimApiName: nipts-pts-checker-web-api
 extends:
   template: /templates/basic-webapp-deploy-pipeline.yaml@PipelineCommon
   parameters:
@@ -125,7 +125,7 @@ extends:
     # sonarExclusionPaths: 'src/*.Api*/**, src/Defra.PTS.Checker.Web.Api/Program.cs'
     publishAPIMApi: 
       apiConfig: '**/api-config/pts-pet-checker-api.yml'
-      apiProjectName: '$(APIName)'
+      apiProjectName: '$(apimApiName)'
       apiTemplate: 'pts-pet-checker'
     runHealthCheck: false
     qualityGate: ${{ parameters.qualityGate }}
