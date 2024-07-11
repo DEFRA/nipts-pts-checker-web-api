@@ -43,6 +43,8 @@ templateParameters:
       value: "#{{ idm2ConfigUrl }}"
     - name: idm2Issuer
       value: "#{{ idm2Issuer }}"
+    - name: idm2Audience
+      value: "#{{ idm2Audience }}"
     - name: roles
       values: 
         roleTradeTracesAdapterRead: "#{{ roleTradeTracesAdapterRead }}"
