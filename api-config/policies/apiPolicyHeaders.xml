@@ -14,21 +14,18 @@
             <otherwise>
                 <set-backend-service base-url="', parameters('pts-pet-checker-v1-serviceUrl') ,'" />
             </otherwise>
-        </choose>
-        <validate-jwt header-name="Authorization" failed-validation-httpcode="401" failed-validation-error-message="Unauthorized. Access token is missing or invalid." require-expiration-time="true" require-scheme="Bearer" require-signed-tokens="true" clock-skew="900" output-token-variable-name="jwt">
-			<openid-config url="', concat('https://login.microsoftonline.com/', subscription().tenantId, '/.well-known/openid-configuration') ,'" />
-			<required-claims>
-				<claim name="aud">
-                    <value>@((string)context.Variables["Audience"])</value>
-                </claim>
+        </choose>      
+         <validate-jwt header-name="Authorization" failed-validation-httpcode="401" failed-validation-error-message="Unauthorized. Access token is missing or invalid." require-expiration-time="true" require-scheme="Bearer" require-signed-tokens="true" clock-skew="900" output-token-variable-name="jwt">
+            <openid-config url="parameters('idm2Url')" />
+            <required-claims>
                 <claim name="iss">
-                    <value>https://sts.windows.net/', subscription().tenantId, '/</value>
+                    <value>parameters('idm2Issuer')</value>
                 </claim>
-                <claim name="tid">
-                    <value>', subscription().tenantId, '</value>
+                <claim name="aud">
+                    <value>parameters('idm2aud')</value>
                 </claim>
-			</required-claims>
-		</validate-jwt>
+            </required-claims>
+        </validate-jwt>
 		<authentication-managed-identity resource="', parameters('aspClientId'), '" ignore-error="false" />
     </inbound>
     <backend>
