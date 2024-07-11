@@ -19,10 +19,10 @@
             <openid-config url="parameters('idm2Url')" />
             <required-claims>
                 <claim name="iss">
-                    <value>parameters('idm2Issuer')</value>
+                    <value>"parameters('idm2Issuer')"</value>
                 </claim>
                 <claim name="aud">
-                    <value>parameters('idm2aud')</value>
+                    <value>"parameters('idm2aud')"</value>
                 </claim>
             </required-claims>
         </validate-jwt>
