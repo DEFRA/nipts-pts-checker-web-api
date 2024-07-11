@@ -16,7 +16,7 @@
             </otherwise>
         </choose>      
          <validate-jwt header-name="Authorization" failed-validation-httpcode="401" failed-validation-error-message="Unauthorized. Access token is missing or invalid." require-expiration-time="true" require-scheme="Bearer" require-signed-tokens="true" clock-skew="900" output-token-variable-name="jwt">
-            <openid-config url="https://dcidmtest.b2clogin.com/dcidmtest.onmicrosoft.com/b2c_1a_cui_cpdev_signupsignin/v2.0/.well-known/openid-configuration"/>
+            <openid-config url="',parameters('idm2Url'),'" />
             <required-claims>               
                   <claim name="iss">
                     <value>https://dcidmtest.b2clogin.com/131a35fb-0422-49c9-8753-15217cec5411/v2.0/</value>

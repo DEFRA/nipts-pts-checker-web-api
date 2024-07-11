@@ -38,7 +38,9 @@ templateParameters:
       reference:
         keyVault:
           id: "/subscriptions/#{{ subscriptionId }}/resourceGroups/#{{ Environment.Name }}TRD#{{ nc-function-infrastructure }}#{{ nc-resource-resourcegroup }}1001/providers/Microsoft.KeyVault/vaults/#{{ Environment.Name }}TRD#{{ nc-function-infrastructure }}#{{ nc-resource-keyvault }}1001"
-        secretName: "PTS#{{ nc-function-web }}#{{ nc-resource-appserviceplan }}1001-OAuth-ClientId"    
+        secretName: "PTS#{{ nc-function-web }}#{{ nc-resource-appserviceplan }}1001-OAuth-ClientId"
+    - name: idm2Url
+      value: "#{{ idm2ConfigUrl }}"
     - name: roles
       values: 
         roleTradeTracesAdapterRead: "#{{ roleTradeTracesAdapterRead }}"
