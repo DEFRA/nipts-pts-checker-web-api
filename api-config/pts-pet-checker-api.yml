@@ -41,6 +41,8 @@ templateParameters:
         secretName: "PTS#{{ nc-function-web }}#{{ nc-resource-appserviceplan }}1001-OAuth-ClientId"
     - name: idm2Url
       value: "#{{ idm2ConfigUrl }}"
+    - name: idm2Issuer
+      value: "#{{ idm2Issuer }}"
     - name: roles
       values: 
         roleTradeTracesAdapterRead: "#{{ roleTradeTracesAdapterRead }}"

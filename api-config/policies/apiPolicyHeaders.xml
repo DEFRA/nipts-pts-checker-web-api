@@ -19,7 +19,7 @@
             <openid-config url="',parameters('idm2Url'),'" />
             <required-claims>               
                   <claim name="iss">
-                    <value>https://dcidmtest.b2clogin.com/131a35fb-0422-49c9-8753-15217cec5411/v2.0/</value>
+                    <value>parameters('idm2Issuer')</value>
                 </claim>
                 <claim name="aud">
                     <value>c7f2227e-d9f0-4294-9cb2-a58c9fd4d968</value>
