@@ -57,6 +57,7 @@ parameters:
       enforceQualityGate: true
       warningVariance: 1
       coverageVariance: 1
+      coverageThreshold: 400
       coverageType: 'blocks'
       baseBranch: '$(System.PullRequest.TargetBranch)'
       allowWarningVariance: true
