@@ -1,0 +1,54 @@
+version: 0.0.1
+apimServiceName: "#{{ Environment.Name }}TRA#{{ nc-function-infrastructure }}#{{ nc-resource-apimanagement }}1002"
+apiVersionSets:
+  - id: pts-pet-checker
+    displayName: PTS PET CHECKER
+    description: PTS PET CHECKER
+    versioningScheme: Segment
+apis:
+  - name: pts-pet-checker-v1
+    type: http
+    displayName: PTS PET CHECKER V1
+    description: PTS PET CHECKER V1.
+    serviceUrl: "https://#{{ Environment.Name }}PTS#{{ nc-function-web }}#{{ nc-resource-webapp }}1003.azurewebsites.net/"
+    openApiSpec: v1\swagger.json
+    policy: policies\apiPolicyHeaders.xml
+    suffix: pts-pet-checker
+    subscriptionRequired: true
+    apiVersion: v1
+    apiVersionDescription: Version 1 Live APIs
+    apiVersionSetId: pts-pet-checker    
+    products: trd-prod
+    authenticationSettings:
+      oAuth2:
+        authorizationServerId: OAuth-Server
+      subscriptionKeyRequired: true
+    diagnostic:
+      name: applicationinsights
+      alwaysLog: allErrors
+      loggerId: "#{{ Environment.Name }}TRD#{{ nc-function-infrastructure }}#{{ nc-resource-appinsights }}1001"
+      sampling:
+        samplingType: fixed
+        percentage: 100
+      enableHttpCorrelationHeaders: true
+templateParameters:
+    - name: secondaryServiceUrl
+      value: "https://#{{ Environment.Name }}PTS#{{ nc-function-web }}#{{ nc-resource-webapp }}1003.azurewebsites.net/"    
+    - name: aspClientId
+      reference:
+        keyVault:
+          id: "/subscriptions/#{{ subscriptionId }}/resourceGroups/#{{ Environment.Name }}TRD#{{ nc-function-infrastructure }}#{{ nc-resource-resourcegroup }}1001/providers/Microsoft.KeyVault/vaults/#{{ Environment.Name }}TRD#{{ nc-function-infrastructure }}#{{ nc-resource-keyvault }}1001"
+        secretName: "PTS#{{ nc-function-web }}#{{ nc-resource-appserviceplan }}1001-OAuth-ClientId"
+    - name: idm2Url
+      value: "#{{ idm2ConfigUrl }}"
+    - name: idm2Issuer
+      value: "#{{ idm2Issuer }}"
+    - name: idm2Audience
+      value: "#{{ idm2Audience }}"
+    - name: roles
+      values: 
+        roleTradeTracesAdapterRead: "#{{ roleTradeTracesAdapterRead }}"
+        roleTradeTracesAdapterUpdate: "#{{ roleTradeTracesAdapterUpdate }}"
+outputLocation: publish-templates
+linked: false
+baseFileName: pts-pet-checker
