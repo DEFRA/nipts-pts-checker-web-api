@@ -269,8 +269,8 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
                 SailingTime = DateTime.UtcNow,
             };
 
-            var response = new CheckOutcomeResponseModel  { CheckSummaryId = Guid.NewGuid() };
-            
+            var response = new CheckOutcomeResponseModel { CheckSummaryId = Guid.NewGuid() };
+
             _applicationServiceMock!.Setup(service => service.GetApplicationById(It.IsAny<Guid>()))!.ReturnsAsync(new entities.Application());
             _checkSummaryServiceMock!.Setup(service => service.SaveCheckSummary(It.IsAny<CheckOutcomeModel>())).ReturnsAsync(response);
 
@@ -304,7 +304,7 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
 
             // Act
             var result = await _controller!.SaveCheckOutcome(request);
-            
+
             // Assert
             Assert.That(result, Is.InstanceOf<NotFoundObjectResult>());
 

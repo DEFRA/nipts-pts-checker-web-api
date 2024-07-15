@@ -1,9 +1,9 @@
 ﻿using Defra.PTS.Checker.Services.Implementation;
 using Defra.PTS.Checker.Services.Interface;
-using Microsoft.Extensions.Options;
 using Defra.Trade.Address.V1.ApiClient.Api;
-using Defra.Trade.Common.Security.Authentication.Interfaces;
 using Defra.Trade.Common.Config;
+using Defra.Trade.Common.Security.Authentication.Interfaces;
+using Microsoft.Extensions.Options;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Defra.PTS.Checker.Web.Api.Configuration
@@ -13,7 +13,7 @@ namespace Defra.PTS.Checker.Web.Api.Configuration
     {
         public static IServiceCollection AddDefraApiServices(this IServiceCollection services, IConfiguration configuration)
         {
-            services            
+            services
             .Configure<ApimInternalSettings>(configuration.GetSection(ApimInternalSettings.OptionsName));
             services.AddTransient<IApplicationService, ApplicationService>();
             services.AddTransient<IColourService, ColourService>();
@@ -34,7 +34,7 @@ namespace Defra.PTS.Checker.Web.Api.Configuration
             var authService = provider.GetService<IAuthenticationService>();
             var apimInternalApisSettings = provider.GetRequiredService<IOptionsSnapshot<ApimInternalSettings>>().Value;
             var authToken = authService!.GetAuthenticationHeaderAsync().Result.ToString();
-            
+
             var config = new Trade.Address.V1.ApiClient.Client.Configuration
             {
                 BasePath = configuration.GetValue<string>("AddressApi:BaseUrl"),

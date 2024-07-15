@@ -4,10 +4,6 @@ using Defra.PTS.Checker.Web.Api.Middleware;
 using Defra.PTS.Configuration;
 using Defra.Trade.Common.AppConfig;
 using Defra.Trade.Common.Security.Authentication.Infrastructure;
-using Defra.Trade.Common.Security.AzureKeyVault;
-using Defra.Trade.Common.Security.AzureKeyVault.Configuration;
-using Microsoft.Azure.Management.Storage.Fluent.Models;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
@@ -16,7 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.AddUserSecrets(Assembly.GetExecutingAssembly(), true);
 #if DEBUG
-                builder.Configuration.AddJsonFile("appsettings.Development.json", true, true);
+builder.Configuration.AddJsonFile("appsettings.Development.json", true, true);
 #endif
 
 builder.Configuration.AddEnvironmentVariables();

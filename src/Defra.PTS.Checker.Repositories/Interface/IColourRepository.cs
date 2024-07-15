@@ -2,7 +2,7 @@
 
 namespace Defra.PTS.Checker.Repositories.Interface
 {
-    public interface IColourRepository :  IRepository<entity.Colour>
+    public interface IColourRepository : IRepository<entity.Colour>
     {
     }
 }

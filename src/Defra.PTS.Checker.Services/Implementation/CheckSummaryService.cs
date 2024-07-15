@@ -37,11 +37,18 @@ public class CheckSummaryService : ICheckSummaryService
 
         var timeSpan = endTime - startTime;
 
+        var checkOutcomeEntity = new CheckOutcome
+        {
+            Outcome = outcome.Id,
+        };
+
         var entity = new CheckSummary
         {
             ApplicationId = travelDocument.ApplicationId,
             CheckerId = checkOutcomeModel.CheckerId,
-            CheckOutcome = false,
+            CheckOutcome = outcome.Id == 1,
+            CheckOutcomeId = checkOutcomeEntity.Id,
+            CheckOutcomeEntity = checkOutcomeEntity,
             Date = startTime,
             ChipNumber = travelDocument.Application?.Pet?.MicrochipNumber,
             TravelDocumentId = travelDocument.Id,
@@ -50,6 +57,8 @@ public class CheckSummaryService : ICheckSummaryService
             GBCheck = false,
         };
 
+
+        _dbContext.Add(checkOutcomeEntity);
         _dbContext.Add(entity);
         await _dbContext.SaveChangesAsync();
 

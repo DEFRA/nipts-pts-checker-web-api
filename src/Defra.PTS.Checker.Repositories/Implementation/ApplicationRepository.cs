@@ -2,7 +2,6 @@
 using Defra.PTS.Checker.Entities;
 using Defra.PTS.Checker.Repositories.Interface;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
 

@@ -1,19 +1,8 @@
 ﻿using Defra.PTS.Checker.Entities;
-using Defra.PTS.Checker.Repositories.Implementation;
 using Defra.PTS.Checker.Repositories.Interface;
-using Defra.PTS.Checker.Services.Enums;
 using Defra.PTS.Checker.Services.Implementation;
-using Microsoft.Extensions.Logging;
 using Moq;
-using Newtonsoft.Json;
 using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Metadata;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace Defra.PTS.Checker.Services.Tests.Implementation
 {

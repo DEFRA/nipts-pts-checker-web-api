@@ -12,7 +12,7 @@ public class ExceptionModel
     [JsonProperty("title")]
     public string? Title { get; set; }
 
-    [JsonProperty("traceId")] 
+    [JsonProperty("traceId")]
     public string? TraceId { get; set; }
 
     [JsonProperty("error")]

@@ -1,15 +1,8 @@
-﻿using Defra.PTS.Checker.Repositories.Interface;
+﻿using Defra.PTS.Checker.Entities;
+using Defra.PTS.Checker.Models;
+using Defra.PTS.Checker.Repositories.Interface;
 using Defra.PTS.Checker.Services.Interface;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Defra.PTS.Checker.Repositories.Implementation;
-using Defra.PTS.Checker.Models;
-using Defra.PTS.Checker.Entities;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Defra.PTS.Checker.Services.Implementation
 {
@@ -17,7 +10,7 @@ namespace Defra.PTS.Checker.Services.Implementation
     {
         private readonly IRepository<Route> _sailingRepository;
         private ILogger<SailingService> _log;
-        public SailingService(ILogger<SailingService> log, IRepository<Route> sailingRepository) 
+        public SailingService(ILogger<SailingService> log, IRepository<Route> sailingRepository)
         {
             _log = log;
             _sailingRepository = sailingRepository;

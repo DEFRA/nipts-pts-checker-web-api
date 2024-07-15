@@ -24,14 +24,14 @@ namespace Defra.PTS.Checker.Repositories.Implementation
         public async Task<bool> DoesUserExists(Guid contactId)
         {
             var reu = userContext.User.FirstOrDefault();
-           return await userContext.User.AnyAsync(a => a.ContactId == contactId);
+            return await userContext.User.AnyAsync(a => a.ContactId == contactId);
         }
 
         public async Task<bool> DoesAddresssExists(Guid addressId)
         {
             return await userContext.Address.AnyAsync(a => a.Id == addressId);
         }
-        
+
         public async Task<(Guid?, Guid?, string)> GetUserDetails(Guid contactId)
         {
             var user = await userContext.User.FirstOrDefaultAsync(a => a.ContactId == contactId);

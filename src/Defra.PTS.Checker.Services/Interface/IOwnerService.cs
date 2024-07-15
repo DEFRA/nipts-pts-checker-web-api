@@ -1,5 +1,4 @@
-﻿using Defra.PTS.Checker.Entities;
-using modelUser = Defra.PTS.Checker.Models;
+﻿using modelUser = Defra.PTS.Checker.Models;
 
 namespace Defra.PTS.Checker.Services.Interface
 {

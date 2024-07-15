@@ -22,9 +22,9 @@ namespace Defra.PTS.Checker.Repositories.Implementation
                 throw new ArgumentException("Microchip number cannot be null or empty.", nameof(microchipNumber));
             }
 
-         
+
             return await _context.Pet
-            .Where(p => p.MicrochipNumber == microchipNumber)            
+            .Where(p => p.MicrochipNumber == microchipNumber)
             .Include(p => p.Breed)
             .Include(p => p.Colour)
             .ToListAsync();

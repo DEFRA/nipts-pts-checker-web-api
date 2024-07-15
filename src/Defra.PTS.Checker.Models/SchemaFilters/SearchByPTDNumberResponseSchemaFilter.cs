@@ -1,6 +1,4 @@
-﻿using Defra.PTS.Checker.Models.Enums;
-using Defra.PTS.Checker.Models.Search;
-using Microsoft.OpenApi.Any;
+﻿using Defra.PTS.Checker.Models.Search;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Diagnostics.CodeAnalysis;

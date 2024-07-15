@@ -10,7 +10,7 @@ namespace Defra.PTS.Configuration
     [ExcludeFromCodeCoverage]
     public static class ConfigureRepositories
     {
-        public static IServiceCollection AddDefraRepositoriesServices(this IServiceCollection services,string conn)
+        public static IServiceCollection AddDefraRepositoriesServices(this IServiceCollection services, string conn)
         {
             services.AddDbContext<CommonDbContext>((context) =>
             {

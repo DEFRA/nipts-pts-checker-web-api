@@ -1,15 +1,9 @@
 ﻿using Defra.PTS.Checker.Models;
 using Defra.PTS.Checker.Services.Interface;
 using Defra.PTS.Checker.Web.Api.Controllers;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
 {

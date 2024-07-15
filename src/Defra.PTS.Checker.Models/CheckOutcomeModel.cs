@@ -1,5 +1,4 @@
-﻿using Defra.PTS.Checker.Models.Constants;
-using Defra.PTS.Checker.Models.SchemaFilters;
+﻿using Defra.PTS.Checker.Models.SchemaFilters;
 using Swashbuckle.AspNetCore.Annotations;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
@@ -12,7 +11,7 @@ public class CheckOutcomeModel : IValidatableObject
 {
     [SwaggerSchema("The application id")]
     [Required(ErrorMessage = "Application id is required")]
-    public Guid ApplicationId {  get; set; }
+    public Guid ApplicationId { get; set; }
 
     [SwaggerSchema("The check outcome: Pass or Fail")]
     [Required(ErrorMessage = "Check outcome is required")]

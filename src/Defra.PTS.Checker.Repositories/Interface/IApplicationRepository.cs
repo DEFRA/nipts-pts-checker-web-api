@@ -3,7 +3,7 @@
 namespace Defra.PTS.Checker.Repositories.Interface
 {
     public interface IApplicationRepository : IRepository<Application>
-    {      
+    {
 
         Task<Application> GetApplicationById(Guid applicationId);
 

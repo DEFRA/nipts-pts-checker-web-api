@@ -1,13 +1,8 @@
-﻿using Defra.PTS.Checker.Services.Interface;
-using Defra.PTS.Checker.Entities;
+﻿using Defra.PTS.Checker.Entities;
 using Defra.PTS.Checker.Repositories.Interface;
+using Defra.PTS.Checker.Services.Interface;
 using Microsoft.Extensions.Logging;
 using modelUser = Defra.PTS.Checker.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Defra.PTS.Checker.Services.Implementation
 {
@@ -22,9 +17,9 @@ namespace Defra.PTS.Checker.Services.Implementation
 
         public void CreateOwner(modelUser.Owner owner)
         {
-            var ownerDb = new Owner() 
-            { 
-                FullName = owner.FullName, 
+            var ownerDb = new Owner()
+            {
+                FullName = owner.FullName,
                 Email = owner.Email,
                 Telephone = owner.Telephone,
             };

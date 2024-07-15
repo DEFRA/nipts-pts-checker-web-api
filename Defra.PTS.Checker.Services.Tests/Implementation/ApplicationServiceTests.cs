@@ -1,5 +1,4 @@
 ﻿using Defra.PTS.Checker.Entities;
-using Defra.PTS.Checker.Repositories.Implementation;
 using Defra.PTS.Checker.Repositories.Interface;
 using Defra.PTS.Checker.Services.Enums;
 using Defra.PTS.Checker.Services.Implementation;
@@ -7,12 +6,7 @@ using Defra.PTS.Checker.Services.Interface;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace Defra.PTS.Checker.Services.Tests.Implementation
 {
@@ -64,31 +58,31 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
 
             var application = new Application
             {
-              Id = guid, 
-              PetId = guid,
-              DynamicId = guid,
-              OwnerAddressId = guid,
-              OwnerId = guid,
-              UserId = guid,
-              Owner = owner, 
-              User = user, 
-              Pet = pet, 
-              CreatedOn = date, 
-              DateAuthorised = date,
-              DateOfApplication = date, 
-              DateRejected = date, 
-              DateRevoked = date,
-              UpdatedOn = date,
-              Status = "In Test", 
-              CreatedBy = guid,
-              UpdatedBy = guid,
-              OwnerNewName = "Newman", 
-              IsConsentAgreed = true,
-              IsDeclarationSigned = true,
-              IsPrivacyPolicyAgreed = true,
-              OwnerNewTelephone = "123",
-              ReferenceNumber = "GB123", 
-              OwnerAddress = address
+                Id = guid,
+                PetId = guid,
+                DynamicId = guid,
+                OwnerAddressId = guid,
+                OwnerId = guid,
+                UserId = guid,
+                Owner = owner,
+                User = user,
+                Pet = pet,
+                CreatedOn = date,
+                DateAuthorised = date,
+                DateOfApplication = date,
+                DateRejected = date,
+                DateRevoked = date,
+                UpdatedOn = date,
+                Status = "In Test",
+                CreatedBy = guid,
+                UpdatedBy = guid,
+                OwnerNewName = "Newman",
+                IsConsentAgreed = true,
+                IsDeclarationSigned = true,
+                IsPrivacyPolicyAgreed = true,
+                OwnerNewTelephone = "123",
+                ReferenceNumber = "GB123",
+                OwnerAddress = address
             };
 
             _applicationRepositoryMock!.Setup(repo => repo.GetApplicationById(It.IsAny<Guid>())).ReturnsAsync(application);

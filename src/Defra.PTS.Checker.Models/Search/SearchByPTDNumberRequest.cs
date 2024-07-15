@@ -13,7 +13,7 @@ public class SearchByPtdNumberRequest : IValidatableObject
     [SwaggerSchema("The pet travel document number")]
     [Required(ErrorMessage = "PTD number is required")]
     [StringLength(20, ErrorMessage = "PTD number must be 20 characters or less")]
-    public string PTDNumber {  get; set; } = string.Empty;
+    public string PTDNumber { get; set; } = string.Empty;
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {

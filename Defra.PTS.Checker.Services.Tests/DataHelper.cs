@@ -52,7 +52,7 @@ public static class DataHelper
         // user
         var user = new User
         {
-             Id = Guid.NewGuid(),
+            Id = Guid.NewGuid(),
         };
 
         // pet

@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Defra.PTS.Checker.Models.Enums
+﻿namespace Defra.PTS.Checker.Models.Enums
 {
     public enum AddressType
     {
-        User =  1,
+        User = 1,
         Owner = 2,
     }
 }

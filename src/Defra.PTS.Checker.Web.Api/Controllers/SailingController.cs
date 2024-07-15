@@ -1,5 +1,4 @@
-﻿using Azure;
-using Defra.PTS.Checker.Models;
+﻿using Defra.PTS.Checker.Models;
 using Defra.PTS.Checker.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,7 +8,7 @@ namespace Defra.PTS.Checker.Web.Api.Controllers
     [ApiController]
     public class SailingController : ControllerBase
     {
-        private readonly ISailingService _sailingService; 
+        private readonly ISailingService _sailingService;
         public SailingController(ISailingService sailingService)
         {
             _sailingService = sailingService;

@@ -23,7 +23,7 @@ namespace Defra.PTS.Checker.Repositories.Implementation
 
         public async Task<entity.Address> GetAddress(Guid? addressId, AddressType addressType)
         {
-           return await addressContext.Address.FirstOrDefaultAsync(a => a.Id == addressId && a.AddressType == addressType.ToString() && a.IsActive == true);
+            return await addressContext.Address.FirstOrDefaultAsync(a => a.Id == addressId && a.AddressType == addressType.ToString() && a.IsActive == true);
         }
     }
 }
