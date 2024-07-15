@@ -302,7 +302,7 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
 
             var response = new CheckOutcomeResponseModel { CheckSummaryId = Guid.NewGuid() };
 
-            _applicationServiceMock!.Setup(service => service.GetApplicationByPTDNumber(It.IsAny<string>()))!.ReturnsAsync(null);
+            _applicationServiceMock!.Setup(service => service.GetApplicationByPTDNumber(It.IsAny<string>()))!.ReturnsAsync(default(object));
             _checkSummaryServiceMock!.Setup(service => service.SaveCheckSummary(It.IsAny<CheckOutcomeModel>())).ReturnsAsync(response);
 
             // Act
