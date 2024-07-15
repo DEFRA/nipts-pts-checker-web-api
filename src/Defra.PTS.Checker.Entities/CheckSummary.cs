@@ -15,7 +15,7 @@ namespace Defra.PTS.Checker.Entities
 
         public Guid? LinkedCheckId { get; set; }
 
-        public Guid CheckerId { get; set; }
+        public Guid? CheckerId { get; set; }
 
         public int? RouteId { get; set; }
 
@@ -32,7 +32,7 @@ namespace Defra.PTS.Checker.Entities
 
         public bool? CheckOutcome { get; set; }
 
-        public Guid CheckOutcomeId { get; set; }
+        public Guid? CheckOutcomeId { get; set; }
 
         // Navigation properties
         [ForeignKey("CheckOutcomeId")]

@@ -11,6 +11,7 @@ using Newtonsoft.Json;
 using NUnit.Framework;
 using System;
 using Defra.PTS.Checker.Entities;
+using Azure;
 
 namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
 {
@@ -19,6 +20,7 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
     {
         private Mock<IApplicationService>? _applicationServiceMock;
         private Mock<ICheckerService>? _checkerServiceMock;
+        private Mock<ICheckSummaryService>? _checkSummaryServiceMock;
         private CheckerController? _controller;
 
         [SetUp]
@@ -26,7 +28,8 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
         {
             _applicationServiceMock = new Mock<IApplicationService>();
             _checkerServiceMock = new Mock<ICheckerService>();
-            _controller = new CheckerController(_applicationServiceMock.Object, _checkerServiceMock.Object);
+            _checkSummaryServiceMock = new Mock<ICheckSummaryService>();
+            _controller = new CheckerController(_applicationServiceMock.Object, _checkerServiceMock.Object, _checkSummaryServiceMock.Object);
         }
 
         [Test]
@@ -56,8 +59,8 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
         {
             // Arrange
             var request = new SearchByApplicationNumberRequest
-            { 
-                ApplicationNumber = "UZHR2" 
+            {
+                ApplicationNumber = "UZHR2"
             };
 
             _applicationServiceMock!.Setup(service => service.GetApplicationByReferenceNumber(It.IsAny<string>()))!.ReturnsAsync((Entities.Application)null!);
@@ -155,7 +158,7 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
             // Arrange
             var request = new SearchByPtdNumberRequest
             {
-                 PTDNumber = string.Empty,
+                PTDNumber = string.Empty,
             };
 
             // Act
@@ -254,6 +257,88 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
             Assert.That(result, Is.InstanceOf<ObjectResult>());
             var ObjectResult = result as ObjectResult;
             Assert.That(ObjectResult!.StatusCode, Is.EqualTo(StatusCodes.Status500InternalServerError));
+        }
+
+        [Test]
+        public async Task SaveCheckOutcomed_ReturnsOkResult()
+        {
+            // Arrange
+            var request = new CheckOutcomeModel
+            {
+                CheckerId = null,
+                CheckOutcome = "Pass",
+                PTDNumber = "GB826CD186E",
+                RouteId = 1,
+                SailingTime = DateTime.UtcNow,
+            };
+
+            var response = new CheckOutcomeResponseModel  { CheckSummaryId = Guid.NewGuid() };
+            
+            _applicationServiceMock!.Setup(service => service.GetApplicationByPTDNumber(It.IsAny<string>()))!.ReturnsAsync(new { ApplicationDetails = "Details" });
+            _checkSummaryServiceMock!.Setup(service => service.SaveCheckSummary(It.IsAny<CheckOutcomeModel>())).ReturnsAsync(response);
+
+            // Act
+            var result = await _controller!.SaveCheckOutcome(request);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+            var okResult = result as OkObjectResult;
+            Assert.That(okResult, Is.Not.Null);
+            Assert.That(okResult!.StatusCode, Is.EqualTo(200));
+        }
+
+        [Test]
+        public async Task SaveCheckOutcomed_ValidRequestButNoApplication_ReturnsNotFoundResult()
+        {
+            // Arrange
+            var request = new CheckOutcomeModel
+            {
+                CheckerId = null,
+                CheckOutcome = "Pass",
+                PTDNumber = "GB826CD186E",
+                RouteId = 1,
+                SailingTime = DateTime.UtcNow,
+            };
+
+            var response = new CheckOutcomeResponseModel { CheckSummaryId = Guid.NewGuid() };
+
+            _applicationServiceMock!.Setup(service => service.GetApplicationByPTDNumber(It.IsAny<string>()))!.ReturnsAsync(null);
+            _checkSummaryServiceMock!.Setup(service => service.SaveCheckSummary(It.IsAny<CheckOutcomeModel>())).ReturnsAsync(response);
+
+            // Act
+            var result = await _controller!.SaveCheckOutcome(request);
+            
+            // Assert
+            Assert.That(result, Is.InstanceOf<NotFoundObjectResult>());
+
+            var objectResult = result as NotFoundObjectResult;
+            Assert.That(objectResult, Is.Not.Null);
+            Assert.That(objectResult!.StatusCode, Is.EqualTo(StatusCodes.Status404NotFound));
+        }
+
+        [Test]
+        public async Task SaveCheckOutcomed_InvalidRequest_ReturnsBadRequestResult()
+        {
+            // Arrange
+            var request = new CheckOutcomeModel
+            {
+                CheckerId = null,
+                CheckOutcome = "Pass",
+                PTDNumber = string.Empty,
+                RouteId = 1,
+                SailingTime = DateTime.UtcNow,
+            };
+
+            // Act
+            _controller!.ModelState.AddModelError("PTDNumber", "PTDNumber is required");
+            var result = await _controller!.SaveCheckOutcome(request);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+
+            var objectResult = result as BadRequestObjectResult;
+            Assert.That(objectResult, Is.Not.Null);
+            Assert.That(objectResult!.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
         }
     }
 }

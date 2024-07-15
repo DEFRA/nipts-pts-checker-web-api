@@ -1,6 +1,5 @@
-﻿using Azure;
-using Defra.PTS.Checker.Entities;
-using Defra.PTS.Checker.Models.Enums;
+﻿using Defra.PTS.Checker.Entities;
+using Defra.PTS.Checker.Models;
 using Defra.PTS.Checker.Models.Search;
 using Defra.PTS.Checker.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
@@ -14,11 +13,13 @@ public class CheckerController : ControllerBase
 {
     private readonly IApplicationService _applicationService;
     private readonly ICheckerService _checkerService;
+    private readonly ICheckSummaryService _checkSummaryService;
 
-    public CheckerController(IApplicationService applicationService, ICheckerService checkerService)
+    public CheckerController(IApplicationService applicationService, ICheckerService checkerService, ICheckSummaryService checkSummaryService)
     {
         _applicationService = applicationService;
         _checkerService = checkerService;
+        _checkSummaryService = checkSummaryService;
     }
 
     [HttpPost("checkApplicationNumber")]
@@ -122,6 +123,33 @@ public class CheckerController : ControllerBase
 
         return Ok(application);
     }
+
+    [HttpPost]
+    [Route("CheckOutcome")]
+    [SwaggerResponse(StatusCodes.Status200OK, "OK: Returns check summary response", typeof(CheckOutcomeResponseModel))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request: Request is not valid", typeof(IDictionary<string, string>))]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Not Found: There is no application matching this PTD number")]
+    [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error: An error has occurred")]
+    [SwaggerOperation(
+            OperationId = "CheckOutcome",
+            Tags = new[] { "Checker" },
+            Summary = "Saves checkout",
+            Description = "Saves check outcome for a pet travel document"
+        )]
+    public async Task<IActionResult> SaveCheckOutcome([FromBody, SwaggerRequestBody("The check outcome payload", Required = true)] CheckOutcomeModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var application = await _applicationService.GetApplicationByPTDNumber(model.PTDNumber);
+        if (application == null)
+        {
+            return new NotFoundObjectResult("Application not found");
+        }
+
+        var response = await _checkSummaryService.SaveCheckSummary(model);
+        return Ok(response);
+    }
 }
-
-
