@@ -1,21 +1,14 @@
 ﻿using Defra.PTS.Checker.Models;
 using Defra.PTS.Checker.Services.Implementation;
 using NUnit.Framework;
+using Polly;
 
 namespace Defra.PTS.Checker.Services.Tests.Implementation
 {
     [TestFixture]
     public class CheckSummaryServiceTests
     {
-        private CheckSummaryService? _service;
-
-        [SetUp]
-        public void SetUp()
-        {
-            var context = DataHelper.GetDbContext();
-
-            _service = new CheckSummaryService(context);
-        }
+        private CheckSummaryService _service = new (DataHelper.GetDbContext());
 
         [Test]
         public async Task SaveCheckSummary_ReturnsIdOnSave()
