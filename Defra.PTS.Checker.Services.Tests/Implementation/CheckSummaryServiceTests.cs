@@ -1,8 +1,5 @@
-﻿using Defra.PTS.Checker.Entities;
-using Defra.PTS.Checker.Models;
-using Defra.PTS.Checker.Repositories.Interface;
+﻿using Defra.PTS.Checker.Models;
 using Defra.PTS.Checker.Services.Implementation;
-using Moq;
 using NUnit.Framework;
 
 namespace Defra.PTS.Checker.Services.Tests.Implementation
@@ -10,7 +7,6 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
     [TestFixture]
     public class CheckSummaryServiceTests
     {
-        private Mock<IRepository<Route>> _sailingRepositoryMock;
         private CheckSummaryService _service;
 
         [SetUp]
