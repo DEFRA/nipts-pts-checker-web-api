@@ -12,7 +12,7 @@ public class CheckOutcomeSchemaFilter : ISchemaFilter
     {
         schema.Example = new OpenApiObject
         {
-            ["ptdNumber"] = new OpenApiString("GB826CD186E"),
+            ["applicationId"] = new OpenApiString(Guid.NewGuid().ToString()),
             ["checkOutcome"] = new OpenApiString("Pass"),
             ["checkerId"] = new OpenApiString(Guid.NewGuid().ToString()),
             ["routeId"] = new OpenApiInteger(1),

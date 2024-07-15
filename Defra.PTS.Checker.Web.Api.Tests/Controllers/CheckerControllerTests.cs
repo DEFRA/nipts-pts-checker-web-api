@@ -1,5 +1,4 @@
-﻿using entities = Defra.PTS.Checker.Entities;
-using Defra.PTS.Checker.Models;
+﻿using Defra.PTS.Checker.Models;
 using Defra.PTS.Checker.Models.Constants;
 using Defra.PTS.Checker.Models.Search;
 using Defra.PTS.Checker.Services.Interface;
@@ -9,9 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Newtonsoft.Json;
 using NUnit.Framework;
-using System;
-using Defra.PTS.Checker.Entities;
-using Azure;
+using entities = Defra.PTS.Checker.Entities;
 
 namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
 {
@@ -267,14 +264,14 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
             {
                 CheckerId = null,
                 CheckOutcome = "Pass",
-                PTDNumber = "GB826CD186E",
+                ApplicationId = new Guid("FF0DF803-8033-4CF8-B877-AB69BEFE63D2"),
                 RouteId = 1,
                 SailingTime = DateTime.UtcNow,
             };
 
             var response = new CheckOutcomeResponseModel  { CheckSummaryId = Guid.NewGuid() };
             
-            _applicationServiceMock!.Setup(service => service.GetApplicationByPTDNumber(It.IsAny<string>()))!.ReturnsAsync(new { ApplicationDetails = "Details" });
+            _applicationServiceMock!.Setup(service => service.GetApplicationById(It.IsAny<Guid>()))!.ReturnsAsync(new entities.Application());
             _checkSummaryServiceMock!.Setup(service => service.SaveCheckSummary(It.IsAny<CheckOutcomeModel>())).ReturnsAsync(response);
 
             // Act
@@ -295,14 +292,14 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
             {
                 CheckerId = null,
                 CheckOutcome = "Pass",
-                PTDNumber = "GB826CD186E",
+                ApplicationId = new Guid("FF0DF803-8033-4CF8-B877-AB69BEFE63D2"),
                 RouteId = 1,
                 SailingTime = DateTime.UtcNow,
             };
 
             var response = new CheckOutcomeResponseModel { CheckSummaryId = Guid.NewGuid() };
 
-            _applicationServiceMock!.Setup(service => service.GetApplicationByPTDNumber(It.IsAny<string>()))!.ReturnsAsync(default(object));
+            _applicationServiceMock!.Setup(service => service.GetApplicationById(It.IsAny<Guid>()))!.ReturnsAsync(default(Defra.PTS.Checker.Entities.Application));
             _checkSummaryServiceMock!.Setup(service => service.SaveCheckSummary(It.IsAny<CheckOutcomeModel>())).ReturnsAsync(response);
 
             // Act
@@ -323,14 +320,16 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
             var request = new CheckOutcomeModel
             {
                 CheckerId = null,
-                CheckOutcome = "Pass",
-                PTDNumber = string.Empty,
+                CheckOutcome = string.Empty,
+                ApplicationId = new Guid("FF0DF803-8033-4CF8-B877-AB69BEFE63D2"),
                 RouteId = 1,
                 SailingTime = DateTime.UtcNow,
             };
 
+            _applicationServiceMock!.Setup(service => service.GetApplicationById(It.IsAny<Guid>()))!.ReturnsAsync(new entities.Application());
+
             // Act
-            _controller!.ModelState.AddModelError("PTDNumber", "PTDNumber is required");
+            _controller!.ModelState.AddModelError("CheckOutcome", "CheckOutcome is required");
             var result = await _controller!.SaveCheckOutcome(request);
 
             // Assert

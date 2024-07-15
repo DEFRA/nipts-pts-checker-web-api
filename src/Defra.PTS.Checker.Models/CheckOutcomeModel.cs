@@ -10,10 +10,9 @@ namespace Defra.PTS.Checker.Models;
 [SwaggerSchemaFilter(typeof(CheckOutcomeSchemaFilter))]
 public class CheckOutcomeModel : IValidatableObject
 {
-    [SwaggerSchema("The pet travel document number")]
-    [Required(ErrorMessage = "PTD number is required")]
-    [StringLength(20, ErrorMessage = "PTD number must be 20 characters or less")]
-    public string PTDNumber {  get; set; } = string.Empty;
+    [SwaggerSchema("The application id")]
+    [Required(ErrorMessage = "Application id is required")]
+    public Guid ApplicationId {  get; set; }
 
     [SwaggerSchema("The check outcome: Pass or Fail")]
     [Required(ErrorMessage = "Check outcome is required")]
@@ -32,11 +31,6 @@ public class CheckOutcomeModel : IValidatableObject
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
-        if (!string.IsNullOrWhiteSpace(PTDNumber) && !PTDNumber.ToLower().StartsWith(ApiConstants.PTDNumberPrefix.ToLower()))
-        {
-            yield return new ValidationResult($"PTD number must start with {ApiConstants.PTDNumberPrefix}", new[] { nameof(PTDNumber) });
-        }
-
         var validOutcomes = new List<string> { "Pass", "Fail" };
         if (!validOutcomes.Contains(CheckOutcome))
         {

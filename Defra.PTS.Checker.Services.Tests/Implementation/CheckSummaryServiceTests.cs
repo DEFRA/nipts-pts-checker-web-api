@@ -18,7 +18,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             {
                 CheckerId = null,
                 CheckOutcome = "Pass",
-                PTDNumber = "GB826CD186E",
+                ApplicationId = new Guid("FF0DF803-8033-4CF8-B877-AB69BEFE63D2"),
                 RouteId = 1,
                 SailingTime = DateTime.UtcNow,
             };
