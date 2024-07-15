@@ -7,7 +7,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
     [TestFixture]
     public class CheckSummaryServiceTests
     {
-        private CheckSummaryService _service;
+        private CheckSummaryService? _service;
 
         [SetUp]
         public void SetUp()
