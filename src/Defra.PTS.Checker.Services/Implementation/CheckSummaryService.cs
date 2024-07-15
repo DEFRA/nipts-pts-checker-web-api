@@ -26,18 +26,27 @@ public class CheckSummaryService : ICheckSummaryService
         ArgumentNullException.ThrowIfNull(travelDocument);
         ArgumentNullException.ThrowIfNull(outcome);
 
-        var timeSpan = checkOutcomeModel.SailingTime - checkOutcomeModel.SailingTime.Value.Date;
+        var startTime = DateTime.MinValue.Date;
+        var endTime = DateTime.MinValue;
+
+        if (checkOutcomeModel.SailingTime.HasValue)
+        {
+            startTime = checkOutcomeModel.SailingTime.Value.Date;
+            endTime = checkOutcomeModel.SailingTime.Value;
+        }
+
+        var timeSpan = endTime - startTime;
 
         var entity = new CheckSummary
         {
             ApplicationId = travelDocument.ApplicationId,
-            CheckerId = checkOutcomeModel.CheckerId,
+            CheckerId = checkOutcomeModel?.CheckerId,
             CheckOutcome = false,
-            Date = checkOutcomeModel.SailingTime.Value.Date,
-            ChipNumber = travelDocument.Application.Pet.MicrochipNumber,
-            TravelDocumentId = travelDocument.Id,
+            Date = startTime,
+            ChipNumber = travelDocument?.Application?.Pet?.MicrochipNumber,
+            TravelDocumentId = travelDocument?.Id ?? Guid.NewGuid(),
             ScheduledSailingTime = timeSpan,
-            RouteId = checkOutcomeModel.RouteId,
+            RouteId = checkOutcomeModel?.RouteId,
             GBCheck = false,
         };
 
