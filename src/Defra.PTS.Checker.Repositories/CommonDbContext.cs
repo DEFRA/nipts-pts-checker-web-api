@@ -139,7 +139,7 @@ namespace Defra.PTS.Checker.Repositories
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<CheckSummary>()
-              .HasOne(cs => cs.CkOutcomeId)
+              .HasOne(cs => cs.CheckOutcomeEntity)
               .WithMany()
               .HasForeignKey(cs => cs.CheckOutcomeId)
               .OnDelete(DeleteBehavior.Restrict);         
