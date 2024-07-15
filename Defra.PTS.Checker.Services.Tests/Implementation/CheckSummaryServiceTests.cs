@@ -2,7 +2,6 @@
 using Defra.PTS.Checker.Models;
 using Defra.PTS.Checker.Repositories.Interface;
 using Defra.PTS.Checker.Services.Implementation;
-using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 
@@ -12,7 +11,6 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
     public class CheckSummaryServiceTests
     {
         private Mock<IRepository<Route>> _sailingRepositoryMock;
-        private Mock<ILogger<CheckSummaryService>> _loggerMock;
         private CheckSummaryService _service;
 
         [SetUp]
@@ -20,8 +18,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
         {
             var context = DataHelper.GetDbContext();
 
-            _loggerMock = new Mock<ILogger<CheckSummaryService>>();
-            _service = new CheckSummaryService(context, _loggerMock.Object);
+            _service = new CheckSummaryService(context);
         }
 
         [Test]

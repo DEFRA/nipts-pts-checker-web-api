@@ -3,18 +3,15 @@ using Defra.PTS.Checker.Models;
 using Defra.PTS.Checker.Repositories;
 using Defra.PTS.Checker.Services.Interface;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace Defra.PTS.Checker.Services.Implementation;
 
 public class CheckSummaryService : ICheckSummaryService
 {
     private readonly CommonDbContext _dbContext;
-    private ILogger<CheckSummaryService> _log;
 
-    public CheckSummaryService(CommonDbContext dbContext, ILogger<CheckSummaryService> log)
+    public CheckSummaryService(CommonDbContext dbContext)
     {
-        _log = log;
         _dbContext = dbContext;
     }
 
