@@ -7,7 +7,7 @@ namespace Defra.PTS.Checker.Entities
     {
         public Guid Id { get; set; }
         public Guid PetId { get; set; }
-        public string EvidenceReference { get; set; }
+        public string EvidenceReference { get; set; } = string.Empty;
         public Guid? CreatedBy { get; set; }
         public DateTime? CreatedOn { get; set; }
         public Guid? UpdatedBy { get; set; }

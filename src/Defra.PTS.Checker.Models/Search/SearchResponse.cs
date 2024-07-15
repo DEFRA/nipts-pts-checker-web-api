@@ -10,7 +10,7 @@ namespace Defra.PTS.Checker.Models.Search;
 [SwaggerSchemaFilter(typeof(SearchByPtdNumberResponseSchemaFilter))]
 public class SearchResponse
 {
-    public Pet Pet { get; set; }
+    public Pet Pet { get; set; }    
     public Application Application { get; set; }
     public TravelDocument TravelDocument { get; set; }
 }
