@@ -80,7 +80,7 @@ public static class DataHelper
         // application
         var application = new Application
         {
-            Id = Guid.NewGuid(),
+            Id = new Guid("FF0DF803-8033-4CF8-B877-AB69BEFE63D2"),
             DateAuthorised = DateTime.Now,
             DateOfApplication = DateTime.Now,
             CreatedOn = DateTime.Now,

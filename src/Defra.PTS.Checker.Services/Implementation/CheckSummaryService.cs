@@ -21,7 +21,7 @@ public class CheckSummaryService : ICheckSummaryService
         var travelDocument = await _dbContext!.TravelDocument
                         .Include(t => t.Application)
                         .Include(t => t.Pet)
-            .SingleOrDefaultAsync(x => x.DocumentReferenceNumber == checkOutcomeModel.PTDNumber);
+            .SingleOrDefaultAsync(x => x.ApplicationId == checkOutcomeModel.ApplicationId);
 
         ArgumentNullException.ThrowIfNull(travelDocument);
         ArgumentNullException.ThrowIfNull(outcome);

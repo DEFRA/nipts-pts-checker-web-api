@@ -144,7 +144,7 @@ public class CheckerController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        var application = await _applicationService.GetApplicationByPTDNumber(model.PTDNumber);
+        var application = await _applicationService.GetApplicationById(model.ApplicationId);
         if (application == null)
         {
             return new NotFoundObjectResult(ApiConstants.ApplicationNotFound);
