@@ -1,5 +1,6 @@
 ﻿using Defra.PTS.Checker.Entities;
 using Defra.PTS.Checker.Models;
+using Defra.PTS.Checker.Models.Constants;
 using Defra.PTS.Checker.Models.Search;
 using Defra.PTS.Checker.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
@@ -48,7 +49,7 @@ public class CheckerController : ControllerBase
         var response = await _applicationService.GetApplicationByReferenceNumber(request.ApplicationNumber);
 
         if (response == null)
-            return new NotFoundObjectResult("Application not found");
+            return new NotFoundObjectResult(ApiConstants.ApplicationNotFound);
 
         return Ok(response);
     }
@@ -77,7 +78,7 @@ public class CheckerController : ControllerBase
             var errorProperty = response.GetType().GetProperty("error")?.GetValue(response, null) as string;
             if (!string.IsNullOrEmpty(errorProperty))
             {
-                if (errorProperty == "Pet not found" || errorProperty == "Application not found")
+                if (errorProperty == "Pet not found" || errorProperty == ApiConstants.ApplicationNotFound)
                 {
                     return NotFound(new { error = errorProperty });
                 }
@@ -118,7 +119,7 @@ public class CheckerController : ControllerBase
         var application = await _applicationService.GetApplicationByPTDNumber(model.PTDNumber);
         if (application == null)
         {
-            return new NotFoundObjectResult("Application not found");
+            return new NotFoundObjectResult(ApiConstants.ApplicationNotFound);
         }
 
         return Ok(application);
@@ -146,7 +147,7 @@ public class CheckerController : ControllerBase
         var application = await _applicationService.GetApplicationByPTDNumber(model.PTDNumber);
         if (application == null)
         {
-            return new NotFoundObjectResult("Application not found");
+            return new NotFoundObjectResult(ApiConstants.ApplicationNotFound);
         }
 
         var response = await _checkSummaryService.SaveCheckSummary(model);

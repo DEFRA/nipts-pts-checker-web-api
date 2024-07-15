@@ -40,11 +40,11 @@ public class CheckSummaryService : ICheckSummaryService
         var entity = new CheckSummary
         {
             ApplicationId = travelDocument.ApplicationId,
-            CheckerId = checkOutcomeModel?.CheckerId,
+            CheckerId = checkOutcomeModel.CheckerId,
             CheckOutcome = false,
             Date = startTime,
-            ChipNumber = travelDocument?.Application?.Pet?.MicrochipNumber,
-            TravelDocumentId = travelDocument?.Id ?? Guid.NewGuid(),
+            ChipNumber = travelDocument.Application?.Pet?.MicrochipNumber,
+            TravelDocumentId = travelDocument.Id,
             ScheduledSailingTime = timeSpan,
             RouteId = checkOutcomeModel?.RouteId,
             GBCheck = false,
