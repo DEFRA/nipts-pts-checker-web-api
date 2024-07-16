@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 
@@ -18,14 +16,14 @@ namespace Defra.PTS.Checker.Entities
         public bool? PTDFailOther { get; set; }
 
         [MaxLength(300)]
-        public string PTDFailOtherDetail { get; set; }
+        public string? PTDFailOtherDetail { get; set; }
 
         public bool? MCFailNotFound { get; set; }
         public bool? MCFailScannerIssue { get; set; }
         public bool? VCFailSpecies { get; set; }
 
         [MaxLength(300)]
-        public string VCFailSpeciesActual { get; set; }
+        public string? VCFailSpeciesActual { get; set; }
 
         public bool? VCFailBreed { get; set; }
         public int? VCFailBreedActual { get; set; }
@@ -34,7 +32,7 @@ namespace Defra.PTS.Checker.Entities
         public bool? VCFailFeatures { get; set; }
 
         [MaxLength(300)]
-        public string VCFailFeaturesActual { get; set; }
+        public string? VCFailFeaturesActual { get; set; }
 
         public bool? OIFailAHCExpInv { get; set; }
         public bool? OIFailCommercial { get; set; }
@@ -43,29 +41,29 @@ namespace Defra.PTS.Checker.Entities
         public int? OIFailCommercialLogos { get; set; }
 
         [MaxLength(300)]
-        public string OIFailCommercialComments { get; set; }
+        public string? OIFailCommercialComments { get; set; }
 
         public bool? OIFailRefusedChecks { get; set; }
 
         [MaxLength(300)]
-        public string OIFailRefusedChecksDetail { get; set; }
+        public string? OIFailRefusedChecksDetail { get; set; }
 
         public bool? OIFailOther { get; set; }
 
         [MaxLength(300)]
-        public string OIFailOtherDetail { get; set; }
+        public string? OIFailOtherDetail { get; set; }
 
         public bool? PDSpecies { get; set; }
         public int? PDBreed { get; set; }
         public int? PDColour { get; set; }
 
         [MaxLength(300)]
-        public string PDFeatures { get; set; }
+        public string? PDFeatures { get; set; }
 
         public int? ODType { get; set; }
 
         [MaxLength(300)]
-        public string ODComments { get; set; }
+        public string? ODComments { get; set; }
 
         public int? Outcome { get; set; }
         public int? OutcomeAdvNotTravelTravelled { get; set; }
@@ -73,21 +71,21 @@ namespace Defra.PTS.Checker.Entities
         public int? OutcomeAdvNotTravelNotSay { get; set; }
 
         [ForeignKey("Outcome")]
-        public virtual Outcome OutcomeNavigation { get; set; }
+        public virtual Outcome? OutcomeNavigation { get; set; }
 
         [ForeignKey("ODType")]
-        public virtual PasengerType ODTypeNavigation { get; set; }
+        public virtual PasengerType? ODTypeNavigation { get; set; }
 
         [ForeignKey("VCFailBreedActual")]
-        public virtual Breed VCFailBreedActualNavigation { get; set; }
+        public virtual Breed? VCFailBreedActualNavigation { get; set; }
 
         [ForeignKey("PDBreed")]
-        public virtual Breed PDBreedNavigation { get; set; }
+        public virtual Breed? PDBreedNavigation { get; set; }
 
         [ForeignKey("VCFailColourActual")]
-        public virtual Color VCFailColourActualNavigation { get; set; }
+        public virtual Colour? VCFailColourActualNavigation { get; set; }
 
         [ForeignKey("PDColour")]
-        public virtual Color PDColourNavigation { get; set; }
+        public virtual Colour? PDColourNavigation { get; set; }
     }
 }

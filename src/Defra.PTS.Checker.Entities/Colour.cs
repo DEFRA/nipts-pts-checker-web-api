@@ -2,11 +2,11 @@
 
 namespace Defra.PTS.Checker.Entities
 {
-    [ExcludeFromCodeCoverageAttribute]
-    public class Color
+    [ExcludeFromCodeCoverage]
+    public class Colour
     {
         public int Id { get; set; }
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
         public int SpeciesId { get; set; }
     }
 }

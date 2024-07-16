@@ -1,18 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace Defra.PTS.Checker.Entities
 {
-    [ExcludeFromCodeCoverageAttribute]
+    [ExcludeFromCodeCoverage]
     public class PetDocumentEvidence
     {
         public Guid Id { get; set; }
         public Guid PetId { get; set; }
-        public string EvidenceReference { get; set; }
+        public string EvidenceReference { get; set; } = string.Empty;
         public Guid? CreatedBy { get; set; }
         public DateTime? CreatedOn { get; set; }
         public Guid? UpdatedBy { get; set; }

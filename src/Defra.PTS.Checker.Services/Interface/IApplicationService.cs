@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Defra.PTS.Checker.Entities;
 
 namespace Defra.PTS.Checker.Services.Interface
 {
     public interface IApplicationService
     {
-        string GetApplication();
+        Task<Application> GetApplicationById(Guid id);
+        Task<object?> GetApplicationByReferenceNumber(string referenceNumber);
+        Task<object?> GetApplicationByPTDNumber(string ptdNumber);
     }
 }

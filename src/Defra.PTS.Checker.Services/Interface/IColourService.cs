@@ -2,8 +2,8 @@
 
 namespace Defra.PTS.Checker.Services.Interface
 {
-    public interface IColorService
+    public interface IColourService
     {
-        Task<IEnumerable<Color>> GetColor();
+        Task<IEnumerable<Colour>> GetAllColours();
     }
 }

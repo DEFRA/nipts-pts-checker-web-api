@@ -9,19 +9,19 @@ namespace Defra.PTS.Checker.Web.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ColorsController : ControllerBase
+    public class ColoursController : ControllerBase
     {
-        private readonly IColorService _color;
-        public ColorsController(IColorService color)
+        private readonly IColourService _colour;
+        public ColoursController(IColourService colour)
         {
-            _color = color;
+            _colour = colour;
         }
-        // GET: api/<ColorsController>        
+        // GET: api/<ColoursController>        
         [HttpGet]
-        [ProducesResponseType(typeof(ColorResponse), StatusCodes.Status200OK)]        
-        public async Task<IActionResult> GetAllColors()
+        [ProducesResponseType(typeof(ColourResponse), StatusCodes.Status200OK)]        
+        public async Task<IActionResult> GetAllColours()
         {
-            var response = await _color.GetColor();
+            var response = await _colour.GetAllColours();
 
             return response == null
                 ? NotFound()
@@ -29,26 +29,26 @@ namespace Defra.PTS.Checker.Web.Api.Controllers
         }
 
 
-        // GET api/<ColorsController>/5
+        // GET api/<ColoursController>/5
         [HttpGet("{id}")]
         public string Get(int id)
         {
             return "value";
         }
 
-        // POST api/<ColorsController>
+        // POST api/<ColoursController>
         [HttpPost]
         public void Post([FromBody] string value)
         {
         }
 
-        // PUT api/<ColorsController>/5
+        // PUT api/<ColoursController>/5
         [HttpPut("{id}")]
         public void Put(int id, [FromBody] string value)
         {
         }
 
-        // DELETE api/<ColorsController>/5
+        // DELETE api/<ColoursController>/5
         [HttpDelete("{id}")]
         public void Delete(int id)
         {

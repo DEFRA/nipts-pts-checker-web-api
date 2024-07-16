@@ -19,7 +19,7 @@ namespace Defra.PTS.Checker.Repositories
         public DbSet<entity.Application> Application { get; set; }
         public DbSet<entity.Pet> Pet { get; set; }
         public DbSet<entity.Breed> Breed { get; set; }
-        public DbSet<entity.Color> Color { get; set; }
+        public DbSet<entity.Colour> Colour { get; set; }
         public DbSet<entity.TravelDocument> TravelDocument { get; set; }
         public DbSet<entity.Operator> Operator { get; set; }
         public DbSet<entity.Port> Port { get; set; }
@@ -30,6 +30,7 @@ namespace Defra.PTS.Checker.Repositories
         public DbSet<entity.PasengerType> PasengerType { get; set; }
         public DbSet<entity.CheckOutcome> CheckOutcome { get; set; }
         public DbSet<entity.CheckSummary> CheckSummary { get; set; }
+        public DbSet<entity.VwApplication> VwApplications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -138,7 +139,7 @@ namespace Defra.PTS.Checker.Repositories
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<CheckSummary>()
-              .HasOne(cs => cs.CkOutcomeId)
+              .HasOne(cs => cs.CheckOutcomeEntity)
               .WithMany()
               .HasForeignKey(cs => cs.CheckOutcomeId)
               .OnDelete(DeleteBehavior.Restrict);         

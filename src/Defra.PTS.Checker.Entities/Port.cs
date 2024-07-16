@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Defra.PTS.Checker.Entities
 {
-    [ExcludeFromCodeCoverageAttribute]
+    [ExcludeFromCodeCoverage]
     [Table("Port")]
     public class Port
     {
@@ -15,15 +15,15 @@ namespace Defra.PTS.Checker.Entities
         [Required]
         [MaxLength(300)]
         [Column("PortName")]
-        public string PortName { get; set; }
+        public string? PortName { get; set; }
 
         [MaxLength(300)]
         [Column("PortLocation")]
-        public string PortLocation { get; set; }
+        public string? PortLocation { get; set; }
 
         // Navigation properties
-        public virtual ICollection<Route> DepartureRoutes { get; set; }
-        public virtual ICollection<Route> ArrivalRoutes { get; set; }
+        public virtual ICollection<Route>? DepartureRoutes { get; set; }
+        public virtual ICollection<Route>? ArrivalRoutes { get; set; }
     }
 
 }

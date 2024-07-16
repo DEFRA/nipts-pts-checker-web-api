@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Defra.PTS.Checker.Entities
 {
-    [ExcludeFromCodeCoverageAttribute]
+    [ExcludeFromCodeCoverage]
     [Table("PasengerType")]
     public class PasengerType
     {
@@ -15,6 +15,6 @@ namespace Defra.PTS.Checker.Entities
         [Required]
         [MaxLength(300)]
         [Column("Type")]
-        public string Type { get; set; }
+        public string? Type { get; set; }
     }
 }

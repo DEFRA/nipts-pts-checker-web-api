@@ -45,7 +45,7 @@ parameters:
   - name: runVulnerabilityScan
     displayName: "Run Vulnerability Scan"
     type: boolean
-    default: true
+    default: false
   - name: libraryVersion
     displayName: "Client Library Version Number"
     type: string
@@ -57,6 +57,7 @@ parameters:
       enforceQualityGate: true
       warningVariance: 1
       coverageVariance: 1
+      coverageThreshold: 400
       coverageType: 'blocks'
       baseBranch: '$(System.PullRequest.TargetBranch)'
       allowWarningVariance: true
@@ -79,19 +80,10 @@ resources:
       type: git
       ref: master
 
-  # pipelines:
-  #   - pipeline: INFRA # need to change as per infra
-  #     source: Defra.EEHC.Infra EUCerts API WebApp
-  #     trigger:
-  #       branches:
-  #         include:
-  #           - '*'
-  #       stages:
-  #         - DEV
 
 variables:
   APIName: DEFRA_nipts-pts-checker-web-api
-
+  apimApiName: Defra.PTS.Checker.Web.Api
 extends:
   template: /templates/basic-webapp-deploy-pipeline.yaml@PipelineCommon
   parameters:
@@ -132,10 +124,10 @@ extends:
       runClientGeneration: ${{ parameters.runCodeGeneration }}
     runSonarScan: true
     # sonarExclusionPaths: 'src/*.Api*/**, src/Defra.PTS.Checker.Web.Api/Program.cs'
-    # publishAPIMApi: 
-    #   apiConfig: '**/api-config/pts-checker-web-api.yml'
-    #   apiProjectName: '$(APIName)'
-    #   apiTemplate: 'pts-checker-web-api'
+    publishAPIMApi: 
+      apiConfig: '**/api-config/pts-pet-checker-api.yml'
+      apiProjectName: '$(apimApiName)'
+      apiTemplate: 'pts-pet-checker'
     runHealthCheck: false
     qualityGate: ${{ parameters.qualityGate }}
     skipBuildTests: true

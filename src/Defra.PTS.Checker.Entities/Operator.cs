@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Defra.PTS.Checker.Entities
 {
-    [ExcludeFromCodeCoverageAttribute]
+    [ExcludeFromCodeCoverage]
     [Table("Operator")]
     public class Operator
     {
@@ -15,10 +15,10 @@ namespace Defra.PTS.Checker.Entities
         [Required]
         [MaxLength(300)]
         [Column("OperatorName")]
-        public string OperatorName { get; set; }
+        public string? OperatorName { get; set; }
 
         // Navigation properties
-        public virtual ICollection<Route> Routes { get; set; }
+        public virtual ICollection<Route>? Routes { get; set; }
     }
 
 }

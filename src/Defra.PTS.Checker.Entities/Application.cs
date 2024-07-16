@@ -1,5 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 
@@ -22,20 +21,20 @@ namespace Defra.PTS.Checker.Entities
         public Guid OwnerId { get; set; }
 
         [MaxLength(300)]
-        public string OwnerNewName { get; set; }
+        public string? OwnerNewName { get; set; }
 
         [MaxLength(50)]
-        public string OwnerNewTelephone { get; set; }
+        public string? OwnerNewTelephone { get; set; }
 
         public Guid? OwnerAddressId { get; set; }
 
         [Required]
         [MaxLength(50)]
-        public string Status { get; set; }
+        public string? Status { get; set; }
 
         [Required]
         [MaxLength(20)]
-        public string ReferenceNumber { get; set; }
+        public string? ReferenceNumber { get; set; }
 
         [Required]
         public bool IsDeclarationSigned { get; set; }
@@ -67,15 +66,16 @@ namespace Defra.PTS.Checker.Entities
 
         // Navigation properties
         [ForeignKey("PetId")]
-        public virtual Pet Pet { get; set; }
+        public virtual Pet? Pet { get; set; }
 
         [ForeignKey("UserId")]
-        public virtual User User { get; set; }
+        public virtual User? User { get; set; }
 
         [ForeignKey("OwnerId")]
-        public virtual Owner Owner { get; set; }
+        public virtual Owner? Owner { get; set; }
 
         [ForeignKey("OwnerAddressId")]
-        public virtual Address OwnerAddress { get; set; }
+        public virtual Address? OwnerAddress { get; set; }
     }
 }
+

@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace Defra.PTS.Checker.Entities
 {
-    [ExcludeFromCodeCoverageAttribute]
+    [ExcludeFromCodeCoverage]
     public class Address
     {
         public Guid Id { get; set; }

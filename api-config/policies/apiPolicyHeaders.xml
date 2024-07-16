@@ -1,0 +1,36 @@
+﻿[concat('<policies>
+    <inbound>        
+        <choose>
+            <when condition="@("North Europe".Equals(context.Deployment.Region, StringComparison.OrdinalIgnoreCase))">
+                <set-backend-service base-url="', parameters('pts-pet-checker-v1-serviceUrl') ,'" />
+            </when>
+            <when condition="@("West Europe".Equals(context.Deployment.Region, StringComparison.OrdinalIgnoreCase))">
+                <set-backend-service base-url="', parameters('secondaryServiceUrl') ,'" />
+            </when>
+            <otherwise>
+                <set-backend-service base-url="', parameters('pts-pet-checker-v1-serviceUrl') ,'" />
+            </otherwise>
+        </choose>      
+         <validate-jwt header-name="Authorization" failed-validation-httpcode="401" failed-validation-error-message="Unauthorized. Access token is missing or invalid." require-expiration-time="true" require-scheme="Bearer" require-signed-tokens="true" clock-skew="900" output-token-variable-name="jwt">
+            <openid-config url="',parameters('idm2Url'),'" />
+            <required-claims>               
+                  <claim name="iss">
+                    <value>',parameters('idm2Issuer'),'</value>
+                </claim>
+                <claim name="aud">
+                    <value>',parameters('idm2Audience'),'</value>
+                </claim>
+            </required-claims>
+        </validate-jwt>
+		<authentication-managed-identity resource="', parameters('aspClientId'), '" ignore-error="false" />
+    </inbound>
+    <backend>
+        <base />
+    </backend>
+    <outbound>
+        <base />
+    </outbound>
+    <on-error>
+        <base />
+    </on-error>
+</policies>')]
