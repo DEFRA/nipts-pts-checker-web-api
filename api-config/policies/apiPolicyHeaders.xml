@@ -1,8 +1,5 @@
 ﻿[concat('<policies>
-    <inbound>
-        <set-header name="x-api-version" exists-action="override">
-            <value>@(context.Api.Version)</value>
-        </set-header>
+    <inbound>        
         <choose>
             <when condition="@("North Europe".Equals(context.Deployment.Region, StringComparison.OrdinalIgnoreCase))">
                 <set-backend-service base-url="', parameters('pts-pet-checker-v1-serviceUrl') ,'" />
