@@ -1,4 +1,5 @@
 ﻿using Defra.PTS.Checker.Entities;
+using models = Defra.PTS.Checker.Models;
 using Defra.PTS.Checker.Repositories.Interface;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -15,6 +16,7 @@ namespace Defra.PTS.Checker.Tests.Services
         private Mock<IPetRepository>? _petRepositoryMock;
         private Mock<IApplicationRepository>? _applicationRepositoryMock;
         private Mock<ITravelDocumentRepository>? _travelDocumentRepositoryMock;
+        private Mock<ICheckerRepository>? _checkerRepositoryMock;
         private Mock<ILogger<CheckerService>>? _loggerMock;
         private CheckerService? _checkerService;
 
@@ -24,12 +26,14 @@ namespace Defra.PTS.Checker.Tests.Services
             _petRepositoryMock = new Mock<IPetRepository>();
             _applicationRepositoryMock = new Mock<IApplicationRepository>();
             _travelDocumentRepositoryMock = new Mock<ITravelDocumentRepository>();
+            _checkerRepositoryMock = new Mock<ICheckerRepository>();
             _loggerMock = new Mock<ILogger<CheckerService>>();
 
             _checkerService = new CheckerService(
                 _petRepositoryMock.Object,
                 _applicationRepositoryMock.Object,
                 _travelDocumentRepositoryMock.Object,
+                _checkerRepositoryMock.Object,
                 _loggerMock.Object
             );
         }
@@ -241,6 +245,63 @@ namespace Defra.PTS.Checker.Tests.Services
 
             // Extract
 
+        }
+
+        [Test]
+        public async Task CheckerUser_AddChecker()
+        {
+            // Arrange
+            var checkerDto = new models.CheckerDto
+            {
+                Id = Guid.NewGuid(),
+                FirstName = "Test",
+                LastName = "Test",
+                RoleId = null
+            };
+
+            _checkerRepositoryMock!.Setup(repo => repo.Add(It.IsAny<Entities.Checker>()))
+                .Returns(Task.CompletedTask);
+
+            // Act
+            var result = await _checkerService!.SaveChecker(checkerDto);
+
+            // Assert
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result, Is.EqualTo(checkerDto.Id));
+        }
+
+        [Test]
+        public async Task CheckerUser_UpdateChecker()
+        {
+            // Arrange
+            var checkerDto = new models.CheckerDto
+            {
+                Id = Guid.NewGuid(),
+                FirstName = "Test",
+                LastName = "Test",
+                RoleId = null
+            };
+
+            var checkerEntity = new Entities.Checker
+            {
+                Id = checkerDto.Id,
+                FirstName = checkerDto.FirstName,
+                LastName = checkerDto.LastName,
+                FullName = $"{checkerDto.FirstName} {checkerDto.LastName}",
+                RoleId = null
+            };
+
+            _checkerRepositoryMock!.Setup(repo => repo.Find(It.IsAny<Guid>()))
+                .ReturnsAsync(checkerEntity);
+
+            _checkerRepositoryMock!.Setup(repo => repo.Update(It.IsAny<Entities.Checker>()));
+
+            // Act
+            var result = await _checkerService!.SaveChecker(checkerDto);
+
+            // Assert
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result, Is.EqualTo(checkerDto.Id));
         }
     }
 }
