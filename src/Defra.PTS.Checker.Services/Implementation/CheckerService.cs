@@ -143,7 +143,7 @@ public class CheckerService : ICheckerService
         }
     }
 
-    private Application? GetMostRelevantApplication(IEnumerable<Application> applications)
+    private static Application? GetMostRelevantApplication(IEnumerable<Application> applications)
     {
         var statusPriority = new Dictionary<string, int>
         {
