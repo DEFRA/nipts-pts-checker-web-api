@@ -415,7 +415,7 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
                 .ThrowsAsync(new Exception("Test exception"));
 
             // Act
-            Assert.ThrowsAsync<Exception>(async () => await _controller!.SaveCheckerUser(request));
+            Assert.Throws<Exception>(async () => await _controller.SaveCheckerUser(request));
         }
     }
 }
