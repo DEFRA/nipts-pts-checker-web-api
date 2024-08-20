@@ -27,9 +27,8 @@ namespace Defra.PTS.Checker.Entities
         [Column("LastName")]
         public string? LastName { get; set; }
 
-        [Required]
-        [Column("RoleId")]
-        public int RoleId { get; set; }
+        [Column("Role")]
+        public int? RoleId { get; set; }
 
         // Navigation property
         [ForeignKey("RoleId")]

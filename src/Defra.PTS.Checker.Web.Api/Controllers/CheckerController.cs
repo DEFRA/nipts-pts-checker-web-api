@@ -153,4 +153,27 @@ public class CheckerController : ControllerBase
         var response = await _checkSummaryService.SaveCheckSummary(model);
         return Ok(response);
     }
+
+    [HttpPost]
+    [Route("checkerUser")]
+    [SwaggerResponse(StatusCodes.Status200OK, "OK: Returns the Id of checker", typeof(Guid))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request: Invalid request", typeof(IDictionary<string, string>))]
+    [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error: An error has occurred")]
+    [SwaggerOperation(
+        OperationId = "checkerUser",
+        Tags = new[] { "Checker" },
+        Summary = "Adds or updates a checker user",
+        Description = "Adds or updates a checker user"
+    )]
+    public async Task<IActionResult> SaveCheckerUser([FromBody, SwaggerRequestBody("The checker user payload", Required = true)] CheckerDto model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var checkerId = await _checkerService.SaveChecker(model);
+
+        return Ok(checkerId);
+    }
 }

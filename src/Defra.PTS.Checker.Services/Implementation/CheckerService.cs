@@ -1,4 +1,5 @@
 ﻿using Defra.PTS.Checker.Entities;
+using models = Defra.PTS.Checker.Models;
 using Defra.PTS.Checker.Repositories.Interface;
 using Defra.PTS.Checker.Services.Enums;
 using Defra.PTS.Checker.Services.Interface;
@@ -9,18 +10,52 @@ public class CheckerService : ICheckerService
     private readonly IPetRepository _petRepository;
     private readonly IApplicationRepository _applicationRepository;
     private readonly ITravelDocumentRepository _travelDocumentRepository;
+    private readonly ICheckerRepository _checkerRepository;
     private readonly ILogger<CheckerService> _logger;
 
     public CheckerService(
         IPetRepository petRepository,
         IApplicationRepository applicationRepository,
         ITravelDocumentRepository travelDocumentRepository,
+        ICheckerRepository checkerRepository,
         ILogger<CheckerService> logger)
     {
         _petRepository = petRepository;
         _applicationRepository = applicationRepository;
         _travelDocumentRepository = travelDocumentRepository;
+        _checkerRepository = checkerRepository;
         _logger = logger;
+    }
+
+    public async Task<Guid> SaveChecker(models.CheckerDto checkerDto)
+    {
+        var entity = await _checkerRepository.Find(checkerDto.Id);
+        if (entity == null)
+        {
+            entity = new Checker
+            {
+                Id = checkerDto.Id,
+                FirstName = checkerDto.FirstName,
+                LastName = checkerDto.LastName,
+                FullName = $"{checkerDto.FirstName} {checkerDto.LastName}",
+                RoleId = checkerDto.RoleId,
+            };
+
+            await _checkerRepository.Add(entity);
+        }
+        else
+        {
+            entity.FirstName = checkerDto.FirstName;
+            entity.LastName = checkerDto.LastName;
+            entity.FullName = $"{checkerDto.FirstName} {checkerDto.LastName}";
+            entity.RoleId = checkerDto.RoleId;
+
+            _checkerRepository.Update(entity);
+        }
+
+        await _checkerRepository.SaveChanges();
+
+        return entity.Id;
     }
 
     public async Task<object?> CheckMicrochipNumberAsync(string microchipNumber)
