@@ -398,7 +398,7 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
         }
 
         [Test]
-        public async Task SaveCheckerUser_ServiceThrowsException_ReturnsInternalServerError()
+        public void SaveCheckerUser_ServiceThrowsException_ReturnsInternalServerError()
         {
             // Arrange
             var request = new CheckerDto
@@ -414,8 +414,8 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
             _checkerServiceMock!.Setup(service => service.SaveChecker(request))
                 .ThrowsAsync(new Exception("Test exception"));
 
-            // Act
-            Assert.Throws<Exception>(async () => await _controller.SaveCheckerUser(request));
+            // Assert
+            Assert.ThrowsAsync<Exception>(async () => await _controller.SaveCheckerUser(request));
         }
     }
 }
