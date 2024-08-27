@@ -1,0 +1,1046 @@
+{
+	"info": {
+		"_postman_id": "058a0a70-78ee-4d97-993b-f492053ac51b",
+		"name": "Compliance Portal API",
+		"description": "# 🚀 Get started here\n\nThis template guides you through CRUD operations (GET, POST, PUT, DELETE), variables, and tests.\n\n## 🔖 **How to use this template**\n\n#### **Step 1: Send requests**\n\nRESTful APIs allow you to perform CRUD operations using the POST, GET, PUT, and DELETE HTTP methods.\n\nThis collection contains each of these [request](https://learning.postman.com/docs/sending-requests/requests/) types. Open each request and click \"Send\" to see what happens.\n\n#### **Step 2: View responses**\n\nObserve the response tab for status code (200 OK), response time, and size.\n\n#### **Step 3: Send new Body data**\n\nUpdate or add new data in \"Body\" in the POST request. Typically, Body data is also used in PUT request.\n\n```\n{\n    \"name\": \"Add your name in the body\"\n}\n\n ```\n\n#### **Step 4: Update the variable**\n\nVariables enable you to store and reuse values in Postman. We have created a [variable](https://learning.postman.com/docs/sending-requests/variables/) called `base_url` with the sample request [https://postman-api-learner.glitch.me](https://postman-api-learner.glitch.me). Replace it with your API endpoint to customize this collection.\n\n#### **Step 5: Add tests in the \"Scripts\" tab**\n\nAdding tests to your requests can help you confirm that your API is working as expected. You can write test scripts in JavaScript and view the output in the \"Test Results\" tab.\n\n<img src=\"https://content.pstmn.io/fa30ea0a-373d-4545-a668-e7b283cca343/aW1hZ2UucG5n\" width=\"2162\" height=\"1530\">\n\n## 💪 Pro tips\n\n- Use folders to group related requests and organize the collection.\n    \n- Add more [scripts](https://learning.postman.com/docs/writing-scripts/intro-to-scripts/) to verify if the API works as expected and execute workflows.\n    \n\n## 💡Related templates\n\n[API testing basics](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=e9a37a28-055b-49cd-8c7e-97494a21eb54&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)  \n[API documentation](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=e9c28f47-1253-44af-a2f3-20dce4da1f18&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)  \n[Authorization methods](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=31a9a6ed-4cdf-4ced-984c-d12c9aec1c27&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "31456399"
+	},
+	"item": [
+		{
+			"name": "CheckByPTDNumber [api/Checker/CheckPTDNumber]",
+			"item": [
+				{
+					"name": "Check By PTD Number [OK] - Authorised",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Successful POST request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{Bearer Token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Ocp-Apim-Subscription-Key",
+								"value": "{{ApimSubscriptionKey}}",
+								"type": "text"
+							},
+							{
+								"key": "",
+								"value": "",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"ptdNumber\": \"{{ptd_authorised}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}Checker/CheckPTDNumber",
+							"host": [
+								"{{base_url}}Checker"
+							],
+							"path": [
+								"CheckPTDNumber"
+							]
+						},
+						"description": "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nA successful POST request returns a `200 OK`response code."
+					},
+					"response": []
+				},
+				{
+					"name": "Check By PTD Number [OK] - Awaiting Verification",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Successful POST request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{Bearer Token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Ocp-Apim-Subscription-Key",
+								"value": "{{ApimSubscriptionKey}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"ptdNumber\": \"{{ptd_awaiting}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}Checker/CheckPTDNumber",
+							"host": [
+								"{{base_url}}Checker"
+							],
+							"path": [
+								"CheckPTDNumber"
+							]
+						},
+						"description": "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nA successful POST request returns a `200 OK`response code."
+					},
+					"response": []
+				},
+				{
+					"name": "Check By PTD Number [OK] - Revoked",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Successful POST request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{Bearer Token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Ocp-Apim-Subscription-Key",
+								"value": "{{ApimSubscriptionKey}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"ptdNumber\": \"{{ptd_revoked}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}Checker/CheckPTDNumber",
+							"host": [
+								"{{base_url}}Checker"
+							],
+							"path": [
+								"CheckPTDNumber"
+							]
+						},
+						"description": "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nA successful POST request returns a `200 OK`response code."
+					},
+					"response": []
+				},
+				{
+					"name": "Check By PTD Number [Not Found]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Successful POST request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{Bearer Token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Ocp-Apim-Subscription-Key",
+								"value": "{{ApimSubscriptionKey}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n \"ptdNumber\": \"{{ptd_not_found}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}Checker/CheckPTDNumber",
+							"host": [
+								"{{base_url}}Checker"
+							],
+							"path": [
+								"CheckPTDNumber"
+							]
+						},
+						"description": "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nWhen no matching application is found, the request returns a `404 Not Found` response code."
+					},
+					"response": []
+				},
+				{
+					"name": "Check By PTD Number [Bad Request - PTD Number required]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Successful POST request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{Bearer Token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Ocp-Apim-Subscription-Key",
+								"value": "{{ApimSubscriptionKey}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"ptdNumber\": \"\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}Checker/CheckPTDNumber",
+							"host": [
+								"{{base_url}}Checker"
+							],
+							"path": [
+								"CheckPTDNumber"
+							]
+						},
+						"description": "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nWhen request is invalid, it returns a `400 Bad Request` response code."
+					},
+					"response": []
+				},
+				{
+					"name": "Check By PTD Number [Bad Request - PTD Number must start with GB826]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Successful POST request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{Bearer Token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Ocp-Apim-Subscription-Key",
+								"value": "{{ApimSubscriptionKey}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"ptdNumber\": \"{{ptd_invalid}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}Checker/CheckPTDNumber",
+							"host": [
+								"{{base_url}}Checker"
+							],
+							"path": [
+								"CheckPTDNumber"
+							]
+						},
+						"description": "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nWhen request is invalid, it returns a `400 Bad Request` response code."
+					},
+					"response": []
+				},
+				{
+					"name": "Check By PTD Number [Bad Request - PTD Number  length > 20]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Successful POST request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{Bearer Token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Ocp-Apim-Subscription-Key",
+								"value": "{{ApimSubscriptionKey}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"ptdNumber\": \"{{ptd_too_long}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}Checker/CheckPTDNumber",
+							"host": [
+								"{{base_url}}Checker"
+							],
+							"path": [
+								"CheckPTDNumber"
+							]
+						},
+						"description": "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nWhen request is invalid, it returns a `400 Bad Request` response code."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "CheckByMicrochipNumber [api/Checker/CheckMicrochipNumber]",
+			"item": [
+				{
+					"name": "Check by Microchip Number [OK] - Authorised",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{Bearer Token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Ocp-Apim-Subscription-Key",
+								"value": "{{ApimSubscriptionKey}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"microchipNumber\": \"{{microchip_authorised}}\"\r\n}\r\n\r\n//https://www.postman.com/downloads/?utm_source=postman-home\r\n// Ctrl + / to comment or uncomment\r\n// {\r\n//   \"microchipNumber\": 99\r\n// }\r\n\r\n// {\r\n//   \"microchipNumber\": null\r\n// }\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}Checker/checkMicrochipNumber",
+							"host": [
+								"{{base_url}}Checker"
+							],
+							"path": [
+								"checkMicrochipNumber"
+							]
+						},
+						"description": "TestPostman"
+					},
+					"response": []
+				},
+				{
+					"name": "Check by Microchip Number [OK] - Awaiting Verification",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{Bearer Token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Ocp-Apim-Subscription-Key",
+								"value": "{{ApimSubscriptionKey}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"microchipNumber\": \"455435435435345\"\r\n}\r\n\r\n//https://www.postman.com/downloads/?utm_source=postman-home\r\n// Ctrl + / to comment or uncomment\r\n// {\r\n//   \"microchipNumber\": 99\r\n// }\r\n\r\n// {\r\n//   \"microchipNumber\": null\r\n// }\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}Checker/checkMicrochipNumber",
+							"host": [
+								"{{base_url}}Checker"
+							],
+							"path": [
+								"checkMicrochipNumber"
+							]
+						},
+						"description": "TestPostman"
+					},
+					"response": []
+				},
+				{
+					"name": "Check by Microchip Number [OK] - Revoked",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{Bearer Token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Ocp-Apim-Subscription-Key",
+								"value": "{{ApimSubscriptionKey}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"microchipNumber\": \"{{microchip_revoked}}\"\r\n}\r\n\r\n//https://www.postman.com/downloads/?utm_source=postman-home\r\n// Ctrl + / to comment or uncomment\r\n// {\r\n//   \"microchipNumber\": 99\r\n// }\r\n\r\n// {\r\n//   \"microchipNumber\": null\r\n// }\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}Checker/checkMicrochipNumber",
+							"host": [
+								"{{base_url}}Checker"
+							],
+							"path": [
+								"checkMicrochipNumber"
+							]
+						},
+						"description": "TestPostman"
+					},
+					"response": []
+				},
+				{
+					"name": "Check by Microchip Number [Not Found]",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{Bearer Token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Ocp-Apim-Subscription-Key",
+								"value": "{{ApimSubscriptionKey}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"microchipNumber\": \"{{microchip_empty}}\"\r\n}\r\n\r\n//https://www.postman.com/downloads/?utm_source=postman-home\r\n// Ctrl + / to comment or uncomment\r\n// {\r\n//   \"microchipNumber\": 99\r\n// }\r\n\r\n// {\r\n//   \"microchipNumber\": null\r\n// }\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}Checker/checkMicrochipNumber",
+							"host": [
+								"{{base_url}}Checker"
+							],
+							"path": [
+								"checkMicrochipNumber"
+							]
+						},
+						"description": "TestPostman"
+					},
+					"response": []
+				},
+				{
+					"name": "Check by Microchip Number [Bad Request - Microchip Number required]",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{Bearer Token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Ocp-Apim-Subscription-Key",
+								"value": "{{ApimSubscriptionKey}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"microchipNumber\": \"{{microchip_empty}}\"\r\n}\r\n\r\n//https://www.postman.com/downloads/?utm_source=postman-home\r\n// Ctrl + / to comment or uncomment\r\n// {\r\n//   \"microchipNumber\": 99\r\n// }\r\n\r\n// {\r\n//   \"microchipNumber\": null\r\n// }\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}Checker/checkMicrochipNumber",
+							"host": [
+								"{{base_url}}Checker"
+							],
+							"path": [
+								"checkMicrochipNumber"
+							]
+						},
+						"description": "TestPostman"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "CheckByApplicationNumber [api/Checker/CheckApplicationNumber]",
+			"item": [
+				{
+					"name": "Check by Application Number [OK] - Authorised",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{Bearer Token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Ocp-Apim-Subscription-Key",
+								"value": "{{ApimSubscriptionKey}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"applicationNumber\": \"{{application_authorised}}\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/Checker/checkApplicationNumber",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"Checker",
+								"checkApplicationNumber"
+							]
+						},
+						"description": "TestPostman"
+					},
+					"response": []
+				},
+				{
+					"name": "Check by Application Number [OK] - Awaiting Verification",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{Bearer Token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Ocp-Apim-Subscription-Key",
+								"value": "{{ApimSubscriptionKey}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"applicationNumber\": \"{{application_awaiting}}\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/Checker/checkApplicationNumber",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"Checker",
+								"checkApplicationNumber"
+							]
+						},
+						"description": "TestPostman"
+					},
+					"response": []
+				},
+				{
+					"name": "Check by Application Number [OK] - Revoked",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{Bearer Token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Ocp-Apim-Subscription-Key",
+								"value": "{{ApimSubscriptionKey}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"applicationNumber\": \"{{application_revoked}}\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/Checker/checkApplicationNumber",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"Checker",
+								"checkApplicationNumber"
+							]
+						},
+						"description": "TestPostman"
+					},
+					"response": []
+				},
+				{
+					"name": "Check by Application Number [OK] - Rejected",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{Bearer Token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Ocp-Apim-Subscription-Key",
+								"value": "{{ApimSubscriptionKey}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"applicationNumber\": \"{{application_rejected}}\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/Checker/checkApplicationNumber",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"Checker",
+								"checkApplicationNumber"
+							]
+						},
+						"description": "TestPostman"
+					},
+					"response": []
+				},
+				{
+					"name": "Check by Application Number [Not Found]",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{Bearer Token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Ocp-Apim-Subscription-Key",
+								"value": "{{ApimSubscriptionKey}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"applicationNumber\": \"{{application_not_found}}\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/Checker/checkApplicationNumber",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"Checker",
+								"checkApplicationNumber"
+							]
+						},
+						"description": "TestPostman"
+					},
+					"response": []
+				},
+				{
+					"name": "Check by Application Number [Bad Request - Application Number required]",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{Bearer Token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Ocp-Apim-Subscription-Key",
+								"value": "{{ApimSubscriptionKey}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"applicationNumber\": \"{{application_empty}}\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/Checker/checkApplicationNumber",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"Checker",
+								"checkApplicationNumber"
+							]
+						},
+						"description": "TestPostman"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Colours [/api/Colours]",
+			"item": [
+				{
+					"name": "Get list of colours [OK]",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{Bearer Token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Ocp-Apim-Subscription-Key",
+								"value": "{{ApimSubscriptionKey}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/Colours",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"Colours"
+							]
+						},
+						"description": "TestPostman"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Sailing [/api/sailing-routes]",
+			"item": [
+				{
+					"name": "Get list of sailing routes [OK]",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{Bearer Token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Ocp-Apim-Subscription-Key",
+								"value": "{{ApimSubscriptionKey}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}sailing-routes",
+							"host": [
+								"{{base_url}}sailing-routes"
+							]
+						},
+						"description": "TestPostman"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "id",
+			"value": "1"
+		},
+		{
+			"key": "base_url",
+			"value": "https://postman-rest-api-learner.glitch.me/"
+		}
+	]
+}

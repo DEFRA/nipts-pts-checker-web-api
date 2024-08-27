@@ -1,10 +1,12 @@
-﻿using Defra.PTS.Checker.Models;
+﻿using Defra.PTS.Checker.Entities;
+using Defra.PTS.Checker.Models;
 using Defra.PTS.Checker.Models.Constants;
 using Defra.PTS.Checker.Models.Search;
 using Defra.PTS.Checker.Services.Interface;
 using Defra.PTS.Checker.Web.Api.Controllers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Management.AppService.Fluent.Models;
 using Moq;
 using Newtonsoft.Json;
 using NUnit.Framework;
@@ -338,6 +340,82 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
             var objectResult = result as BadRequestObjectResult;
             Assert.That(objectResult, Is.Not.Null);
             Assert.That(objectResult!.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
+        }
+
+        [Test]
+        public async Task SaveCheckerUser_ReturnsOkResult()
+        {
+            // Arrange
+            var request = new CheckerDto
+            {
+                Id = Guid.NewGuid(),
+                FirstName = "Test",
+                LastName = "User",
+                RoleId  = null
+            };
+
+            var response = request.Id;
+
+            _checkerServiceMock!.Setup(service => service.SaveChecker(It.IsAny<CheckerDto>()))!.ReturnsAsync(request.Id);
+
+            // Act
+            var result = await _controller!.SaveCheckerUser(request);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+            var okResult = result as OkObjectResult;
+            Assert.That(okResult, Is.Not.Null);
+            Assert.That(okResult!.StatusCode, Is.EqualTo(200));
+        }
+
+        [Test]
+        public async Task SaveCheckerUser_InvalidRequest_ReturnsBadRequestResult()
+        {
+            // Arrange
+            var request = new CheckerDto
+            {
+                Id = Guid.NewGuid(),
+                FirstName = string.Empty,
+                LastName = string.Empty,
+                RoleId = null
+            };
+
+            var response = request.Id;
+
+            _checkerServiceMock!.Setup(service => service.SaveChecker(It.IsAny<CheckerDto>()))!.ReturnsAsync(request.Id);
+
+            // Act
+            _controller!.ModelState.AddModelError("FirstName", "FirstName is required");
+            _controller!.ModelState.AddModelError("LastName", "LastName is required");
+            var result = await _controller!.SaveCheckerUser(request);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+
+            var objectResult = result as BadRequestObjectResult;
+            Assert.That(objectResult, Is.Not.Null);
+            Assert.That(objectResult!.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
+        }
+
+        [Test]
+        public void SaveCheckerUser_ServiceThrowsException_ReturnsInternalServerError()
+        {
+            // Arrange
+            var request = new CheckerDto
+            {
+                Id = Guid.NewGuid(),
+                FirstName = "Test",
+                LastName = "User",
+                RoleId = null
+            };
+
+            var response = request.Id;
+
+            _checkerServiceMock!.Setup(service => service.SaveChecker(request))
+                .ThrowsAsync(new Exception("Test exception"));
+
+            // Assert
+            Assert.ThrowsAsync<Exception>(async () => await _controller.SaveCheckerUser(request));
         }
     }
 }
