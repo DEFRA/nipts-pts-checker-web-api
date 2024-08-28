@@ -215,5 +215,65 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             Assert.That(travelDocument.Application.DateRevoked, Is.EqualTo(root.GetProperty("Application").GetProperty("DateRevoked").GetString()));
         }
 
+        [Test]
+        public async Task GetApplicationByReferenceNumber_ReturnsNull_WhenTravelDocumentNotFound()
+        {
+            // Arrange
+            string referenceNumber = "GB2618181";
+            _applicationRepositoryMock.Setup(repo => repo.GetApplicationByReferenceNumber(referenceNumber))
+                           .Returns(Task.FromResult((Application)null));
+
+            // Act
+            var result = await _applicationService.GetApplicationByReferenceNumber(referenceNumber);
+
+            // Assert
+            Assert.That(result, Is.Null);
+        }
+
+        [Test]
+        public async Task GetApplicationByReferenceNumber_ReturnsCorrectData_WhenTravelDocumentFound()
+        {
+            // Arrange
+            string reference = "PTD123";
+
+            var application = new Application
+            {
+                Id = Guid.NewGuid(),
+                ReferenceNumber = "APP123",
+                DateOfApplication = new DateTime(2022, 1, 1),
+                Status = "Approved",
+                DateAuthorised = new DateTime(2022, 2, 1),
+                DateRejected = null,
+                DateRevoked = null
+            };
+
+            _applicationRepositoryMock.Setup(repo => repo.GetApplicationByReferenceNumber(reference))
+                 .Returns(Task.FromResult(application)!);
+                      
+            // Act
+            var result = await _applicationService.GetApplicationByReferenceNumber(reference);
+
+            // Assert
+            Assert.That(result, Is.Not.Null);
+            var parsedJson = System.Text.Json.JsonSerializer.Serialize(result);
+
+            // Parse JSON string
+            using JsonDocument doc = JsonDocument.Parse(parsedJson);
+            JsonElement root = doc.RootElement;
+
+            string str = string.Empty;
+            
+            //// Extract and assert Application details
+            Assert.That(application.Id, Is.EqualTo(Guid.Parse(root.GetProperty("Application").GetProperty("ApplicationId").GetString())));
+            Assert.That(application.ReferenceNumber, Is.EqualTo(root.GetProperty("Application").GetProperty("ReferenceNumber").GetString()));
+            Assert.That(application.DateOfApplication, Is.EqualTo(root.GetProperty("Application").GetProperty("DateOfApplication").GetDateTime()));
+            Assert.That(application.Status, Is.EqualTo(root.GetProperty("Application").GetProperty("Status").GetString()));
+            Assert.That(application.DateAuthorised, Is.EqualTo(root.GetProperty("Application").GetProperty("DateAuthorised").GetDateTime()));
+            Assert.That(application.DateRejected, Is.EqualTo(root.GetProperty("Application").GetProperty("DateRejected").GetString()));
+            Assert.That(application.DateRevoked, Is.EqualTo(root.GetProperty("Application").GetProperty("DateRevoked").GetString()));
+        }
+
+
+
     }
 }
