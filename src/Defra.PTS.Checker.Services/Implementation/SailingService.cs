@@ -16,7 +16,7 @@ namespace Defra.PTS.Checker.Services.Implementation
     public class SailingService : ISailingService
     {
         private readonly IRepository<Route> _sailingRepository;
-        private ILogger<SailingService> _log;
+        private readonly ILogger<SailingService> _log;
         public SailingService(ILogger<SailingService> log, IRepository<Route> sailingRepository) 
         {
             _log = log;
@@ -25,12 +25,13 @@ namespace Defra.PTS.Checker.Services.Implementation
 
         public async Task<IEnumerable<RouteResponse>> GetAllSailingRoutes()
         {
+            _log.LogInformation("In method GetAllSailingRoutes");
             IEnumerable<Route> routes = await _sailingRepository.GetAllAsync();
 
             return routes.Select(route => new RouteResponse
             {
                 Id = route.Id,
-                RouteName = route.RouteName,
+                RouteName = route.RouteName!,
             });
         }
     }

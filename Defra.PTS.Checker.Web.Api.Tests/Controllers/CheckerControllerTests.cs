@@ -137,7 +137,7 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
                 PTDNumber = $"{ApiConstants.PTDNumberPrefix}ABCXYZ123",
             };
 
-            _applicationServiceMock!.Setup(service => service.GetApplicationByPTDNumber(It.IsAny<string>()))!.ReturnsAsync(null);
+            _applicationServiceMock!.Setup(service => service.GetApplicationByPTDNumber(It.IsAny<string>()))!.ReturnsAsync(null!);
 
             // Act
             var result = await _controller!.GetApplicationByPTDNumber(request);
@@ -354,8 +354,6 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
                 RoleId  = null
             };
 
-            var response = request.Id;
-
             _checkerServiceMock!.Setup(service => service.SaveChecker(It.IsAny<CheckerDto>()))!.ReturnsAsync(request.Id);
 
             // Act
@@ -379,8 +377,6 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
                 LastName = string.Empty,
                 RoleId = null
             };
-
-            var response = request.Id;
 
             _checkerServiceMock!.Setup(service => service.SaveChecker(It.IsAny<CheckerDto>()))!.ReturnsAsync(request.Id);
 
@@ -409,13 +405,11 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
                 RoleId = null
             };
 
-            var response = request.Id;
-
             _checkerServiceMock!.Setup(service => service.SaveChecker(request))
                 .ThrowsAsync(new Exception("Test exception"));
 
             // Assert
-            Assert.ThrowsAsync<Exception>(async () => await _controller.SaveCheckerUser(request));
+            Assert.ThrowsAsync<Exception>(async () => await _controller!.SaveCheckerUser(request));
         }
     }
 }

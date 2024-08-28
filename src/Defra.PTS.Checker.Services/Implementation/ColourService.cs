@@ -13,7 +13,7 @@ namespace Defra.PTS.Checker.Services.Implementation
     public class ColourService : IColourService
     {
         private readonly IRepository<Colour> _colourRepository;
-        private ILogger<ColourService> _log;
+        private readonly ILogger<ColourService> _log;
         public ColourService(ILogger<ColourService> log, IRepository<Colour> colourRepository)
         {
             _log = log;

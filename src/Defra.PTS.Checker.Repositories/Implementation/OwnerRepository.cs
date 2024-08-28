@@ -10,7 +10,7 @@ namespace Defra.PTS.Checker.Repositories.Implementation
     public class OwnerRepository : Repository<entity.Owner>, IOwnerRepository
     {
 
-        private CommonDbContext userContext
+        private CommonDbContext? UserContext
         {
             get
             {
@@ -24,12 +24,12 @@ namespace Defra.PTS.Checker.Repositories.Implementation
 
         public async Task<bool> DoesOwnerExists(string ownerEmailAddress)
         {
-           return await userContext.Owner.AnyAsync(a => a.Email == ownerEmailAddress);
+           return await UserContext.Owner.AnyAsync(a => a.Email == ownerEmailAddress);
         }
 
         public async Task<Owner> GetOwner(Guid ownerId)
         {
-            return await userContext.Owner.FirstOrDefaultAsync(a => a.Id == ownerId);
+            return await UserContext.Owner.FirstOrDefaultAsync(a => a.Id == ownerId);
         }
     }
 }
