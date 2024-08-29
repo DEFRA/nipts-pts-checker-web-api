@@ -9,7 +9,7 @@ namespace Defra.PTS.Checker.Repositories.Implementation
     public class UserRepository : Repository<entity.User>, IUserRepository
     {
 
-        private CommonDbContext userContext
+        private CommonDbContext? userContext
         {
             get
             {
@@ -23,7 +23,7 @@ namespace Defra.PTS.Checker.Repositories.Implementation
 
         public async Task<bool> DoesUserExists(Guid contactId)
         {
-            var reu = userContext.User.FirstOrDefault();
+           var reu = userContext.User.FirstOrDefault();
            return await userContext.User.AnyAsync(a => a.ContactId == contactId);
         }
 

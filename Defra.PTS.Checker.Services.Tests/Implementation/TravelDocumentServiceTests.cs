@@ -39,19 +39,19 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             {
                 Id = Guid.NewGuid(),
                 DocumentReferenceNumber = "REF123",
-                DateOfIssue = new DateTime(2023, 1, 1),
-                ValidityStartDate = new DateTime(2023, 1, 1),
-                ValidityEndDate = new DateTime(2024, 1, 1),
+                DateOfIssue = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Unspecified),
+                ValidityStartDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Unspecified),
+                ValidityEndDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Unspecified),
                 StatusId = 1,
                 Pet = new Pet { Id = Guid.NewGuid(), Name = "Buddy" },
                 Application = new Application { Id = Guid.NewGuid(), ReferenceNumber = "APP123" }
             };
 
-            _mockRepository.Setup(repo => repo.GetTravelDocumentByPTDNumber(ptdNumber))
+            _mockRepository!.Setup(repo => repo.GetTravelDocumentByPTDNumber(ptdNumber))
                            .ReturnsAsync(expectedTravelDocument);
 
             // Act
-            var result = await _service.GetTravelDocumentByPTDNumber(ptdNumber);
+            var result = await _service!.GetTravelDocumentByPTDNumber(ptdNumber);
 
             // Assert
             Assert.That(result, Is.Not.Null);
@@ -68,19 +68,19 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             {
                 Id = Guid.NewGuid(),
                 DocumentReferenceNumber = "REF123",
-                DateOfIssue = new DateTime(2023, 1, 1),
-                ValidityStartDate = new DateTime(2023, 1, 1),
-                ValidityEndDate = new DateTime(2024, 1, 1),
+                DateOfIssue = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Unspecified),
+                ValidityStartDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Unspecified),
+                ValidityEndDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Unspecified),
                 StatusId = 1,
                 Pet = new Pet { Id = Guid.NewGuid(), Name = "Buddy" },
                 Application = new Application { Id = Guid.NewGuid(), ReferenceNumber = "APP123" }
             };
 
-            _mockRepository.Setup(repo => repo.GetTravelDocumentByApplicationIdAsync(applicationId))
+            _mockRepository!.Setup(repo => repo.GetTravelDocumentByApplicationIdAsync(applicationId))
                            .ReturnsAsync(expectedTravelDocument);
 
             // Act
-            var result = await _service.GetTravelDocumentByApplicationId(applicationId);
+            var result = await _service!.GetTravelDocumentByApplicationId(applicationId);
 
             // Assert
             Assert.That(result, Is.Not.Null);

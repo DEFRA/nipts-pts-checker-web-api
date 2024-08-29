@@ -27,7 +27,7 @@ builder.Services
     .AddTradeAppConfiguration(builder.Configuration)
     .AddApimAuthentication(builder.Configuration.GetSection(ApimSettings.InternalApim));
 
-var settings = builder.Configuration.ConfigureTradeAppConfiguration(true, "RemosSignUpService:Sentinel");
+builder.Configuration.ConfigureTradeAppConfiguration(true, "RemosSignUpService:Sentinel");
 
 
 builder.Services.AddControllers();

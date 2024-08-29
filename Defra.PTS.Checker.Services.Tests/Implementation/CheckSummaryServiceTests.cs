@@ -8,7 +8,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
     [TestFixture]
     public class CheckSummaryServiceTests
     {
-        private CheckSummaryService _service = new (DataHelper.GetDbContext());
+        private readonly CheckSummaryService _service = new (DataHelper.GetDbContext());
 
         [Test]
         public async Task SaveCheckSummary_ReturnsIdOnSave()

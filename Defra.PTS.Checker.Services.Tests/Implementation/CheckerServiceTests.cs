@@ -7,6 +7,7 @@ using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Defra.PTS.Checker.Services.Implementation;
 
 namespace Defra.PTS.Checker.Tests.Services
 {

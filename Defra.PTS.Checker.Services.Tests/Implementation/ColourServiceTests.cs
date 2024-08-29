@@ -15,9 +15,9 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
     [TestFixture]
     public class ColourServiceTests
     {
-        private Mock<IRepository<Colour>> _colourRepositoryMock;
-        private Mock<ILogger<ColourService>> _loggerMock;
-        private ColourService _colourService;
+        private Mock<IRepository<Colour>>? _colourRepositoryMock;
+        private Mock<ILogger<ColourService>>? _loggerMock;
+        private ColourService? _colourService;
 
         [SetUp]
         public void SetUp()
@@ -37,10 +37,10 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
                 new Colour { Id = 2, Name = "White" }
             };
 
-            _colourRepositoryMock.Setup(repo => repo.GetAll()).Returns(colours);
+            _colourRepositoryMock!.Setup(repo => repo.GetAll()).Returns(colours);
 
             // Act
-            var result = await _colourService.GetAllColours();
+            var result = await _colourService!.GetAllColours();
 
             // Assert
             Assert.That(result, Is.Not.Null);
