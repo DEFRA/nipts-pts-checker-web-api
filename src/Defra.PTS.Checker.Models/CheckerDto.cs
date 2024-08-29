@@ -1,7 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Defra.PTS.Checker.Models;
 
+[ExcludeFromCodeCoverage]
 public class CheckerDto
 {
     [Required(ErrorMessage = "Checker Id is required")]

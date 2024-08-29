@@ -35,7 +35,7 @@ namespace Defra.PTS.Checker.Repositories.Implementation
 
         public async Task<TEntity> Find(object id)
         {
-            return await _dbContext.Set<TEntity>().FindAsync(id)!;
+            return await _dbContext.Set<TEntity>().FindAsync(id) ?? null!;
         }
 
         public async Task<IEnumerable<TEntity>> GetAllAsync()
