@@ -5,6 +5,8 @@ using Defra.PTS.Checker.Services.Enums;
 using Defra.PTS.Checker.Services.Interface;
 using Microsoft.Extensions.Logging;
 
+namespace Defra.PTS.Checker.Services.Implementation;
+
 public class CheckerService : ICheckerService
 {
     private readonly IPetRepository _petRepository;
@@ -32,7 +34,7 @@ public class CheckerService : ICheckerService
         var entity = await _checkerRepository.Find(checkerDto.Id);
         if (entity == null)
         {
-            entity = new Checker
+            entity = new Entities.Checker
             {
                 Id = checkerDto.Id,
                 FirstName = checkerDto.FirstName,
@@ -71,11 +73,11 @@ public class CheckerService : ICheckerService
 
             var allApplications = new List<Application>();
 
-            foreach (var pet in pets)
+            foreach (var id in pets.Select(x => x.Id))
             {
-                _logger.LogInformation("Processing pet with ID: {PetId}", pet.Id);
+                _logger.LogInformation("Processing pet with ID: {PetId}", id);
 
-                var applications = await _applicationRepository.GetApplicationsByPetIdAsync(pet.Id);
+                var applications = await _applicationRepository.GetApplicationsByPetIdAsync(id);
                 if (applications.Any())
                 {
                     allApplications.AddRange(applications);

@@ -26,7 +26,7 @@ namespace Defra.PTS.Checker.Repositories.Implementation
 
         public void Delete(object id)
         {
-            TEntity entity = _dbContext.Set<TEntity>().Find(id);
+            TEntity entity = _dbContext.Set<TEntity>().Find(id)!;
             if (entity != null)
             {
                 _dbContext.Set<TEntity>().Remove(entity);
@@ -35,7 +35,7 @@ namespace Defra.PTS.Checker.Repositories.Implementation
 
         public async Task<TEntity> Find(object id)
         {
-            return await _dbContext.Set<TEntity>().FindAsync(id);
+            return await _dbContext.Set<TEntity>().FindAsync(id) ?? null!;
         }
 
         public async Task<IEnumerable<TEntity>> GetAllAsync()

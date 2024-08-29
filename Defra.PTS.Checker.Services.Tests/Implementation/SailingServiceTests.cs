@@ -15,9 +15,9 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
     [TestFixture]
     public class SailingServiceTests
     {
-        private Mock<IRepository<Route>> _sailingRepositoryMock;
-        private Mock<ILogger<SailingService>> _loggerMock;
-        private SailingService _sailingService;
+        private Mock<IRepository<Route>>? _sailingRepositoryMock;
+        private Mock<ILogger<SailingService>>? _loggerMock;
+        private SailingService? _sailingService;
 
         [SetUp]
         public void SetUp()
@@ -37,10 +37,10 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
                 new Route { Id = 2, RouteName = "Route B" }
             };
 
-            _sailingRepositoryMock.Setup(repo => repo.GetAllAsync()).ReturnsAsync(routes);
+            _sailingRepositoryMock!.Setup(repo => repo.GetAllAsync()).ReturnsAsync(routes);
 
             // Act
-            var result = await _sailingService.GetAllSailingRoutes();
+            var result = await _sailingService!.GetAllSailingRoutes();
 
             // Assert
             Assert.That(result, Is.Not.Null);
@@ -56,10 +56,10 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
         {
             // Arrange
             var routes = new List<Route>();
-            _sailingRepositoryMock.Setup(repo => repo.GetAllAsync()).ReturnsAsync(routes);
+            _sailingRepositoryMock!.Setup(repo => repo.GetAllAsync()).ReturnsAsync(routes);
 
             // Act
-            var result = await _sailingService.GetAllSailingRoutes();
+            var result = await _sailingService!.GetAllSailingRoutes();
 
             // Assert
             Assert.That(result, Is.Not.Null);

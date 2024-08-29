@@ -122,11 +122,11 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
         {
             // Arrange
             string ptdNumber = "PTD123";
-            _travelDocumentServiceMock.Setup(repo => repo.GetTravelDocumentByPTDNumber(ptdNumber))
-                           .ReturnsAsync((TravelDocument)null);
+            _travelDocumentServiceMock!.Setup(repo => repo.GetTravelDocumentByPTDNumber(ptdNumber))!
+                           .ReturnsAsync((TravelDocument)null!);
 
             // Act
-            var result = await _applicationService.GetApplicationByPTDNumber(ptdNumber);
+            var result = await _applicationService!.GetApplicationByPTDNumber(ptdNumber);
 
             // Assert
             Assert.That(result, Is.Null);
@@ -141,9 +141,9 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             {
                 Id = Guid.NewGuid(),
                 DocumentReferenceNumber = "REF123",
-                DateOfIssue = new DateTime(2023, 1, 1),
-                ValidityStartDate = new DateTime(2023, 1, 1),
-                ValidityEndDate = new DateTime(2024, 1, 1),
+                DateOfIssue = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Unspecified),
+                ValidityStartDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Unspecified),
+                ValidityEndDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Unspecified),
                 StatusId = 1,
                 Pet = new Pet
                 {
@@ -152,29 +152,29 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
                     SpeciesId = (int)PetSpecies.Dog,
                     Breed = new Breed { Name = "Labrador" },
                     SexId = (int)PetGender.Male,
-                    DOB = new DateTime(2020, 1, 1),
+                    DOB = new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Unspecified),
                     Colour = new Colour { Name = "Black" },
                     UniqueFeatureDescription = "Scar on ear",
                     MicrochipNumber = "1234567890",
-                    MicrochippedDate = new DateTime(2020, 1, 10)
+                    MicrochippedDate = new DateTime(2020, 1, 10, 0, 0, 0, DateTimeKind.Unspecified)
                 },
                 Application = new Application
                 {
                     Id = Guid.NewGuid(),
                     ReferenceNumber = "APP123",
-                    DateOfApplication = new DateTime(2022, 1, 1),
+                    DateOfApplication = new DateTime(2022, 1, 1, 0, 0, 0, DateTimeKind.Unspecified),
                     Status = "Approved",
-                    DateAuthorised = new DateTime(2022, 2, 1),
+                    DateAuthorised = new DateTime(2022, 2, 1, 0, 0, 0, DateTimeKind.Unspecified),
                     DateRejected = null,
                     DateRevoked = null
                 }
             };
 
-            _travelDocumentServiceMock.Setup(repo => repo.GetTravelDocumentByPTDNumber(ptdNumber))
+            _travelDocumentServiceMock!.Setup(repo => repo.GetTravelDocumentByPTDNumber(ptdNumber))
                            .ReturnsAsync(travelDocument);
 
             // Act
-            var result = await _applicationService.GetApplicationByPTDNumber(ptdNumber);
+            var result = await _applicationService!.GetApplicationByPTDNumber(ptdNumber);
 
             // Assert
             Assert.That(result, Is.Not.Null);
@@ -184,9 +184,8 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             using JsonDocument doc = JsonDocument.Parse(parsedJson);
             JsonElement root = doc.RootElement;
 
-            string str = string.Empty;
             // Extract and assert TravelDocument details
-            Assert.That(travelDocument.Id, Is.EqualTo(Guid.Parse(root.GetProperty("TravelDocument").GetProperty("TravelDocumentId").GetString())));
+            Assert.That(travelDocument.Id, Is.EqualTo(Guid.Parse(root.GetProperty("TravelDocument").GetProperty("TravelDocumentId").GetString()!)));
             Assert.That(travelDocument.DocumentReferenceNumber, Is.EqualTo(root.GetProperty("TravelDocument").GetProperty("TravelDocumentReferenceNumber").GetString()));
             Assert.That(travelDocument.DateOfIssue, Is.EqualTo(root.GetProperty("TravelDocument").GetProperty("TravelDocumentDateOfIssue").GetDateTime()));
             Assert.That(travelDocument.ValidityStartDate, Is.EqualTo(root.GetProperty("TravelDocument").GetProperty("TravelDocumentValidityStartDate").GetDateTime()));
@@ -194,7 +193,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             Assert.That(travelDocument.StatusId, Is.EqualTo(root.GetProperty("TravelDocument").GetProperty("TravelDocumentStatusId").GetInt32()));
 
             //// Extract and assert Pet details
-            Assert.That(travelDocument.Pet.Id, Is.EqualTo(Guid.Parse(root.GetProperty("Pet").GetProperty("PetId").GetString())));
+            Assert.That(travelDocument.Pet.Id, Is.EqualTo(Guid.Parse(root.GetProperty("Pet").GetProperty("PetId").GetString()!)));
             Assert.That(travelDocument.Pet.Name, Is.EqualTo(root.GetProperty("Pet").GetProperty("PetName").GetString()));
             Assert.That(Enum.GetName(typeof(PetSpecies), travelDocument.Pet.SpeciesId), Is.EqualTo(root.GetProperty("Pet").GetProperty("Species").GetString()));
             Assert.That(travelDocument.Pet.Breed.Name, Is.EqualTo(root.GetProperty("Pet").GetProperty("BreedName").GetString()));
@@ -206,7 +205,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             Assert.That(travelDocument.Pet.MicrochippedDate, Is.EqualTo(root.GetProperty("Pet").GetProperty("MicrochippedDate").GetDateTime()));
 
             //// Extract and assert Application details
-            Assert.That(travelDocument.Application.Id, Is.EqualTo(Guid.Parse(root.GetProperty("Application").GetProperty("ApplicationId").GetString())));
+            Assert.That(travelDocument.Application.Id, Is.EqualTo(Guid.Parse(root.GetProperty("Application").GetProperty("ApplicationId").GetString()!)));
             Assert.That(travelDocument.Application.ReferenceNumber, Is.EqualTo(root.GetProperty("Application").GetProperty("ReferenceNumber").GetString()));
             Assert.That(travelDocument.Application.DateOfApplication, Is.EqualTo(root.GetProperty("Application").GetProperty("DateOfApplication").GetDateTime()));
             Assert.That(travelDocument.Application.Status, Is.EqualTo(root.GetProperty("Application").GetProperty("Status").GetString()));
@@ -214,6 +213,64 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             Assert.That(travelDocument.Application.DateRejected, Is.EqualTo(root.GetProperty("Application").GetProperty("DateRejected").GetString()));
             Assert.That(travelDocument.Application.DateRevoked, Is.EqualTo(root.GetProperty("Application").GetProperty("DateRevoked").GetString()));
         }
+
+        [Test]
+        public async Task GetApplicationByReferenceNumber_ReturnsNull_WhenTravelDocumentNotFound()
+        {
+            // Arrange
+            string referenceNumber = "GB2618181";
+            _applicationRepositoryMock!.Setup(repo => repo.GetApplicationByReferenceNumber(referenceNumber))
+                           .Returns(Task.FromResult((Application)null!)!);
+
+            // Act
+            var result = await _applicationService!.GetApplicationByReferenceNumber(referenceNumber);
+
+            // Assert
+            Assert.That(result, Is.Null);
+        }
+
+        [Test]
+        public async Task GetApplicationByReferenceNumber_ReturnsCorrectData_WhenTravelDocumentFound()
+        {
+            // Arrange
+            string reference = "PTD123";
+
+            var application = new Application
+            {
+                Id = Guid.NewGuid(),
+                ReferenceNumber = "APP123",
+                DateOfApplication = new DateTime(2022, 1, 1, 0, 0, 0, DateTimeKind.Unspecified),
+                Status = "Approved",
+                DateAuthorised = new DateTime(2022, 2, 1, 0, 0, 0, DateTimeKind.Unspecified),
+                DateRejected = null,
+                DateRevoked = null
+            };
+
+            _applicationRepositoryMock!.Setup(repo => repo.GetApplicationByReferenceNumber(reference))
+                 .Returns(Task.FromResult(application)!);
+                      
+            // Act
+            var result = await _applicationService!.GetApplicationByReferenceNumber(reference);
+
+            // Assert
+            Assert.That(result, Is.Not.Null);
+            var parsedJson = System.Text.Json.JsonSerializer.Serialize(result);
+
+            // Parse JSON string
+            using JsonDocument doc = JsonDocument.Parse(parsedJson);
+            JsonElement root = doc.RootElement;
+            
+            //// Extract and assert Application details
+            Assert.That(application.Id, Is.EqualTo(Guid.Parse(root.GetProperty("Application").GetProperty("ApplicationId").GetString()!)));
+            Assert.That(application.ReferenceNumber, Is.EqualTo(root.GetProperty("Application").GetProperty("ReferenceNumber").GetString()));
+            Assert.That(application.DateOfApplication, Is.EqualTo(root.GetProperty("Application").GetProperty("DateOfApplication").GetDateTime()));
+            Assert.That(application.Status, Is.EqualTo(root.GetProperty("Application").GetProperty("Status").GetString()));
+            Assert.That(application.DateAuthorised, Is.EqualTo(root.GetProperty("Application").GetProperty("DateAuthorised").GetDateTime()));
+            Assert.That(application.DateRejected, Is.EqualTo(root.GetProperty("Application").GetProperty("DateRejected").GetString()));
+            Assert.That(application.DateRevoked, Is.EqualTo(root.GetProperty("Application").GetProperty("DateRevoked").GetString()));
+        }
+
+
 
     }
 }

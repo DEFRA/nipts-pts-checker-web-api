@@ -13,24 +13,24 @@ namespace Defra.PTS.Checker.Repositories
 
         }
 
-        public DbSet<entity.User> User { get; set; }
-        public DbSet<entity.Owner> Owner { get; set; }
-        public DbSet<entity.Address> Address { get; set; }
-        public DbSet<entity.Application> Application { get; set; }
-        public DbSet<entity.Pet> Pet { get; set; }
-        public DbSet<entity.Breed> Breed { get; set; }
-        public DbSet<entity.Colour> Colour { get; set; }
-        public DbSet<entity.TravelDocument> TravelDocument { get; set; }
-        public DbSet<entity.Operator> Operator { get; set; }
-        public DbSet<entity.Port> Port { get; set; }
-        public DbSet<entity.Route> Route { get; set; }
-        public DbSet<entity.Role> Role { get; set; }
-        public DbSet<entity.Checker> Checker { get; set; }
-        public DbSet<entity.Outcome> Outcome { get; set; }
-        public DbSet<entity.PasengerType> PasengerType { get; set; }
-        public DbSet<entity.CheckOutcome> CheckOutcome { get; set; }
-        public DbSet<entity.CheckSummary> CheckSummary { get; set; }
-        public DbSet<entity.VwApplication> VwApplications { get; set; }
+        public DbSet<entity.User> User { get; set; } = null!;
+        public DbSet<entity.Owner> Owner { get; set; } = null!;
+        public DbSet<entity.Address> Address { get; set; } = null!;
+        public DbSet<entity.Application> Application { get; set; } = null!;
+        public DbSet<entity.Pet> Pet { get; set; } = null!;
+        public DbSet<entity.Breed> Breed { get; set; } = null!;
+        public DbSet<entity.Colour> Colour { get; set; } = null!;
+        public DbSet<entity.TravelDocument> TravelDocument { get; set; } = null!;
+        public DbSet<entity.Operator> Operator { get; set; } = null!;
+        public DbSet<entity.Port> Port { get; set; } = null!;
+        public DbSet<entity.Route> Route { get; set; } = null!;
+        public DbSet<entity.Role> Role { get; set; } = null!;
+        public DbSet<entity.Checker> Checker { get; set; } = null!;
+        public DbSet<entity.Outcome> Outcome { get; set; } = null!;
+        public DbSet<entity.PasengerType> PasengerType { get; set; } = null!;
+        public DbSet<entity.CheckOutcome> CheckOutcome { get; set; } = null!;
+        public DbSet<entity.CheckSummary> CheckSummary { get; set; } = null!;
+        public DbSet<entity.VwApplication> VwApplications { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -16,8 +16,8 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
     [TestFixture]
     public class SailingControllerTests
     {
-        private Mock<ISailingService> _sailingServiceMock;
-        private SailingController _controller;
+        private Mock<ISailingService>? _sailingServiceMock;
+        private SailingController? _controller;
 
         [SetUp]
         public void SetUp()
@@ -36,16 +36,16 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
                 new RouteResponse { Id = 2, RouteName = "Route B" }
             };
 
-            _sailingServiceMock.Setup(s => s.GetAllSailingRoutes()).ReturnsAsync(routes);
+            _sailingServiceMock!.Setup(s => s.GetAllSailingRoutes()).ReturnsAsync(routes);
 
             // Act
-            var result = await _controller.GetAllSailingRoutes();
+            var result = await _controller!.GetAllSailingRoutes();
 
             // Assert
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
             var okResult = result as OkObjectResult;
             Assert.That(okResult, Is.Not.Null);
-            Assert.That(okResult.StatusCode, Is.EqualTo(200));
+            Assert.That(okResult!.StatusCode, Is.EqualTo(200));
             Assert.That(okResult.Value, Is.EqualTo(routes));
         }
 
@@ -53,16 +53,16 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
         public async Task GetAllSailingRoutes_ReturnsNotFound_WhenNoRoutes()
         {
             // Arrange
-            _sailingServiceMock.Setup(s => s.GetAllSailingRoutes()).ReturnsAsync((IEnumerable<RouteResponse>)null);
+            _sailingServiceMock!.Setup(s => s.GetAllSailingRoutes()).ReturnsAsync((IEnumerable<RouteResponse>)null!);
 
             // Act
-            var result = await _controller.GetAllSailingRoutes();
+            var result = await _controller!.GetAllSailingRoutes();
 
             // Assert
             Assert.That(result, Is.InstanceOf<NotFoundResult>());
             var notFoundResult = result as NotFoundResult;
             Assert.That(notFoundResult, Is.Not.Null);
-            Assert.That(notFoundResult.StatusCode, Is.EqualTo(404));
+            Assert.That(notFoundResult!.StatusCode, Is.EqualTo(404));
         }
     }
 }
