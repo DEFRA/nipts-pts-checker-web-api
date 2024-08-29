@@ -1,9 +1,10 @@
 ﻿using System;
 using System.ComponentModel;
-
+using System.Diagnostics.CodeAnalysis;
 
 namespace Defra.PTS.Checker.Models.Helper
 {
+    [ExcludeFromCodeCoverage]
     public static class EnumExtensions
     {
         public static string GetDescription(this Enum enumValue)
