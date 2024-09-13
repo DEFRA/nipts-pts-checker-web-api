@@ -103,6 +103,26 @@ public class CheckerService : ICheckerService
                         }
                         : null;
 
+                    var petOwnerAddress = mostRelevantApplication?.OwnerAddress != null
+                        ? new
+                        {
+                            AddressLineOne = mostRelevantApplication.OwnerAddress.AddressLineOne,
+                            AddressLineTwo = mostRelevantApplication.OwnerAddress.AddressLineTwo,
+                            TownOrCity = mostRelevantApplication.OwnerAddress.TownOrCity,
+                            County = mostRelevantApplication.OwnerAddress.County,
+                            PostCode = mostRelevantApplication.OwnerAddress.PostCode,
+                        }
+                        : null;
+
+                    var petOwner =
+                        new
+                        {
+                            Name = mostRelevantApplication?.OwnerNewName,
+                            Telephone = mostRelevantApplication?.OwnerNewTelephone,
+                            Email = mostRelevantApplication?.Owner != null ? mostRelevantApplication.Owner.Email : null,
+                            Address = petOwnerAddress,
+                        };
+
                     var petDetail = new
                     {
                         Pet = new
@@ -128,7 +148,8 @@ public class CheckerService : ICheckerService
                             mostRelevantApplication.DateRejected,
                             mostRelevantApplication.DateRevoked
                         },
-                        TravelDocument = travelDocumentDetail
+                        TravelDocument = travelDocumentDetail,
+                        PetOwner = petOwner
                     };
 
                     return petDetail;

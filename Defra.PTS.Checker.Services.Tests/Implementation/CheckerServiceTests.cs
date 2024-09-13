@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Defra.PTS.Checker.Services.Implementation;
+using System.Text.Json;
 
 namespace Defra.PTS.Checker.Tests.Services
 {
@@ -204,7 +205,18 @@ namespace Defra.PTS.Checker.Tests.Services
                 PetId = petId,
                 ReferenceNumber = "APP123",
                 DateAuthorised = DateTime.Now,
-                Status = "authorised"
+                Status = "authorised",
+                OwnerNewName = "NG authorised",
+                OwnerNewTelephone = "07 177",
+                Owner = new Owner() { Email = "ng.auth@mail.com" },
+                OwnerAddress = new Address()
+                {
+                    AddressLineOne = "Line 1 Auth",
+                    AddressLineTwo = "Line 2 Auth",
+                    TownOrCity = "London",
+                    County = "",
+                    PostCode = "EC1N 2PB"
+                }                 
             };
 
             var applicationRevoked = new Application
@@ -213,7 +225,18 @@ namespace Defra.PTS.Checker.Tests.Services
                 PetId = petId,
                 ReferenceNumber = "APP124",
                 DateRevoked = DateTime.Now.AddDays(-1),
-                Status = "revoked"
+                Status = "Revoked",
+                OwnerNewName = "NG Revoked",
+                OwnerNewTelephone = "07 177",
+                Owner = new Owner() { Email = "ng.auth@mail.com" },
+                OwnerAddress = new Address()
+                {
+                    AddressLineOne = "Line 1 Revoked",
+                    AddressLineTwo = "Line 2 Revoked",
+                    TownOrCity = "London",
+                    County = "",
+                    PostCode = "EC1N 2PB"
+                }
             };
 
             var applicationAwaitingVerification = new Application
@@ -222,7 +245,18 @@ namespace Defra.PTS.Checker.Tests.Services
                 PetId = petId,
                 ReferenceNumber = "APP125",
                 CreatedOn = DateTime.Now.AddDays(-2),
-                Status = "awaiting verification"
+                Status = "awaiting verification",
+                OwnerNewName = "NG awaiting verification",
+                OwnerNewTelephone = "07 177",
+                Owner = new Owner() { Email = "ng.auth@mail.com" },
+                OwnerAddress = new Address()
+                {
+                    AddressLineOne = "Line 1 Awaiting Verification",
+                    AddressLineTwo = "Line 2 Awaiting Verification",
+                    TownOrCity = "London",
+                    County = "",
+                    PostCode = "EC1N 2PB"
+                }
             };
 
             _petRepositoryMock!.Setup(repo => repo.GetByMicrochipNumberAsync(microchipNumber))
@@ -245,7 +279,23 @@ namespace Defra.PTS.Checker.Tests.Services
             Assert.That(result, Is.Not.Null);
 
             // Extract
+            var parsedJson = System.Text.Json.JsonSerializer.Serialize(result);
 
+            // Parse JSON string
+            using JsonDocument doc = JsonDocument.Parse(parsedJson);
+            JsonElement root = doc.RootElement;
+
+            //// Extract and assert Application details
+            Assert.That(applicationAuthorised.Status, Is.EqualTo(root.GetProperty("Application").GetProperty("Status").GetString()!));
+            Assert.That(applicationAuthorised.ReferenceNumber, Is.EqualTo(root.GetProperty("Application").GetProperty("ReferenceNumber").GetString()!));
+            Assert.That(applicationAuthorised.OwnerNewName, Is.EqualTo(root.GetProperty("PetOwner").GetProperty("Name").GetString()!));
+            Assert.That(applicationAuthorised.OwnerNewTelephone, Is.EqualTo(root.GetProperty("PetOwner").GetProperty("Telephone").GetString()!));
+            Assert.That(applicationAuthorised.Owner.Email, Is.EqualTo(root.GetProperty("PetOwner").GetProperty("Email").GetString()!));
+            Assert.That(applicationAuthorised.OwnerAddress.AddressLineOne, Is.EqualTo(root.GetProperty("PetOwner").GetProperty("Address").GetProperty("AddressLineOne").GetString()!));
+            Assert.That(applicationAuthorised.OwnerAddress.AddressLineTwo, Is.EqualTo(root.GetProperty("PetOwner").GetProperty("Address").GetProperty("AddressLineTwo").GetString()!));
+            Assert.That(applicationAuthorised.OwnerAddress.TownOrCity, Is.EqualTo(root.GetProperty("PetOwner").GetProperty("Address").GetProperty("TownOrCity").GetString()!));
+            Assert.That(applicationAuthorised.OwnerAddress.County, Is.EqualTo(root.GetProperty("PetOwner").GetProperty("Address").GetProperty("County").GetString()!));
+            Assert.That(applicationAuthorised.OwnerAddress.PostCode, Is.EqualTo(root.GetProperty("PetOwner").GetProperty("Address").GetProperty("PostCode").GetString()!));
         }
 
         [Test]
