@@ -166,7 +166,18 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
                     Status = "Approved",
                     DateAuthorised = new DateTime(2022, 2, 1, 0, 0, 0, DateTimeKind.Unspecified),
                     DateRejected = null,
-                    DateRevoked = null
+                    DateRevoked = null,
+                    OwnerNewName = "NG authorised",
+                    OwnerNewTelephone = "07 177",
+                    Owner = new Owner() { Email = "ng.auth@mail.com" },
+                    OwnerAddress = new Address()
+                    {
+                        AddressLineOne = "Line 1 Auth",
+                        AddressLineTwo = "Line 2 Auth",
+                        TownOrCity = "London",
+                        County = "",
+                        PostCode = "EC1N 2PB"
+                    }
                 }
             };
 
@@ -212,6 +223,15 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             Assert.That(travelDocument.Application.DateAuthorised, Is.EqualTo(root.GetProperty("Application").GetProperty("DateAuthorised").GetDateTime()));
             Assert.That(travelDocument.Application.DateRejected, Is.EqualTo(root.GetProperty("Application").GetProperty("DateRejected").GetString()));
             Assert.That(travelDocument.Application.DateRevoked, Is.EqualTo(root.GetProperty("Application").GetProperty("DateRevoked").GetString()));
+
+            Assert.That(travelDocument.Application.OwnerNewName, Is.EqualTo(root.GetProperty("PetOwner").GetProperty("Name").GetString()!));
+            Assert.That(travelDocument.Application.OwnerNewTelephone, Is.EqualTo(root.GetProperty("PetOwner").GetProperty("Telephone").GetString()!));
+            Assert.That(travelDocument.Application.Owner.Email, Is.EqualTo(root.GetProperty("PetOwner").GetProperty("Email").GetString()!));
+            Assert.That(travelDocument.Application.OwnerAddress.AddressLineOne, Is.EqualTo(root.GetProperty("PetOwner").GetProperty("Address").GetProperty("AddressLineOne").GetString()!));
+            Assert.That(travelDocument.Application.OwnerAddress.AddressLineTwo, Is.EqualTo(root.GetProperty("PetOwner").GetProperty("Address").GetProperty("AddressLineTwo").GetString()!));
+            Assert.That(travelDocument.Application.OwnerAddress.TownOrCity, Is.EqualTo(root.GetProperty("PetOwner").GetProperty("Address").GetProperty("TownOrCity").GetString()!));
+            Assert.That(travelDocument.Application.OwnerAddress.County, Is.EqualTo(root.GetProperty("PetOwner").GetProperty("Address").GetProperty("County").GetString()!));
+            Assert.That(travelDocument.Application.OwnerAddress.PostCode, Is.EqualTo(root.GetProperty("PetOwner").GetProperty("Address").GetProperty("PostCode").GetString()!));
         }
 
         [Test]
@@ -243,7 +263,18 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
                 Status = "Approved",
                 DateAuthorised = new DateTime(2022, 2, 1, 0, 0, 0, DateTimeKind.Unspecified),
                 DateRejected = null,
-                DateRevoked = null
+                DateRevoked = null,
+                OwnerNewName = "NG authorised",
+                OwnerNewTelephone = "07 177",
+                Owner = new Owner() { Email = "ng.auth@mail.com" },
+                OwnerAddress = new Address()
+                {
+                    AddressLineOne = "Line 1 Auth",
+                    AddressLineTwo = "Line 2 Auth",
+                    TownOrCity = "London",
+                    County = "",
+                    PostCode = "EC1N 2PB"
+                }
             };
 
             _applicationRepositoryMock!.Setup(repo => repo.GetApplicationByReferenceNumber(reference))
@@ -268,6 +299,14 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             Assert.That(application.DateAuthorised, Is.EqualTo(root.GetProperty("Application").GetProperty("DateAuthorised").GetDateTime()));
             Assert.That(application.DateRejected, Is.EqualTo(root.GetProperty("Application").GetProperty("DateRejected").GetString()));
             Assert.That(application.DateRevoked, Is.EqualTo(root.GetProperty("Application").GetProperty("DateRevoked").GetString()));
+            Assert.That(application.OwnerNewName, Is.EqualTo(root.GetProperty("PetOwner").GetProperty("Name").GetString()!));
+            Assert.That(application.OwnerNewTelephone, Is.EqualTo(root.GetProperty("PetOwner").GetProperty("Telephone").GetString()!));
+            Assert.That(application.Owner.Email, Is.EqualTo(root.GetProperty("PetOwner").GetProperty("Email").GetString()!));
+            Assert.That(application.OwnerAddress.AddressLineOne, Is.EqualTo(root.GetProperty("PetOwner").GetProperty("Address").GetProperty("AddressLineOne").GetString()!));
+            Assert.That(application.OwnerAddress.AddressLineTwo, Is.EqualTo(root.GetProperty("PetOwner").GetProperty("Address").GetProperty("AddressLineTwo").GetString()!));
+            Assert.That(application.OwnerAddress.TownOrCity, Is.EqualTo(root.GetProperty("PetOwner").GetProperty("Address").GetProperty("TownOrCity").GetString()!));
+            Assert.That(application.OwnerAddress.County, Is.EqualTo(root.GetProperty("PetOwner").GetProperty("Address").GetProperty("County").GetString()!));
+            Assert.That(application.OwnerAddress.PostCode, Is.EqualTo(root.GetProperty("PetOwner").GetProperty("Address").GetProperty("PostCode").GetString()!));
         }
 
 
