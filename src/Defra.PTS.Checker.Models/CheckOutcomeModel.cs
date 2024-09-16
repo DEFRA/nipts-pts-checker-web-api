@@ -21,8 +21,7 @@ public class CheckOutcomeModel : IValidatableObject
     [SwaggerSchema("The checker id")]
     public Guid? CheckerId { get; set; }
 
-    [SwaggerSchema("The route id")]
-    [Required(ErrorMessage = "Route id is required")]
+    [SwaggerSchema("The route id")]    
     public int? RouteId { get; set; }
 
     [SwaggerSchema("The sailing time")]
@@ -37,7 +36,7 @@ public class CheckOutcomeModel : IValidatableObject
             yield return new ValidationResult($"Outcome must be 'Pass' or 'Fail'", new[] { nameof(CheckOutcome) });
         }
 
-        if (RouteId.GetValueOrDefault() == 0)
+        if (RouteId != null && RouteId.GetValueOrDefault() == 0)
         {
             yield return new ValidationResult($"RouteId is required", new[] { nameof(RouteId) });
         }
