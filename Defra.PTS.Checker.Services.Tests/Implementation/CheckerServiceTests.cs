@@ -354,5 +354,122 @@ namespace Defra.PTS.Checker.Tests.Services
             Assert.That(result, Is.Not.Null);
             Assert.That(result, Is.EqualTo(checkerDto.Id));
         }
+                
+
+        [Test]
+        public async Task CheckerMicrochipNumberExistWithPtd_PetNotFound_ReturnsFalse()
+        {
+            // Arrange
+            string microchipNumber = "1234567890";
+            _petRepositoryMock!.Setup(repo => repo.GetByMicrochipNumberAsync(microchipNumber))
+                .ReturnsAsync(new List<Pet>());
+
+            // Act
+            var result = await _checkerService!.CheckerMicrochipNumberExistWithPtd(microchipNumber);
+
+            // Assert
+            Assert.That(result, Is.False);
+        }
+
+        [Test]
+        public async Task CheckerMicrochipNumberExistWithPtd_PetFound_NoApplications_ReturnsFalse()
+        {
+            // Arrange
+            string microchipNumber = "1234567890";
+            var pets = new List<Pet>
+            {
+                new Pet { Id = Guid.NewGuid(), Name = "Fido", MicrochipNumber = microchipNumber }
+            };
+            _petRepositoryMock!.Setup(repo => repo.GetByMicrochipNumberAsync(microchipNumber))
+                .ReturnsAsync(pets);
+
+            _applicationRepositoryMock!.Setup(repo => repo.GetApplicationsByPetIdAsync(It.IsAny<Guid>()))
+                .ReturnsAsync(new List<Application>());
+
+            // Act
+            var result = await _checkerService!.CheckerMicrochipNumberExistWithPtd(microchipNumber);
+
+            // Assert
+            Assert.That(result, Is.False);
+        }
+
+        [Test]
+        public async Task CheckerMicrochipNumberExistWithPtd_PetFound_Applications_NoTravelDocuments_ReturnsFalse()
+        {
+            // Arrange
+            string microchipNumber = "1234567890";
+            var petId = Guid.NewGuid();
+            var pets = new List<Pet>
+            {
+                new Pet { Id = petId, Name = "Fido", MicrochipNumber = microchipNumber }
+            };
+            var applications = new List<Application>
+            {
+                new Application { Id = Guid.NewGuid(), PetId = petId }
+            };
+
+            _petRepositoryMock!.Setup(repo => repo.GetByMicrochipNumberAsync(microchipNumber))
+                .ReturnsAsync(pets);
+
+            _applicationRepositoryMock!.Setup(repo => repo.GetApplicationsByPetIdAsync(petId))
+                .ReturnsAsync(applications);
+
+            _travelDocumentRepositoryMock!.Setup(repo => repo.GetTravelDocumentByApplicationIdAsync(It.IsAny<Guid>()))
+                .ReturnsAsync((TravelDocument?)null);
+
+            // Act
+            var result = await _checkerService!.CheckerMicrochipNumberExistWithPtd(microchipNumber);
+
+            // Assert
+            Assert.That(result, Is.False);
+        }
+
+        [Test]
+        public async Task CheckerMicrochipNumberExistWithPtd_PetFound_ApplicationWithTravelDocument_ReturnsTrue()
+        {
+            // Arrange
+            string microchipNumber = "1234567890";
+            var petId = Guid.NewGuid();
+            var applicationId = Guid.NewGuid();
+            var pets = new List<Pet>
+            {
+                new Pet { Id = petId, Name = "Fido", MicrochipNumber = microchipNumber }
+            };
+            var applications = new List<Application>
+            {
+                new Application { Id = applicationId, PetId = petId }
+            };
+            var travelDocument = new TravelDocument { Id = Guid.NewGuid(), ApplicationId = applicationId };
+
+            _petRepositoryMock!.Setup(repo => repo.GetByMicrochipNumberAsync(microchipNumber))
+                .ReturnsAsync(pets);
+
+            _applicationRepositoryMock!.Setup(repo => repo.GetApplicationsByPetIdAsync(petId))
+                .ReturnsAsync(applications);
+
+            _travelDocumentRepositoryMock!.Setup(repo => repo.GetTravelDocumentByApplicationIdAsync(applicationId))
+                .ReturnsAsync(travelDocument);
+
+            // Act
+            var result = await _checkerService!.CheckerMicrochipNumberExistWithPtd(microchipNumber);
+
+            // Assert
+            Assert.That(result, Is.True);
+        }
+
+        [Test]
+        public async Task CheckerMicrochipNumberExistWithPtd_ExceptionOccurs_ReturnsFalse()
+        {
+            // Arrange
+            string microchipNumber = "1234567890";
+            _petRepositoryMock!.Setup(repo => repo.GetByMicrochipNumberAsync(microchipNumber))
+                .ThrowsAsync(new Exception("Database connection error"));
+
+            // Act
+            var result = await _checkerService!.CheckerMicrochipNumberExistWithPtd(microchipNumber);
+
+            // Assert
+            Assert.That(result, Is.False);
+        }
     }
 }

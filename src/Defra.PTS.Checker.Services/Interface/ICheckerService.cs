@@ -7,5 +7,7 @@ namespace Defra.PTS.Checker.Services.Interface
         Task<Guid> SaveChecker(CheckerDto checkerDto);
 
         Task<object?> CheckMicrochipNumberAsync(string microchipNumber);
+
+        Task<bool> CheckerMicrochipNumberExistWithPtd(string microchipNumber);
     }
 }

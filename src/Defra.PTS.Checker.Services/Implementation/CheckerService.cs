@@ -188,4 +188,44 @@ public class CheckerService : ICheckerService
             })
             .FirstOrDefault();
     }
+
+    public async Task<bool> CheckerMicrochipNumberExistWithPtd(string microchipNumber)
+    {
+        try
+        {
+            var pets = await _petRepository.GetByMicrochipNumberAsync(microchipNumber);
+            if (!pets.Any())
+            {
+                _logger.LogInformation("No pets found with microchip number: {MicrochipNumber}", microchipNumber);
+                return false;
+            }
+
+            foreach (var pet in pets)
+            {
+                _logger.LogInformation("Processing pet with ID: {PetId}", pet.Id);
+
+                var applications = await _applicationRepository.GetApplicationsByPetIdAsync(pet.Id);
+
+                foreach (var application in applications)
+                {
+                    var travelDocument = await _travelDocumentRepository.GetTravelDocumentByApplicationIdAsync(application.Id);
+                    if (travelDocument != null)
+                    {
+                        // Found a travel document associated with the pet's application
+                        return true;
+                    }
+                }
+            }
+
+            // No travel documents found for any of the pet's applications
+            _logger.LogInformation("No travel documents found for pets with microchip number: {MicrochipNumber}", microchipNumber);
+            return false;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while checking microchip number: {MicrochipNumber}", microchipNumber);
+            return false;
+        }
+    }
+
 }

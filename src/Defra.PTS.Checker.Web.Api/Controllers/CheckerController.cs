@@ -176,4 +176,27 @@ public class CheckerController : ControllerBase
 
         return Ok(checkerId);
     }
+
+    [HttpPost]
+    [Route("checkMicrochipNumberExistWithPtd")]
+    [SwaggerResponse(StatusCodes.Status200OK, "OK: Returns the bool", typeof(bool))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request: Invalid request", typeof(IDictionary<string, string>))]
+    [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error: An error has occurred")]
+    [SwaggerOperation(
+      OperationId = "checkMicrochipNumberExistWithPtd",
+      Tags = new[] { "Checker" },
+      Summary = "Check Microchip Number Exist With Ptd ",
+      Description = "Check Microchip Number Exist With Ptd "
+  )]
+    public async Task<IActionResult> CheckerMicrochipNumberExistWithPtd([FromBody, SwaggerRequestBody("The checker microchip number payload", Required = true)] CheckerMicrochipDto model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var exist = await _checkerService.CheckerMicrochipNumberExistWithPtd(model.MicrochipNumber!);
+
+        return Ok(exist);
+    }
 }

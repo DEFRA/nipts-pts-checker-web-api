@@ -411,5 +411,74 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
             // Assert
             Assert.ThrowsAsync<Exception>(async () => await _controller!.SaveCheckerUser(request));
         }
+
+        [Test]
+        public async Task CheckerMicrochipNumberExistWithPtd_ValidRequest_ServiceReturnsTrue_ReturnsOkWithTrue()
+        {
+            // Arrange
+            var model = new CheckerMicrochipDto { MicrochipNumber = "1234567890" };
+            _checkerServiceMock!.Setup(service => service.CheckerMicrochipNumberExistWithPtd(model.MicrochipNumber!))
+                .ReturnsAsync(true);
+
+            // Act
+            var result = await _controller!.CheckerMicrochipNumberExistWithPtd(model);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+            var okResult = result as OkObjectResult;
+            Assert.That(okResult, Is.Not.Null);
+            Assert.That(okResult!.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
+            Assert.That(okResult.Value, Is.EqualTo(true));
+        }
+
+        [Test]
+        public async Task CheckerMicrochipNumberExistWithPtd_ValidRequest_ServiceReturnsFalse_ReturnsOkWithFalse()
+        {
+            // Arrange
+            var model = new CheckerMicrochipDto { MicrochipNumber = "1234567890" };
+            _checkerServiceMock!.Setup(service => service.CheckerMicrochipNumberExistWithPtd(model.MicrochipNumber!))
+                .ReturnsAsync(false);
+
+            // Act
+            var result = await _controller!.CheckerMicrochipNumberExistWithPtd(model);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+            var okResult = result as OkObjectResult;
+            Assert.That(okResult, Is.Not.Null);
+            Assert.That(okResult!.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
+            Assert.That(okResult.Value, Is.EqualTo(false));
+        }
+
+        [Test]
+        public async Task CheckerMicrochipNumberExistWithPtd_InvalidRequest_ReturnsBadRequest()
+        {
+            // Arrange
+            var model = new CheckerMicrochipDto { MicrochipNumber = string.Empty };
+
+            // Simulate model state error
+            _controller!.ModelState.AddModelError("MicrochipNumber", "MicrochipNumber is required");
+
+            // Act
+            var result = await _controller!.CheckerMicrochipNumberExistWithPtd(model);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+            var badRequestResult = result as BadRequestObjectResult;
+            Assert.That(badRequestResult, Is.Not.Null);
+            Assert.That(badRequestResult!.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
+        }
+
+        [Test]
+        public void CheckerMicrochipNumberExistWithPtd_ServiceThrowsException_ThrowsException()
+        {
+            // Arrange
+            var model = new CheckerMicrochipDto { MicrochipNumber = "1234567890" };
+            _checkerServiceMock!.Setup(service => service.CheckerMicrochipNumberExistWithPtd(model.MicrochipNumber!))
+                .ThrowsAsync(new Exception("Test exception"));
+
+            // Act & Assert
+            Assert.ThrowsAsync<Exception>(async () => await _controller!.CheckerMicrochipNumberExistWithPtd(model));
+        }
     }
 }
