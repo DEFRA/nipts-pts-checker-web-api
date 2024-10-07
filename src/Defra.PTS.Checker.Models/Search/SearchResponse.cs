@@ -13,5 +13,6 @@ public class SearchResponse
     public Pet? Pet { get; set; }    
     public Application? Application { get; set; }
     public TravelDocument? TravelDocument { get; set; }
+    public Owner? PetOwner { get; set; }
 }
 

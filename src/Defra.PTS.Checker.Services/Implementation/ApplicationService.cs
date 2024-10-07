@@ -82,12 +82,34 @@ namespace Defra.PTS.Checker.Services.Implementation
                 }
                  : null;
 
+
+            var petOwnerAddress = travelDocument.Application?.OwnerAddress != null
+                ? new
+                {
+                    AddressLineOne = travelDocument.Application.OwnerAddress.AddressLineOne,
+                    AddressLineTwo = travelDocument.Application.OwnerAddress.AddressLineTwo,
+                    TownOrCity = travelDocument.Application.OwnerAddress.TownOrCity,
+                    County = travelDocument.Application.OwnerAddress.County,
+                    PostCode = travelDocument.Application.OwnerAddress.PostCode,
+                }
+                : null;
+
+            var petOwner =
+                new
+                {
+                    Name = travelDocument.Application?.OwnerNewName,
+                    Telephone = travelDocument.Application?.OwnerNewTelephone,
+                    Email = travelDocument.Application?.Owner != null ? travelDocument.Application.Owner.Email : null,
+                    Address = petOwnerAddress,
+                };
+
             var petDetail =
                 new
                 {
                     Pet = pet,
                     Application = application,
-                    TravelDocument = travelDocumentDetail
+                    TravelDocument = travelDocumentDetail,
+                    PetOwner = petOwner
                 };
 
             return petDetail;
@@ -145,12 +167,33 @@ namespace Defra.PTS.Checker.Services.Implementation
                     application.DateRevoked
                 };
 
+            var petOwnerAddress = application.OwnerAddress != null
+                ? new
+                {
+                    AddressLineOne = application.OwnerAddress.AddressLineOne,
+                    AddressLineTwo = application.OwnerAddress.AddressLineTwo,
+                    TownOrCity = application.OwnerAddress.TownOrCity,
+                    County = application.OwnerAddress.County,
+                    PostCode = application.OwnerAddress.PostCode,                    
+                }
+                : null;
+
+            var petOwner = 
+                new
+                {
+                    Name = application.OwnerNewName,
+                    Telephone = application.OwnerNewTelephone,
+                    Email = application.Owner != null ? application.Owner.Email : null,
+                    Address = petOwnerAddress,
+                };
+
             var response =
                 new
                 {
                     Pet = pet,
                     Application = applicationDetail,
-                    TravelDocument = travelDocumentDetail
+                    TravelDocument = travelDocumentDetail,
+                    PetOwner = petOwner
                 };
 
             return response;

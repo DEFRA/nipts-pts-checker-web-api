@@ -44,7 +44,7 @@ namespace Defra.PTS.Checker.Repositories.Implementation
             ArgumentNullException.ThrowIfNull(ptdNumber);
 
             return await _context!.TravelDocument
-                        .Include(t => t.Application)
+                        .Include(t => t.Application!.OwnerAddress)
                         .Include(t => t.Owner)
                         .Include(t => t.Pet)
                         .Include(t => t.Pet!.Breed)
