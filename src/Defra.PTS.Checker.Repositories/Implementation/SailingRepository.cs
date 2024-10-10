@@ -7,15 +7,7 @@ namespace Defra.PTS.Checker.Repositories.Implementation
 {
     [ExcludeFromCodeCoverage]
     public class SailingRepository : Repository<entity.Route>, ISailingRepository
-    {   
-        private CommonDbContext? SailingContext
-        {
-            get
-            {
-                return _dbContext as CommonDbContext;
-            }
-        }
-
+    {
         public SailingRepository(DbContext dbContext) : base(dbContext)
         {
 

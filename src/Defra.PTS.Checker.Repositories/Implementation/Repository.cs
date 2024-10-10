@@ -45,7 +45,16 @@ namespace Defra.PTS.Checker.Repositories.Implementation
 
         public IEnumerable<TEntity> GetAll()
         {
-            return _dbContext.Set<TEntity>().ToList();
+            try
+            {
+                return _dbContext.Set<TEntity>().ToList();
+            }
+
+            catch(Exception e)
+            {
+                Console.WriteLine();
+                throw;
+            }
         }
 
         public void Remove(TEntity entity)
