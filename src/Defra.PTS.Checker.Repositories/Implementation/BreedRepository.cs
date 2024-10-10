@@ -8,14 +8,6 @@ namespace Defra.PTS.Checker.Repositories.Implementation
     [ExcludeFromCodeCoverage]
     public class BreedRepository : Repository<entity.Breed>, IBreedRepository
     {
-        private CommonDbContext? BreedContext
-        {
-            get
-            {
-                return _dbContext as CommonDbContext;
-            }
-        }
-
         public BreedRepository(DbContext dbContext) : base(dbContext)
         {
 

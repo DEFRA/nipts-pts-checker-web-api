@@ -8,14 +8,6 @@ namespace Defra.PTS.Checker.Repositories.Implementation
     [ExcludeFromCodeCoverage]
     public class ColourRepository : Repository<entity.Colour>, IColourRepository
     {
-        private CommonDbContext? ColourContext
-        {
-            get
-            {
-                return _dbContext as CommonDbContext;
-            }
-        }
-
         public ColourRepository(DbContext dbContext) : base(dbContext)
         {
 
