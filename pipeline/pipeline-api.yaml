@@ -78,7 +78,7 @@ resources:
     - repository: PipelineCommon
       name: DEFRA-TRD/Defra.TRD.Pipeline.Common
       type: git
-      ref: kk/APIMTemplateIssue
+      ref: master
 
 
 variables:
