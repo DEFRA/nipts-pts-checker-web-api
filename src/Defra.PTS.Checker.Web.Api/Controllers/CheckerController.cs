@@ -201,9 +201,9 @@ public class CheckerController : ControllerBase
     }
 
     [HttpGet("getCheckOutcomes")]
-    [ProducesResponseType(typeof(IEnumerable<CheckOutcomeResponse>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(object), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(object), StatusCodes.Status500InternalServerError)]
+    [SwaggerResponse(StatusCodes.Status200OK, "OK: Returns the bool", typeof(bool))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request: Invalid request", typeof(IDictionary<string, string>))]
+    [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error: An error has occurred")]
     public async Task<IActionResult> GetCheckOutcomes()
     {
         try
