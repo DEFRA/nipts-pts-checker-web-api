@@ -199,4 +199,32 @@ public class CheckerController : ControllerBase
 
         return Ok(exist);
     }
+
+    [HttpGet("getCheckOutcomes")]
+    [ProducesResponseType(typeof(IEnumerable<CheckOutcomeResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(object), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(object), StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetCheckOutcomes()
+    {
+        try
+        {
+            var startDate = DateTime.UtcNow.AddHours(-48);
+            var endDate = DateTime.UtcNow.AddHours(24);
+
+            var results = await _checkSummaryService.GetRecentCheckOutcomesAsync(startDate, endDate);
+
+            if (results == null || !results.Any())
+            {
+                return NotFound(new { error = "No check outcomes found within the specified time range." });
+            }
+
+            return Ok(results);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = "An error occurred while fetching check outcomes", details = ex.Message });
+        }
+    }
+
+
 }
