@@ -200,16 +200,30 @@ public class CheckerController : ControllerBase
         return Ok(exist);
     }
 
-    [HttpGet("getCheckOutcomes")]
+    [HttpPost("getCheckOutcomes")]
     [SwaggerResponse(StatusCodes.Status200OK, "OK: Returns the bool", typeof(bool))]
     [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request: Invalid request", typeof(IDictionary<string, string>))]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error: An error has occurred")]
-    public async Task<IActionResult> GetCheckOutcomes()
+    public async Task<IActionResult> GetCheckOutcomes([FromBody, SwaggerRequestBody("The checker dashboard start hour and end hour payload", Required = true)] CheckerOutcomeDashboardDto model)
     {
         try
         {
-            var startDate = DateTime.UtcNow.AddHours(-48);
-            var endDate = DateTime.UtcNow.AddHours(24);
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState
+                    .Where(x => x.Value.Errors.Count > 0)
+                    .Select(x => new { Field = x.Key, Error = x.Value.Errors.First().ErrorMessage })
+                    .ToList();
+
+                return BadRequest(new { message = "Validation failed", errors });
+            }
+
+            // Parse the validated strings into integers
+            int startHour = int.Parse(model.StartHour);
+            int endHour = int.Parse(model.EndHour);
+
+            var startDate = DateTime.UtcNow.AddHours(startHour);
+            var endDate = DateTime.UtcNow.AddHours(endHour);
 
             var results = await _checkSummaryService.GetRecentCheckOutcomesAsync(startDate, endDate);
 
@@ -225,6 +239,7 @@ public class CheckerController : ControllerBase
             return StatusCode(500, new { error = "An error occurred while fetching check outcomes", details = ex.Message });
         }
     }
+
 
 
 }
