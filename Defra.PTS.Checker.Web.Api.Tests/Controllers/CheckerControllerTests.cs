@@ -343,6 +343,91 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
         }
 
         [Test]
+        public async Task SaveNonCompliance_ReturnsOkResult()
+        {
+            // Arrange
+            var request = new NonComplianceModel
+            {
+                CheckerId = null,
+                CheckOutcome = "Pass",
+                ApplicationId = new Guid("FF0DF803-8033-4CF8-B877-AB69BEFE63D2"),
+                RouteId = 1,
+                SailingTime = DateTime.UtcNow,
+            };
+
+            var response = new NonComplianceResponseModel { CheckSummaryId = Guid.NewGuid() };
+
+            _applicationServiceMock!.Setup(service => service.GetApplicationById(It.IsAny<Guid>()))!.ReturnsAsync(new entities.Application());
+            _checkSummaryServiceMock!.Setup(service => service.SaveCheckSummary(It.IsAny<CheckOutcomeModel>())).ReturnsAsync(response);
+
+            // Act
+            var result = await _controller!.ReportNonCompliance(request);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+            var okResult = result as OkObjectResult;
+            Assert.That(okResult, Is.Not.Null);
+            Assert.That(okResult!.StatusCode, Is.EqualTo(200));
+        }
+
+        [Test]
+        public async Task SaveNonCompliance_ValidRequestButNoApplication_ReturnsNotFoundResult()
+        {
+            // Arrange
+            var request = new NonComplianceModel
+            {
+                CheckerId = null,
+                CheckOutcome = "Pass",
+                ApplicationId = new Guid("FF0DF803-8033-4CF8-B877-AB69BEFE63D2"),
+                RouteId = 1,
+                SailingTime = DateTime.UtcNow,
+            };
+
+            var response = new NonComplianceResponseModel { CheckSummaryId = Guid.NewGuid() };
+
+            _applicationServiceMock!.Setup(service => service.GetApplicationById(It.IsAny<Guid>()))!.ReturnsAsync(default(Defra.PTS.Checker.Entities.Application));
+            _checkSummaryServiceMock!.Setup(service => service.SaveCheckSummary(It.IsAny<CheckOutcomeModel>())).ReturnsAsync(response);
+
+            // Act
+            var result = await _controller!.ReportNonCompliance(request);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<NotFoundObjectResult>());
+
+            var objectResult = result as NotFoundObjectResult;
+            Assert.That(objectResult, Is.Not.Null);
+            Assert.That(objectResult!.StatusCode, Is.EqualTo(StatusCodes.Status404NotFound));
+        }
+
+        [Test]
+        public async Task SaveNonCompliance_InvalidRequest_ReturnsBadRequestResult()
+        {
+            // Arrange
+            var request = new NonComplianceModel
+            {
+                CheckerId = null,
+                CheckOutcome = string.Empty,
+                ApplicationId = new Guid("FF0DF803-8033-4CF8-B877-AB69BEFE63D2"),
+                RouteId = 1,
+                SailingTime = DateTime.UtcNow,
+            };
+
+            _applicationServiceMock!.Setup(service => service.GetApplicationById(It.IsAny<Guid>()))!.ReturnsAsync(new entities.Application());
+
+            // Act
+            _controller!.ModelState.AddModelError("CheckOutcome", "CheckOutcome is required");
+            var result = await _controller!.ReportNonCompliance(request);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+
+            var objectResult = result as BadRequestObjectResult;
+            Assert.That(objectResult, Is.Not.Null);
+            Assert.That(objectResult!.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
+        }
+
+
+        [Test]
         public async Task SaveCheckerUser_ReturnsOkResult()
         {
             // Arrange

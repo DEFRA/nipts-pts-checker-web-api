@@ -34,6 +34,16 @@ namespace Defra.PTS.Checker.Entities
 
         public Guid? CheckOutcomeId { get; set; }
 
+        public string? FlightNo { get; set; }
+
+        public Guid? CreatedBy { get; set; }
+
+        public DateTime? CreatedOn { get; set; } = DateTime.UtcNow;
+
+        public Guid? UpdatedBy { get; set; }
+
+        public DateTime? UpdatedOn { get; set; } = DateTime.UtcNow;
+
         // Navigation properties
         [ForeignKey("CheckOutcomeId")]
         public virtual CheckOutcome? CheckOutcomeEntity { get; set; }      
