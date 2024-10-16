@@ -1,5 +1,6 @@
 ﻿using Defra.PTS.Checker.Entities;
 using Defra.PTS.Checker.Models;
+using Defra.PTS.Checker.Models.Enums;
 using Defra.PTS.Checker.Repositories;
 using Defra.PTS.Checker.Services.Interface;
 using Microsoft.EntityFrameworkCore;
@@ -40,36 +41,70 @@ public class CheckSummaryService : ICheckSummaryService
 
         var timeSpan = endTime - startTime;
 
-        var checkOutcomeEntity = new CheckOutcome
-        {
-            Outcome = outcome.Id,
-        };
-
-        var entity = new CheckSummary
+        //TODO Check if the date value being populated is correct
+        var checkSummaryEntity = new CheckSummary
         {
             ApplicationId = travelDocument.ApplicationId,
             CheckerId = checkOutcomeModel.CheckerId,
             CheckOutcome = outcome.Id == 1,
-            CheckOutcomeId = checkOutcomeEntity.Id,
-            CheckOutcomeEntity = checkOutcomeEntity,
-            Date = startTime,
             ChipNumber = travelDocument.Application?.Pet?.MicrochipNumber,
             TravelDocumentId = travelDocument.Id,
+            GBCheck = checkOutcomeModel.IsGBCheck,
+            Date = startTime,
             ScheduledSailingTime = timeSpan,
-            RouteId = checkOutcomeModel?.RouteId,
-            GBCheck = false,
+            CreatedBy = checkOutcomeModel.CheckerId,
         };
 
+        if (checkOutcomeModel.SailingOption ==  (int)SailingOption.Flight)
+        {
+            checkSummaryEntity.FlightNo = checkOutcomeModel.FlightNumber;
+        }
 
-        _dbContext.Add(checkOutcomeEntity);
-        _dbContext.Add(entity);
+        if (checkOutcomeModel.SailingOption == (int)SailingOption.Ferry)
+        {
+            checkSummaryEntity.RouteId = checkOutcomeModel?.RouteId;
+        }
+
+        
+        if ((bool)checkSummaryEntity.CheckOutcome)
+        {
+            //Pass
+            _dbContext.Add(checkSummaryEntity);
+        }
+        else
+        {
+            //Fail
+            var nonComplianceModel = checkOutcomeModel as NonComplianceModel;
+            var checkOutcomeEntity = new CheckOutcome
+            {
+                MCNotMatch = nonComplianceModel?.MCNotMatch,
+                MCNotMatchActual = nonComplianceModel?.MCNotMatchActual,
+                MCNotFound = nonComplianceModel?.MCNotFound,
+                VCNotMatchPTD = nonComplianceModel?.VCNotMatchPTD,
+                OIFailPotentialCommercial = nonComplianceModel?.OIFailPotentialCommercial,
+                OIFailAuthTravellerNoConfirmation = nonComplianceModel?.OIFailAuthTravellerNoConfirmation,
+                OIFailOther = nonComplianceModel?.OIFailOther,
+                PassengerTypeId = nonComplianceModel?.PassengerTypeId,
+                RelevantComments = nonComplianceModel?.RelevantComments,
+                GBRefersToDAERAOrSPS = nonComplianceModel?.GBRefersToDAERAOrSPS,
+                GBAdviseNoTravel = nonComplianceModel?.GBAdviseNoTravel,
+                GBPassengerSaysNoTravel = nonComplianceModel?.GBPassengerSaysNoTravel,
+                SPSOutcome = nonComplianceModel?.SPSOutcome,
+                SPSOutcomeDetails = nonComplianceModel?.SPSOutcomeDetails,
+                CreatedBy = nonComplianceModel?.CheckerId,
+            };
+            checkSummaryEntity.CheckOutcomeId = checkOutcomeEntity.Id;
+            checkSummaryEntity.CheckOutcomeEntity = checkOutcomeEntity;
+
+            _dbContext.Add(checkOutcomeEntity);
+            _dbContext.Add(checkSummaryEntity);
+        }
+
         await _dbContext.SaveChangesAsync();
-
         var response = new CheckOutcomeResponseModel
         {
-            CheckSummaryId = entity.Id
+            CheckSummaryId = checkSummaryEntity.Id
         };
-
         return response;
     }
 

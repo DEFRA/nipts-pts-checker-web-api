@@ -103,39 +103,9 @@ namespace Defra.PTS.Checker.Repositories
               .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<CheckOutcome>()
-              .HasOne(co => co.OutcomeNavigation)
-              .WithMany()
-              .HasForeignKey(co => co.Outcome)
-              .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<CheckOutcome>()
-                .HasOne(co => co.ODTypeNavigation)
+                .HasOne(co => co.PassengerTypeNavigation)
                 .WithMany()
-                .HasForeignKey(co => co.ODType)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<CheckOutcome>()
-                .HasOne(co => co.VCFailBreedActualNavigation)
-                .WithMany()
-                .HasForeignKey(co => co.VCFailBreedActual)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<CheckOutcome>()
-                .HasOne(co => co.PDBreedNavigation)
-                .WithMany()
-                .HasForeignKey(co => co.PDBreed)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<CheckOutcome>()
-                .HasOne(co => co.VCFailColourActualNavigation)
-                .WithMany()
-                .HasForeignKey(co => co.VCFailColourActual)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<CheckOutcome>()
-                .HasOne(co => co.PDColourNavigation)
-                .WithMany()
-                .HasForeignKey(co => co.PDColour)
+                .HasForeignKey(co => co.PassengerTypeId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<CheckSummary>()

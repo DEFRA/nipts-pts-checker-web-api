@@ -135,7 +135,7 @@ public class CheckerController : ControllerBase
             OperationId = "CheckOutcome",
             Tags = new[] { "Checker" },
             Summary = "Saves checkout",
-            Description = "Saves check outcome for a pet travel document"
+            Description = "Saves check outcome of pass for a pet travel document"
         )]
     public async Task<IActionResult> SaveCheckOutcome([FromBody, SwaggerRequestBody("The check outcome payload", Required = true)] CheckOutcomeModel model)
     {
@@ -153,6 +153,39 @@ public class CheckerController : ControllerBase
         var response = await _checkSummaryService.SaveCheckSummary(model);
         return Ok(response);
     }
+
+
+
+    [HttpPost]
+    [Route("ReportNonCompliance")]
+    [SwaggerResponse(StatusCodes.Status200OK, "OK: Returns NonCompliance summary response", typeof(NonComplianceResponseModel))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request: Request is not valid", typeof(IDictionary<string, string>))]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Not Found: There is no application matching this PTD number")]
+    [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error: An error has occurred")]
+    [SwaggerOperation(
+           OperationId = "ReportNonCompliance",
+           Tags = new[] { "Checker" },
+           Summary = "Saves NonCompliance",
+           Description = "Saves NonCompliance for a pet travel document"
+       )]
+    public async Task<IActionResult> ReportNonCompliance([FromBody, SwaggerRequestBody("The NonCompliance payload", Required = true)] NonComplianceModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var application = await _applicationService.GetApplicationById(model.ApplicationId);
+        if (application == null)
+        {
+            return new NotFoundObjectResult(ApiConstants.ApplicationNotFound);
+        }
+
+        var response = await _checkSummaryService.SaveCheckSummary(model);
+        return Ok(response);
+    }
+
+
 
     [HttpPost]
     [Route("checkerUser")]
