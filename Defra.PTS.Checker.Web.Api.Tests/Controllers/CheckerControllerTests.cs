@@ -565,5 +565,141 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
             // Act & Assert
             Assert.ThrowsAsync<Exception>(async () => await _controller!.CheckerMicrochipNumberExistWithPtd(model));
         }
+
+        [Test]
+        public async Task GetCheckOutcomes_ValidRequest_ReturnsOkResult()
+        {
+            // Arrange
+            var request = new CheckerOutcomeDashboardDto
+            {
+                StartHour = "10",
+                EndHour = "12"
+            };
+
+            var outcomeResults = new List<CheckOutcomeResponse>
+        {
+            new CheckOutcomeResponse { RouteName = "TestRoute", PassCount = 1, FailCount = 0 }
+        };
+
+            // Correct return type for the service mock setup
+            _checkSummaryServiceMock!.Setup(service => service.GetRecentCheckOutcomesAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+                                     .ReturnsAsync(outcomeResults.AsEnumerable());
+
+            // Act
+            var result = await _controller!.GetCheckOutcomes(request);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+            var okResult = result as OkObjectResult;
+            Assert.That(okResult, Is.Not.Null);
+            Assert.That(okResult!.StatusCode, Is.EqualTo(200));
+            Assert.That(okResult.Value, Is.EqualTo(outcomeResults));
+        }
+
+        [Test]
+        public async Task GetCheckOutcomes_NoCheckOutcomesFound_ReturnsNotFoundResult()
+        {
+            // Arrange
+            var request = new CheckerOutcomeDashboardDto
+            {
+                StartHour = "10",
+                EndHour = "12"
+            };
+
+            // Set up the mock to return an empty list of CheckOutcomeResponse
+            _checkSummaryServiceMock!.Setup(service => service.GetRecentCheckOutcomesAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+                                     .ReturnsAsync(new List<CheckOutcomeResponse>().AsEnumerable());
+
+            // Act
+            var result = await _controller!.GetCheckOutcomes(request);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<NotFoundObjectResult>());
+            var notFoundResult = result as NotFoundObjectResult;
+            Assert.That(notFoundResult, Is.Not.Null);
+            Assert.That(notFoundResult!.StatusCode, Is.EqualTo(StatusCodes.Status404NotFound));
+        }
+
+        [Test]
+        public async Task GetCheckOutcomes_InvalidModelState_ReturnsBadRequest()
+        {
+            // Arrange
+            var request = new CheckerOutcomeDashboardDto
+            {
+                StartHour = string.Empty,  // Invalid StartHour (empty)
+                EndHour = "12"
+            };
+
+            // Simulating model validation error
+            _controller!.ModelState.AddModelError("StartHour", "StartHour is required");
+
+            // Act
+            var result = await _controller!.GetCheckOutcomes(request);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+            var badRequestResult = result as BadRequestObjectResult;
+            Assert.That(badRequestResult, Is.Not.Null);
+            Assert.That(badRequestResult!.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
+
+            // Validate error message
+            var jsonString = JsonConvert.SerializeObject(badRequestResult.Value);
+            var errorResponse = JsonConvert.DeserializeObject<ErrorResponse>(jsonString);
+            Assert.That(errorResponse, Is.Not.Null);
+            Assert.That(errorResponse!.message, Is.EqualTo("Validation failed"));
+            Assert.That(errorResponse.errors[0].Field, Is.EqualTo("StartHour"));
+            Assert.That(errorResponse.errors[0].Error, Is.EqualTo("StartHour is required"));
+        }
+
+        [Test]
+        public async Task GetCheckOutcomes_InternalServerError_ReturnsStatus500()
+        {
+            // Arrange
+            var request = new CheckerOutcomeDashboardDto
+            {
+                StartHour = "10",
+                EndHour = "12"
+            };
+
+            // Simulating an exception thrown by the service
+            _checkSummaryServiceMock!.Setup(service => service.GetRecentCheckOutcomesAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+                                     .ThrowsAsync(new Exception("Mock Exception"));
+
+            // Act
+            var result = await _controller!.GetCheckOutcomes(request);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<ObjectResult>());
+            var objectResult = result as ObjectResult;
+            Assert.That(objectResult, Is.Not.Null);
+            Assert.That(objectResult!.StatusCode, Is.EqualTo(StatusCodes.Status500InternalServerError));
+
+            // Validate error message
+            var jsonString = JsonConvert.SerializeObject(objectResult.Value);
+            var errorResponse = JsonConvert.DeserializeObject<InternalServerErrorResponse>(jsonString);
+            Assert.That(errorResponse, Is.Not.Null);
+            Assert.That(errorResponse!.error, Is.EqualTo("An error occurred while fetching check outcomes"));
+            Assert.That(errorResponse.details, Is.EqualTo("Mock Exception"));
+        }
+
+
+    }
+
+    public class ErrorResponse
+    {
+        public string message { get; set; }
+        public List<FieldError> errors { get; set; }
+    }
+
+    public class FieldError
+    {
+        public string Field { get; set; }
+        public string Error { get; set; }
+    }
+
+    public class InternalServerErrorResponse
+    {
+        public string error { get; set; }
+        public string details { get; set; }
     }
 }
