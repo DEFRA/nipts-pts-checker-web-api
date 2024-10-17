@@ -1,21 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Defra.Trade.Address.V1.ApiClient" Version="1.0.8" />
     <PackageReference Include="Defra.Trade.Common" Version="3.0.0" />
     <PackageReference Include="Defra.Trade.Common.Security" Version="2.0.5" />
     <PackageReference Include="Microsoft.Identity.Client" Version="4.61.3" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\Defra.PTS.Checker.Models\Defra.PTS.Checker.Models.csproj" />
     <ProjectReference Include="..\Defra.PTS.Checker.Repositories\Defra.PTS.Checker.Repositories.csproj" />
   </ItemGroup>
-
 </Project>

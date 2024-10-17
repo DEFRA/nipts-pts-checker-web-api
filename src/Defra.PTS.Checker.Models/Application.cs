@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+﻿
 using System.Diagnostics.CodeAnalysis;
 
 namespace Defra.PTS.Checker.Models
