@@ -4,8 +4,12 @@ using Defra.PTS.Checker.Models.Enums;
 using Defra.PTS.Checker.Repositories;
 using Defra.PTS.Checker.Services.Interface;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.SqlServer; // Include this namespace
 using Microsoft.Extensions.Logging;
+using System;
 using System.Globalization;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Defra.PTS.Checker.Services.Implementation;
 
@@ -118,10 +122,14 @@ public class CheckSummaryService : ICheckSummaryService
             var results = checkOutcomes.Select(co => new CheckOutcomeResponse
             {
                 RouteName = co.RouteNavigation?.RouteName ?? "Unknown",
-                DepartureDate = co.Date.HasValue ? co.Date.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) : "N/A",
-                DepartureTime = co.ScheduledSailingTime.HasValue ? co.ScheduledSailingTime.Value.ToString(@"hh\:mm", CultureInfo.InvariantCulture) : "N/A",
+                DepartureDate = co.Date.HasValue
+                    ? co.Date.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture)
+                    : "N/A",
+                DepartureTime = co.ScheduledSailingTime.HasValue
+                    ? co.ScheduledSailingTime.Value.ToString(@"hh\:mm", CultureInfo.InvariantCulture)
+                    : "N/A",
                 CombinedDateTime = co.Date.HasValue && co.ScheduledSailingTime.HasValue
-                    ? co.Date.Value.Date.Add(co.ScheduledSailingTime.Value)
+                    ? co.Date.Value.Add(co.ScheduledSailingTime.Value)
                     : DateTime.MinValue,
                 PassCount = co.CheckOutcome == true ? 1 : 0,
                 FailCount = co.CheckOutcome == false ? 1 : 0
@@ -153,29 +161,25 @@ public class CheckSummaryService : ICheckSummaryService
     {
         try
         {
-            // Adjust the date range to include entire days
-            var startDateOnly = startDate.Date;
-            var endDateOnly = endDate.Date.AddDays(1); // Include the entire end date
+            // Preliminary filtering to reduce the dataset
+            var preliminaryStartDate = startDate.Date.AddDays(-1);
+            var preliminaryEndDate = endDate.Date.AddDays(1);
 
-            // Fetch data from the database with preliminary date filtering
             var summaries = await _dbContext.CheckSummary
                 .Include(cs => cs.RouteNavigation)
                 .Where(cs => cs.Date.HasValue && cs.ScheduledSailingTime.HasValue)
-                .Where(cs => cs.Date.Value.Date >= startDateOnly && cs.Date.Value.Date <= endDateOnly)
+                .Where(cs => cs.Date.Value >= preliminaryStartDate && cs.Date.Value <= preliminaryEndDate)
                 .ToListAsync();
 
-            // Perform the CombinedDateTime calculation and precise filtering in memory
+            // Precise filtering and combining Date and Time in memory
             var filteredSummaries = summaries
                 .Select(cs => new
                 {
                     CheckSummary = cs,
-                    CombinedDateTime = cs.Date.HasValue && cs.ScheduledSailingTime.HasValue
-                        ? cs.Date.Value.Date.Add(cs.ScheduledSailingTime.Value)
-                        : (DateTime?)null
+                    CombinedDateTime = cs.Date.Value.Add(cs.ScheduledSailingTime.Value)
                 })
-                .Where(cs => cs.CombinedDateTime.HasValue)
-                .Where(cs => cs.CombinedDateTime.Value >= startDate && cs.CombinedDateTime.Value <= endDate)
-                .OrderByDescending(cs => cs.CombinedDateTime)
+                .Where(cs => cs.CombinedDateTime >= startDate && cs.CombinedDateTime <= endDate)
+                .OrderBy(cs => cs.CombinedDateTime)
                 .Select(cs => cs.CheckSummary);
 
             return filteredSummaries;
@@ -186,6 +190,8 @@ public class CheckSummaryService : ICheckSummaryService
             throw;
         }
     }
+
+
 }
 
 

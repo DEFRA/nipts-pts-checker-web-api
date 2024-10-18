@@ -234,8 +234,8 @@ public class CheckerController : ControllerBase
     }
 
     [HttpPost("getCheckOutcomes")]
-    [SwaggerResponse(StatusCodes.Status200OK, "OK: Returns the bool", typeof(bool))]
-    [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request: Invalid request", typeof(IDictionary<string, string>))]
+    [SwaggerResponse(StatusCodes.Status200OK, "OK: Returns the check outcomes", typeof(IEnumerable<CheckOutcomeResponse>))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request: Invalid request", typeof(object))]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error: An error has occurred")]
     public async Task<IActionResult> GetCheckOutcomes([FromBody, SwaggerRequestBody("The checker dashboard start hour and end hour payload", Required = true)] CheckerOutcomeDashboardDto model)
     {
@@ -251,13 +251,23 @@ public class CheckerController : ControllerBase
                 return BadRequest(new { message = "Validation failed", errors });
             }
 
-            // Parse the validated strings into integers
-            int startHour = int.Parse(model.StartHour);
-            int endHour = int.Parse(model.EndHour);
+            if (!int.TryParse(model.StartHour, out int startHour))
+            {
+                return BadRequest(new { error = "Invalid StartHour value" });
+            }
 
-            var startDate = DateTime.Now.AddHours(int.Parse(model.StartHour));
-            var endDate = DateTime.Now.AddHours(int.Parse(model.EndHour));
+            if (!int.TryParse(model.EndHour, out int endHour))
+            {
+                return BadRequest(new { error = "Invalid EndHour value" });
+            }
 
+            // Use the server's local time (GMT)
+            var referenceDateTime = DateTime.Now;
+
+            var startDate = referenceDateTime.AddHours(startHour);
+            var endDate = referenceDateTime.AddHours(endHour);
+
+            
 
             var results = await _checkSummaryService.GetRecentCheckOutcomesAsync(startDate, endDate);
 
@@ -269,11 +279,8 @@ public class CheckerController : ControllerBase
             return Ok(results);
         }
         catch (Exception ex)
-        {
+        {            
             return StatusCode(500, new { error = "An error occurred while fetching check outcomes", details = ex.Message });
         }
     }
-
-
-
 }
