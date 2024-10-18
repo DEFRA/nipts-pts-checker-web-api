@@ -115,7 +115,7 @@ public class CheckSummaryService : ICheckSummaryService
         var results = checkOutcomes.Select(co => new CheckOutcomeResponse
         {
             RouteName = co.RouteNavigation?.RouteName ?? "Unknown",
-            DepartureDate = co.Date?.ToShortDateString() ?? "N/A",
+            DepartureDate = co.Date.HasValue ? co.Date.Value.ToString(@"dd/MM/yyyy") : "N/A",
             DepartureTime = co.ScheduledSailingTime.HasValue ? co.ScheduledSailingTime.Value.ToString(@"hh\:mm") : "N/A",
             PassCount = co.CheckOutcome == true ? 1 : 0,
             FailCount = co.CheckOutcome == false ? 1 : 0
