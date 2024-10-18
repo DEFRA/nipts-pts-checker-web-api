@@ -117,6 +117,8 @@ public class CheckSummaryService : ICheckSummaryService
     {
         try
         {
+            _logger.LogInformation("GetRecentCheckOutcomesAsync startDate", startDate);
+            _logger.LogInformation("GetRecentCheckOutcomesAsync endDate", endDate);
             var checkOutcomes = await GetCheckOutcomesAsync(startDate, endDate);
 
             var results = checkOutcomes.Select(co => new CheckOutcomeResponse
