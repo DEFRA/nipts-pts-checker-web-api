@@ -22,7 +22,7 @@ public class NonComplianceSchemaFilter : ISchemaFilter
             ["isGBCheck"] = new OpenApiBoolean(true),
 
             // Adding Non Compliance Details
-             ["mcNotFound"] = new OpenApiBoolean(true),
+             ["mcNotMatch"] = new OpenApiBoolean(true),
              ["mcNotMatchActual"] = new OpenApiString("123456789123456"),
              ["mcNotFound"] = new OpenApiBoolean(true),
              ["vcNotMatchPTD"] = new OpenApiBoolean(true),
