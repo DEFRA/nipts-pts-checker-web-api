@@ -572,18 +572,28 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
             // Arrange
             var request = new CheckerOutcomeDashboardDto
             {
-                StartHour = "10",
-                EndHour = "12"
+                StartHour = "-48",
+                EndHour = "24"
             };
 
-            var outcomeResults = new List<CheckOutcomeResponse>
-        {
-            new CheckOutcomeResponse { RouteName = "TestRoute", PassCount = 1, FailCount = 0 }
-        };
+            var now = DateTime.Now;
+            var combinedDateTime = now.AddHours(1); // Example departure time in the future
 
-            // Correct return type for the service mock setup
+            var outcomeResults = new List<CheckOutcomeResponse>
+            {
+                new CheckOutcomeResponse
+                {
+                    RouteName = "TestRoute",
+                    PassCount = 1,
+                    FailCount = 0,
+                    DepartureDate = combinedDateTime.ToString("dd/MM/yyyy"),
+                    DepartureTime = combinedDateTime.ToString("HH:mm"),
+                    CombinedDateTime = combinedDateTime
+                }
+            };
+
             _checkSummaryServiceMock!.Setup(service => service.GetRecentCheckOutcomesAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
-                                     .ReturnsAsync(outcomeResults.AsEnumerable());
+                                     .ReturnsAsync(outcomeResults);
 
             // Act
             var result = await _controller!.GetCheckOutcomes(request);
@@ -592,7 +602,7 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
             var okResult = result as OkObjectResult;
             Assert.That(okResult, Is.Not.Null);
-            Assert.That(okResult!.StatusCode, Is.EqualTo(200));
+            Assert.That(okResult!.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
             Assert.That(okResult.Value, Is.EqualTo(outcomeResults));
         }
 
@@ -602,13 +612,12 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
             // Arrange
             var request = new CheckerOutcomeDashboardDto
             {
-                StartHour = "10",
-                EndHour = "12"
+                StartHour = "-48",
+                EndHour = "24"
             };
 
-            // Set up the mock to return an empty list of CheckOutcomeResponse
             _checkSummaryServiceMock!.Setup(service => service.GetRecentCheckOutcomesAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
-                                     .ReturnsAsync(new List<CheckOutcomeResponse>().AsEnumerable());
+                                     .ReturnsAsync(new List<CheckOutcomeResponse>());
 
             // Act
             var result = await _controller!.GetCheckOutcomes(request);
@@ -626,11 +635,11 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
             // Arrange
             var request = new CheckerOutcomeDashboardDto
             {
-                StartHour = string.Empty,  // Invalid StartHour (empty)
-                EndHour = "12"
+                StartHour = string.Empty,  // Invalid StartHour
+                EndHour = "24"
             };
 
-            // Simulating model validation error
+            // Simulate model validation error
             _controller!.ModelState.AddModelError("StartHour", "StartHour is required");
 
             // Act
@@ -657,11 +666,11 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
             // Arrange
             var request = new CheckerOutcomeDashboardDto
             {
-                StartHour = "10",
-                EndHour = "12"
+                StartHour = "-48",
+                EndHour = "24"
             };
 
-            // Simulating an exception thrown by the service
+            // Simulate an exception thrown by the service
             _checkSummaryServiceMock!.Setup(service => service.GetRecentCheckOutcomesAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
                                      .ThrowsAsync(new Exception("Mock Exception"));
 
@@ -681,6 +690,7 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
             Assert.That(errorResponse!.error, Is.EqualTo("An error occurred while fetching check outcomes"));
             Assert.That(errorResponse.details, Is.EqualTo("Mock Exception"));
         }
+
 
 
     }

@@ -5,6 +5,7 @@ using Defra.PTS.Checker.Repositories;
 using Defra.PTS.Checker.Services.Interface;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Globalization;
 
 namespace Defra.PTS.Checker.Services.Implementation;
 
@@ -110,59 +111,81 @@ public class CheckSummaryService : ICheckSummaryService
 
     public async Task<IEnumerable<CheckOutcomeResponse>> GetRecentCheckOutcomesAsync(DateTime startDate, DateTime endDate)
     {
-        var checkOutcomes = await GetCheckOutcomesAsync(startDate, endDate);
-
-        var results = checkOutcomes.Select(co => new CheckOutcomeResponse
+        try
         {
-            RouteName = co.RouteNavigation?.RouteName ?? "Unknown",
-            DepartureDate = co.Date.HasValue ? co.Date.Value.ToString(@"dd/MM/yyyy") : "N/A",
-            DepartureTime = co.ScheduledSailingTime.HasValue ? co.ScheduledSailingTime.Value.ToString(@"hh\:mm") : "N/A",
-            PassCount = co.CheckOutcome == true ? 1 : 0,
-            FailCount = co.CheckOutcome == false ? 1 : 0
-        })
-        .GroupBy(x => new { x.RouteName, x.DepartureDate, x.DepartureTime })
-        .Select(group => new CheckOutcomeResponse
-        {
-            RouteName = group.Key.RouteName,
-            DepartureDate = group.Key.DepartureDate,
-            DepartureTime = group.Key.DepartureTime,
-            PassCount = group.Sum(x => x.PassCount),
-            FailCount = group.Sum(x => x.FailCount)
-        })
-        .OrderByDescending(x => DateTime.Parse($"{x.DepartureDate} {x.DepartureTime}"))
-        .ToList();
+            var checkOutcomes = await GetCheckOutcomesAsync(startDate, endDate);
 
-        return results;
+            var results = checkOutcomes.Select(co => new CheckOutcomeResponse
+            {
+                RouteName = co.RouteNavigation?.RouteName ?? "Unknown",
+                DepartureDate = co.Date.HasValue ? co.Date.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) : "N/A",
+                DepartureTime = co.ScheduledSailingTime.HasValue ? co.ScheduledSailingTime.Value.ToString(@"hh\:mm", CultureInfo.InvariantCulture) : "N/A",
+                CombinedDateTime = co.Date.HasValue && co.ScheduledSailingTime.HasValue
+                    ? co.Date.Value.Date.Add(co.ScheduledSailingTime.Value)
+                    : DateTime.MinValue,
+                PassCount = co.CheckOutcome == true ? 1 : 0,
+                FailCount = co.CheckOutcome == false ? 1 : 0
+            })
+            .Where(x => x.CombinedDateTime != DateTime.MinValue) // Ensure CombinedDateTime is valid
+            .GroupBy(x => new { x.RouteName, x.DepartureDate, x.DepartureTime, x.CombinedDateTime })
+            .Select(group => new CheckOutcomeResponse
+            {
+                RouteName = group.Key.RouteName,
+                DepartureDate = group.Key.DepartureDate,
+                DepartureTime = group.Key.DepartureTime,
+                PassCount = group.Sum(x => x.PassCount),
+                FailCount = group.Sum(x => x.FailCount),
+                CombinedDateTime = group.Key.CombinedDateTime
+            })
+            .OrderByDescending(x => x.CombinedDateTime)
+            .ToList();
+
+            return results;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in GetRecentCheckOutcomesAsync");
+            throw;
+        }
     }
-
-
 
     public async Task<IEnumerable<CheckSummary>> GetCheckOutcomesAsync(DateTime startDate, DateTime endDate)
     {
-        // Pre-filter on approximate date range to reduce data fetched
-        var dateRangeStart = startDate.Date.AddDays(-1);
-        var dateRangeEnd = endDate.Date.AddDays(1);
+        try
+        {
+            // Adjust the date range to include entire days
+            var startDateOnly = startDate.Date;
+            var endDateOnly = endDate.Date.AddDays(1); // Include the entire end date
 
-        var summaries = await _dbContext.CheckSummary
-            .Include(cs => cs.RouteNavigation)
-            .Where(cs => cs.Date.HasValue && cs.ScheduledSailingTime.HasValue)
-            .Where(cs => cs.Date >= dateRangeStart && cs.Date <= dateRangeEnd)
-            .ToListAsync();
+            // Fetch data from the database with preliminary date filtering
+            var summaries = await _dbContext.CheckSummary
+                .Include(cs => cs.RouteNavigation)
+                .Where(cs => cs.Date.HasValue && cs.ScheduledSailingTime.HasValue)
+                .Where(cs => cs.Date.Value.Date >= startDateOnly && cs.Date.Value.Date <= endDateOnly)
+                .ToListAsync();
 
-        // Perform calculation and filtering in memory
-        var filteredSummaries = summaries
-            .Select(cs => new
-            {
-                CheckSummary = cs,
-                CombinedDateTime = cs.Date.Value.Add(cs.ScheduledSailingTime.Value)
-            })
-            .Where(cs => cs.CombinedDateTime >= startDate && cs.CombinedDateTime <= endDate)
-            .OrderByDescending(cs => cs.CombinedDateTime)
-            .Select(cs => cs.CheckSummary);
+            // Perform the CombinedDateTime calculation and precise filtering in memory
+            var filteredSummaries = summaries
+                .Select(cs => new
+                {
+                    CheckSummary = cs,
+                    CombinedDateTime = cs.Date.HasValue && cs.ScheduledSailingTime.HasValue
+                        ? cs.Date.Value.Date.Add(cs.ScheduledSailingTime.Value)
+                        : (DateTime?)null
+                })
+                .Where(cs => cs.CombinedDateTime.HasValue)
+                .Where(cs => cs.CombinedDateTime.Value >= startDate && cs.CombinedDateTime.Value <= endDate)
+                .OrderByDescending(cs => cs.CombinedDateTime)
+                .Select(cs => cs.CheckSummary);
 
-        return filteredSummaries;
+            return filteredSummaries;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in GetCheckOutcomesAsync");
+            throw;
+        }
     }
-
 }
 
 

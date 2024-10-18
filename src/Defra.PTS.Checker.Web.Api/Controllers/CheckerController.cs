@@ -255,8 +255,9 @@ public class CheckerController : ControllerBase
             int startHour = int.Parse(model.StartHour);
             int endHour = int.Parse(model.EndHour);
 
-            var startDate = DateTime.UtcNow.AddHours(startHour);
-            var endDate = DateTime.UtcNow.AddHours(endHour);
+            var startDate = DateTime.Now.AddHours(int.Parse(model.StartHour));
+            var endDate = DateTime.Now.AddHours(int.Parse(model.EndHour));
+
 
             var results = await _checkSummaryService.GetRecentCheckOutcomesAsync(startDate, endDate);
 

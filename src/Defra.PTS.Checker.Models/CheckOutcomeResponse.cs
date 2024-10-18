@@ -15,5 +15,6 @@ public class CheckOutcomeResponse
     public int FailCount { get; set; }
     public string? FailReason { get; set; }
     public string? ViewDetailsLink { get; set; }
+    public DateTime CombinedDateTime { get; set; }
 }
 
