@@ -169,7 +169,7 @@ public class CheckSummaryService : ICheckSummaryService
 
             var summaries = await _dbContext.CheckSummary
                 .Include(cs => cs.RouteNavigation)
-                .Where(cs => cs.Date.HasValue && cs.ScheduledSailingTime.HasValue)
+                .Where(cs => cs.Date.HasValue && cs.ScheduledSailingTime.HasValue && cs.RouteId.HasValue)
                 .Where(cs => cs.Date.Value >= preliminaryStartDate && cs.Date.Value <= preliminaryEndDate)
                 .ToListAsync();
 
