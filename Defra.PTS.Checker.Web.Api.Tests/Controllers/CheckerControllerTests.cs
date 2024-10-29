@@ -656,8 +656,13 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
             var errorResponse = JsonConvert.DeserializeObject<ErrorResponse>(jsonString);
             Assert.That(errorResponse, Is.Not.Null);
             Assert.That(errorResponse!.Message, Is.EqualTo("Validation failed"));
-            Assert.That(errorResponse!.Errors[0].Field, Is.EqualTo("StartHour"));
-            Assert.That(errorResponse!.Errors[0].Error, Is.EqualTo("StartHour is required"));
+            Assert.That(errorResponse, Is.Not.Null, "errorResponse should not be null");
+            Assert.That(errorResponse.Errors, Is.Not.Null.And.Not.Empty, "errorResponse.Errors should not be null or empty");
+            Assert.That(errorResponse.Errors![0]!, Is.Not.Null, "The first error in the list should not be null");
+
+            // Now you can safely assert on the properties
+            Assert.That(errorResponse.Errors[0].Field, Is.EqualTo("StartHour"), "The field should be 'StartHour'");
+            Assert.That(errorResponse.Errors[0].Error, Is.EqualTo("StartHour is required"), "The error message should be 'StartHour is required'");
         }
 
         [Test]
