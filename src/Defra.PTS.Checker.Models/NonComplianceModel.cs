@@ -36,7 +36,7 @@ namespace Defra.PTS.Checker.Models
         public int? PassengerTypeId { get; set; }
 
         [SwaggerSchema("Relevant Comments")]
-        [StringLength(300, ErrorMessage = "Relevant Comments cannot exceed 300 characters.")]
+        [StringLength(500, ErrorMessage = "Relevant Comments cannot exceed 500 characters.")]
         public string? RelevantComments { get; set; }
 
         [SwaggerSchema("GB Outcome Passenger referred to DAERA/SPS at NI port")]
@@ -52,7 +52,7 @@ namespace Defra.PTS.Checker.Models
         public bool? SPSOutcome { get; set; }
 
         [SwaggerSchema("SPS Outcome Details")]
-        [StringLength(300, ErrorMessage = "SPS Outcome Details cannot exceed 300 characters.")]
+        [StringLength(500, ErrorMessage = "SPS Outcome Details cannot exceed 500 characters.")]
         public string? SPSOutcomeDetails { get; set; }
 
         public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)

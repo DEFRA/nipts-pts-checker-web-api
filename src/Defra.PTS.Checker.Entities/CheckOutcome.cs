@@ -26,7 +26,7 @@ namespace Defra.PTS.Checker.Entities
 
         public int? PassengerTypeId { get; set; }
 
-        [MaxLength(300)]
+        [MaxLength(500)]
         public string? RelevantComments { get; set; }
 
         public bool? GBRefersToDAERAOrSPS { get; set; }
@@ -37,7 +37,7 @@ namespace Defra.PTS.Checker.Entities
 
         public bool? SPSOutcome { get; set; }
 
-        [MaxLength(300)]
+        [MaxLength(500)]
         public string? SPSOutcomeDetails { get; set; }
 
         public Guid? CreatedBy { get; set; }
