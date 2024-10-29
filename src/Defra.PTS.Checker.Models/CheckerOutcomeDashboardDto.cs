@@ -2,11 +2,13 @@
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 
+namespace Defra.PTS.Checker.Models;
+
 [ExcludeFromCodeCoverage]
 public class CheckerOutcomeDashboardDto : IValidatableObject
 {
-    public string StartHour { get; set; }
-    public string EndHour { get; set; }
+    public string? StartHour { get; set; }
+    public string? EndHour { get; set; }
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
@@ -33,12 +35,9 @@ public class CheckerOutcomeDashboardDto : IValidatableObject
         }
 
         // Additional validation (if both StartHour and EndHour are valid)
-        if (int.TryParse(StartHour, out var startHourInt) && int.TryParse(EndHour, out var endHourInt))
+        if (int.TryParse(StartHour, out var startHourInt) && int.TryParse(EndHour, out var endHourInt) && startHourInt > endHourInt)
         {
-            if (startHourInt > endHourInt)
-            {
-                validationResults.Add(new ValidationResult("Start Hour cannot be greater than End Hour", new[] { nameof(StartHour), nameof(EndHour) }));
-            }
+            validationResults.Add(new ValidationResult("Start Hour cannot be greater than End Hour", new[] { nameof(StartHour), nameof(EndHour) }));
         }
 
         return validationResults;

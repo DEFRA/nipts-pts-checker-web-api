@@ -1,5 +1,5 @@
 ﻿using Defra.PTS.Checker.Entities;
-using models = Defra.PTS.Checker.Models;
+using Models = Defra.PTS.Checker.Models;
 using Defra.PTS.Checker.Repositories.Interface;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -302,7 +302,7 @@ namespace Defra.PTS.Checker.Tests.Services
         public async Task CheckerUser_AddChecker()
         {
             // Arrange
-            var checkerDto = new models.CheckerDto
+            var checkerDto = new Models.CheckerDto
             {
                 Id = Guid.NewGuid(),
                 FirstName = "Test",
@@ -325,7 +325,7 @@ namespace Defra.PTS.Checker.Tests.Services
         public async Task CheckerUser_UpdateChecker()
         {
             // Arrange
-            var checkerDto = new models.CheckerDto
+            var checkerDto = new Models.CheckerDto
             {
                 Id = Guid.NewGuid(),
                 FirstName = "Test",

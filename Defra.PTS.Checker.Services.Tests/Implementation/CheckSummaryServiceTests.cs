@@ -12,9 +12,9 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
     [TestFixture]
     public class CheckSummaryServiceTests
     {
-        private CheckSummaryService _service;
-        private CommonDbContext _dbContext;
-        private Mock<ILogger<CheckerService>> _loggerMock;
+        private CheckSummaryService? _service;
+        private CommonDbContext? _dbContext;
+        private Mock<ILogger<CheckerService>>? _loggerMock;
 
         [SetUp]
         public void Setup()
@@ -39,7 +39,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             // Arrange
             var applicationId = Guid.NewGuid();
 
-            var route = await _dbContext.Route.FirstOrDefaultAsync();
+            var route = await _dbContext?.Route?.FirstOrDefaultAsync()!;
             if (route == null)
             {
                 route = new Route { RouteName = "Test Route" };
@@ -88,7 +88,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             _dbContext.ChangeTracker.Clear();
 
             // Act
-            var result = await _service.SaveCheckSummary(model);
+            var result = await _service?.SaveCheckSummary(model)!;
 
             // Assert
             Assert.That(result, Is.Not.Null);
@@ -101,7 +101,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             // Arrange
             var applicationId = Guid.NewGuid();
 
-            var route = await _dbContext.Route.FirstOrDefaultAsync();
+            var route = await _dbContext?.Route?.FirstOrDefaultAsync()!;
             if (route == null)
             {
                 route = new Route { RouteName = "Test Route" };
@@ -154,7 +154,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             _dbContext.ChangeTracker.Clear();
 
             // Act
-            var result = await _service.SaveCheckSummary(model);
+            var result = await _service?.SaveCheckSummary(model)!;
 
             // Assert
             Assert.That(result, Is.Not.Null);
@@ -166,7 +166,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
         public async Task SaveCheckSummary_ThrowsException_WhenTravelDocumentIsNull()
         {
             // Arrange            
-            var route = await _dbContext.Route.FirstOrDefaultAsync();
+            var route = await _dbContext?.Route?.FirstOrDefaultAsync()!;
             if (route == null)
             {
                 route = new Route { RouteName = "Test Route" };
@@ -184,7 +184,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             };
 
             // Act & Assert
-            var ex = Assert.ThrowsAsync<ArgumentNullException>(async () => await _service.SaveCheckSummary(model));
+            var ex = Assert.ThrowsAsync<ArgumentNullException>(async () => await _service?.SaveCheckSummary(model)!);
             Assert.That(ex?.Message, Does.Contain("Value cannot be null"), "Exception message should indicate a null value.");
         }
 
@@ -197,7 +197,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             var endDate = DateTime.UtcNow;
 
             // Retrieve or add Route entities
-            var route1 = await _dbContext.Route.FirstOrDefaultAsync(r => r.RouteName == "Route1");
+            var route1 = await _dbContext?.Route?.FirstOrDefaultAsync(r => r.RouteName == "Route1")!;
             if (route1 == null)
             {
                 route1 = new Route { RouteName = "Route1" };
@@ -237,7 +237,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             _dbContext.ChangeTracker.Clear();
 
             // Act
-            var result = await _service.GetRecentCheckOutcomesAsync(startDate, endDate);
+            var result = await _service?.GetRecentCheckOutcomesAsync(startDate, endDate)!;
 
             // Assert
             Assert.That(result, Is.Not.Null, "The result should not be null.");

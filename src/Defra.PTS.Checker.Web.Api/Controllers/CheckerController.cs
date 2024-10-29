@@ -244,8 +244,8 @@ public class CheckerController : ControllerBase
             if (!ModelState.IsValid)
             {
                 var errors = ModelState
-                    .Where(x => x.Value.Errors.Count > 0)
-                    .Select(x => new { Field = x.Key, Error = x.Value.Errors.First().ErrorMessage })
+                    .Where(x => x.Value?.Errors?.Count > 0)
+                    .Select(x => new { Field = x.Key, Error = x.Value?.Errors?.FirstOrDefault()?.ErrorMessage })
                     .ToList();
 
                 return BadRequest(new { message = "Validation failed", errors });
