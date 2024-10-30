@@ -1,5 +1,6 @@
 ﻿using Defra.PTS.Checker.Models;
 using Defra.PTS.Checker.Models.Constants;
+using Defra.PTS.Checker.Models.Enums;
 using Defra.PTS.Checker.Models.Search;
 using Defra.PTS.Checker.Services.Interface;
 using Defra.PTS.Checker.Web.Api.Controllers;
@@ -10,7 +11,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 using NUnit.Framework;
-using entities = Defra.PTS.Checker.Entities;
+using Entities = Defra.PTS.Checker.Entities;
 
 namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
 {
@@ -273,7 +274,7 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
 
             var response = new CheckOutcomeResponseModel  { CheckSummaryId = Guid.NewGuid() };
             
-            _applicationServiceMock!.Setup(service => service.GetApplicationById(It.IsAny<Guid>()))!.ReturnsAsync(new entities.Application());
+            _applicationServiceMock!.Setup(service => service.GetApplicationById(It.IsAny<Guid>()))!.ReturnsAsync(new Entities.Application());
             _checkSummaryServiceMock!.Setup(service => service.SaveCheckSummary(It.IsAny<CheckOutcomeModel>())).ReturnsAsync(response);
 
             // Act
@@ -325,10 +326,10 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
                 CheckOutcome = string.Empty,
                 ApplicationId = new Guid("FF0DF803-8033-4CF8-B877-AB69BEFE63D2"),
                 RouteId = 1,
-                SailingTime = DateTime.UtcNow,
+                SailingTime = DateTime.UtcNow
             };
 
-            _applicationServiceMock!.Setup(service => service.GetApplicationById(It.IsAny<Guid>()))!.ReturnsAsync(new entities.Application());
+            _applicationServiceMock!.Setup(service => service.GetApplicationById(It.IsAny<Guid>()))!.ReturnsAsync(new Entities.Application());
 
             // Act
             _controller!.ModelState.AddModelError("CheckOutcome", "CheckOutcome is required");
@@ -357,7 +358,7 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
 
             var response = new NonComplianceResponseModel { CheckSummaryId = Guid.NewGuid() };
 
-            _applicationServiceMock!.Setup(service => service.GetApplicationById(It.IsAny<Guid>()))!.ReturnsAsync(new entities.Application());
+            _applicationServiceMock!.Setup(service => service.GetApplicationById(It.IsAny<Guid>()))!.ReturnsAsync(new Entities.Application());
             _checkSummaryServiceMock!.Setup(service => service.SaveCheckSummary(It.IsAny<CheckOutcomeModel>())).ReturnsAsync(response);
 
             // Act
@@ -412,7 +413,7 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
                 SailingTime = DateTime.UtcNow,
             };
 
-            _applicationServiceMock!.Setup(service => service.GetApplicationById(It.IsAny<Guid>()))!.ReturnsAsync(new entities.Application());
+            _applicationServiceMock!.Setup(service => service.GetApplicationById(It.IsAny<Guid>()))!.ReturnsAsync(new Entities.Application());
 
             // Act
             _controller!.ModelState.AddModelError("CheckOutcome", "CheckOutcome is required");
@@ -655,9 +656,14 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
             var jsonString = JsonConvert.SerializeObject(badRequestResult.Value);
             var errorResponse = JsonConvert.DeserializeObject<ErrorResponse>(jsonString);
             Assert.That(errorResponse, Is.Not.Null);
-            Assert.That(errorResponse!.message, Is.EqualTo("Validation failed"));
-            Assert.That(errorResponse.errors[0].Field, Is.EqualTo("StartHour"));
-            Assert.That(errorResponse.errors[0].Error, Is.EqualTo("StartHour is required"));
+            Assert.That(errorResponse!.Message, Is.EqualTo("Validation failed"));
+            Assert.That(errorResponse, Is.Not.Null, "errorResponse should not be null");
+            Assert.That(errorResponse.Errors, Is.Not.Null.And.Not.Empty, "errorResponse.Errors should not be null or empty");
+            Assert.That(errorResponse.Errors![0]!, Is.Not.Null, "The first error in the list should not be null");
+
+            // Now you can safely assert on the properties
+            Assert.That(errorResponse.Errors[0].Field, Is.EqualTo("StartHour"), "The field should be 'StartHour'");
+            Assert.That(errorResponse.Errors[0].Error, Is.EqualTo("StartHour is required"), "The error message should be 'StartHour is required'");
         }
 
         [Test]
@@ -687,8 +693,8 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
             var jsonString = JsonConvert.SerializeObject(objectResult.Value);
             var errorResponse = JsonConvert.DeserializeObject<InternalServerErrorResponse>(jsonString);
             Assert.That(errorResponse, Is.Not.Null);
-            Assert.That(errorResponse!.error, Is.EqualTo("An error occurred while fetching check outcomes"));
-            Assert.That(errorResponse.details, Is.EqualTo("Mock Exception"));
+            Assert.That(errorResponse!.Error, Is.EqualTo("An error occurred while fetching check outcomes"));
+            Assert.That(errorResponse.Details, Is.EqualTo("Mock Exception"));
         }
 
  
@@ -788,19 +794,19 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
 
 public class ErrorResponse
     {
-        public string message { get; set; }
-        public List<FieldError> errors { get; set; }
+        public string? Message { get; set; }
+        public List<FieldError>? Errors { get; set; }
     }
 
     public class FieldError
     {
-        public string Field { get; set; }
-        public string Error { get; set; }
+        public string? Field { get; set; }
+        public string? Error { get; set; }
     }
 
     public class InternalServerErrorResponse
     {
-        public string error { get; set; }
-        public string details { get; set; }
+        public string? Error { get; set; }
+        public string? Details { get; set; }
     }
 }

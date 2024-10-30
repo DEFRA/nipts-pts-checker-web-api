@@ -1,12 +1,12 @@
 ﻿using Defra.PTS.Checker.Repositories.Interface;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics.CodeAnalysis;
-using entity = Defra.PTS.Checker.Entities;
+using Entity = Defra.PTS.Checker.Entities;
 
 namespace Defra.PTS.Checker.Repositories.Implementation
 {
     [ExcludeFromCodeCoverage]
-    public class PetRepository : Repository<entity.Pet>, IPetRepository
+    public class PetRepository : Repository<Entity.Pet>, IPetRepository
     {
         private readonly CommonDbContext _context;
 
@@ -15,7 +15,7 @@ namespace Defra.PTS.Checker.Repositories.Implementation
             _context = dbContext as CommonDbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }
 
-        public async Task<IEnumerable<entity.Pet>> GetByMicrochipNumberAsync(string microchipNumber)
+        public async Task<IEnumerable<Entity.Pet>> GetByMicrochipNumberAsync(string microchipNumber)
         {
             if (string.IsNullOrEmpty(microchipNumber))
             {

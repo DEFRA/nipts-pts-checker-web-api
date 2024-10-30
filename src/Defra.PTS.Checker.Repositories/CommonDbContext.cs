@@ -1,7 +1,7 @@
 ﻿using Defra.PTS.Checker.Entities;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics.CodeAnalysis;
-using entity = Defra.PTS.Checker.Entities;
+using Entity = Defra.PTS.Checker.Entities;
 
 namespace Defra.PTS.Checker.Repositories
 {
@@ -13,24 +13,24 @@ namespace Defra.PTS.Checker.Repositories
 
         }
 
-        public DbSet<entity.User> User { get; set; } = null!;
-        public DbSet<entity.Owner> Owner { get; set; } = null!;
-        public DbSet<entity.Address> Address { get; set; } = null!;
-        public DbSet<entity.Application> Application { get; set; } = null!;
-        public DbSet<entity.Pet> Pet { get; set; } = null!;
-        public DbSet<entity.Breed> Breed { get; set; } = null!;
-        public DbSet<entity.Colour> Colour { get; set; } = null!;
-        public DbSet<entity.TravelDocument> TravelDocument { get; set; } = null!;
-        public DbSet<entity.Operator> Operator { get; set; } = null!;
-        public DbSet<entity.Port> Port { get; set; } = null!;
-        public DbSet<entity.Route> Route { get; set; } = null!;
-        public DbSet<entity.Role> Role { get; set; } = null!;
-        public DbSet<entity.Checker> Checker { get; set; } = null!;
-        public DbSet<entity.Outcome> Outcome { get; set; } = null!;
-        public DbSet<entity.PasengerType> PasengerType { get; set; } = null!;
-        public DbSet<entity.CheckOutcome> CheckOutcome { get; set; } = null!;
-        public DbSet<entity.CheckSummary> CheckSummary { get; set; } = null!;
-        public DbSet<entity.VwApplication> VwApplications { get; set; } = null!;
+        public DbSet<Entity.User> User { get; set; } = null!;
+        public DbSet<Entity.Owner> Owner { get; set; } = null!;
+        public DbSet<Entity.Address> Address { get; set; } = null!;
+        public DbSet<Entity.Application> Application { get; set; } = null!;
+        public DbSet<Entity.Pet> Pet { get; set; } = null!;
+        public DbSet<Entity.Breed> Breed { get; set; } = null!;
+        public DbSet<Entity.Colour> Colour { get; set; } = null!;
+        public DbSet<Entity.TravelDocument> TravelDocument { get; set; } = null!;
+        public DbSet<Entity.Operator> Operator { get; set; } = null!;
+        public DbSet<Entity.Port> Port { get; set; } = null!;
+        public DbSet<Entity.Route> Route { get; set; } = null!;
+        public DbSet<Entity.Role> Role { get; set; } = null!;
+        public DbSet<Entity.Checker> Checker { get; set; } = null!;
+        public DbSet<Entity.Outcome> Outcome { get; set; } = null!;
+        public DbSet<Entity.PasengerType> PasengerType { get; set; } = null!;
+        public DbSet<Entity.CheckOutcome> CheckOutcome { get; set; } = null!;
+        public DbSet<Entity.CheckSummary> CheckSummary { get; set; } = null!;
+        public DbSet<Entity.VwApplication> VwApplications { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -96,7 +96,7 @@ namespace Defra.PTS.Checker.Repositories
                 .HasForeignKey(r => r.OperatorId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<entity.Checker>()
+            modelBuilder.Entity<Entity.Checker>()
               .HasOne(c => c.RoleNavigation)
               .WithMany(r => r.Checkers)
               .HasForeignKey(c => c.RoleId)

@@ -1,12 +1,12 @@
 ﻿using Defra.PTS.Checker.Repositories.Interface;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics.CodeAnalysis;
-using entity = Defra.PTS.Checker.Entities;
+using Entity = Defra.PTS.Checker.Entities;
 
 namespace Defra.PTS.Checker.Repositories.Implementation
 {
     [ExcludeFromCodeCoverage]
-    public class UserRepository : Repository<entity.User>, IUserRepository
+    public class UserRepository : Repository<Entity.User>, IUserRepository
     {
 
         private CommonDbContext? userContext
@@ -37,7 +37,7 @@ namespace Defra.PTS.Checker.Repositories.Implementation
             return user != null ? (user.Id, user.AddressId, user.Email!) : (Guid.Empty, Guid.Empty, string.Empty);
         }
 
-        public async Task<entity.User> GetUser(string userEmailAddress)
+        public async Task<Entity.User> GetUser(string userEmailAddress)
         {
             return await userContext!.User.SingleOrDefaultAsync(a => a.Email == userEmailAddress) ?? null!;
         }

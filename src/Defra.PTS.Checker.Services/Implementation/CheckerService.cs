@@ -1,5 +1,5 @@
 ﻿using Defra.PTS.Checker.Entities;
-using models = Defra.PTS.Checker.Models;
+using Models = Defra.PTS.Checker.Models;
 using Defra.PTS.Checker.Repositories.Interface;
 using Defra.PTS.Checker.Services.Enums;
 using Defra.PTS.Checker.Services.Interface;
@@ -29,7 +29,7 @@ public class CheckerService : ICheckerService
         _logger = logger;
     }
 
-    public async Task<Guid> SaveChecker(models.CheckerDto checkerDto)
+    public async Task<Guid> SaveChecker(Models.CheckerDto checkerDto)
     {
         var entity = await _checkerRepository.Find(checkerDto.Id);
         if (entity == null)
@@ -140,13 +140,13 @@ public class CheckerService : ICheckerService
                         },
                         Application = new
                         {
-                            ApplicationId = mostRelevantApplication.Id,
-                            mostRelevantApplication.ReferenceNumber,
-                            mostRelevantApplication.DateOfApplication,
-                            mostRelevantApplication.Status,
-                            mostRelevantApplication.DateAuthorised,
-                            mostRelevantApplication.DateRejected,
-                            mostRelevantApplication.DateRevoked
+                            ApplicationId = mostRelevantApplication?.Id,
+                            mostRelevantApplication?.ReferenceNumber,
+                            mostRelevantApplication?.DateOfApplication,
+                            mostRelevantApplication?.Status,
+                            mostRelevantApplication?.DateAuthorised,
+                            mostRelevantApplication?.DateRejected,
+                            mostRelevantApplication?.DateRevoked
                         },
                         TravelDocument = travelDocumentDetail,
                         PetOwner = petOwner
@@ -200,25 +200,31 @@ public class CheckerService : ICheckerService
                 return false;
             }
 
-            foreach (var pet in pets)
-            {
-                _logger.LogInformation("Processing pet with ID: {PetId}", pet.Id);
-
-                var applications = await _applicationRepository.GetApplicationsByPetIdAsync(pet.Id);
-
-                foreach (var application in applications)
+            var hasTravelDocument = await Task.WhenAny(
+                pets.Select(async pet =>
                 {
-                    var travelDocument = await _travelDocumentRepository.GetTravelDocumentByApplicationIdAsync(application.Id);
-                    if (travelDocument != null)
-                    {
-                        // Found a travel document associated with the pet's application
-                        return true;
-                    }
-                }
+                    _logger.LogInformation("Processing pet with ID: {PetId}", pet.Id);
+
+                    var applications = await _applicationRepository.GetApplicationsByPetIdAsync(pet.Id);
+
+                    return await Task.WhenAny(
+                        applications.Select(async application =>
+                        {
+                            var travelDocument = await _travelDocumentRepository.GetTravelDocumentByApplicationIdAsync(application.Id);
+                            return travelDocument != null;
+                        })
+                    ).Result;
+                })
+            ).Result;
+
+            if (hasTravelDocument)
+            {
+                return true;
             }
 
             // No travel documents found for any of the pet's applications
             _logger.LogInformation("No travel documents found for pets with microchip number: {MicrochipNumber}", microchipNumber);
+
             return false;
         }
         catch (Exception ex)

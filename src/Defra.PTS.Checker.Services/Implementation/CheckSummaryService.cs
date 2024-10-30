@@ -47,12 +47,11 @@ public class CheckSummaryService : ICheckSummaryService
 
         var timeSpan = endTime - startTime;
 
-        //TODO Check if the date value being populated is correct
         var checkSummaryEntity = new CheckSummary
         {
             ApplicationId = travelDocument.ApplicationId,
             CheckerId = checkOutcomeModel.CheckerId,
-            CheckOutcome = outcome.Id == 1,
+            CheckOutcome = outcome.Type == "Pass",
             ChipNumber = travelDocument.Application?.Pet?.MicrochipNumber,
             TravelDocumentId = travelDocument.Id,
             GBCheck = checkOutcomeModel.IsGBCheck,
@@ -171,7 +170,7 @@ public class CheckSummaryService : ICheckSummaryService
             var summaries = await _dbContext.CheckSummary
                 .Include(cs => cs.RouteNavigation)
                 .Where(cs => cs.Date.HasValue && cs.ScheduledSailingTime.HasValue && cs.RouteId.HasValue)
-                .Where(cs => cs.Date.Value >= preliminaryStartDate && cs.Date.Value <= preliminaryEndDate)
+                .Where(cs => cs.Date!.Value >= preliminaryStartDate && cs.Date.Value <= preliminaryEndDate)
                 .ToListAsync();
 
             // Precise filtering and combining Date and Time in memory
@@ -179,7 +178,7 @@ public class CheckSummaryService : ICheckSummaryService
                 .Select(cs => new
                 {
                     CheckSummary = cs,
-                    CombinedDateTime = cs.Date.Value.Add(cs.ScheduledSailingTime.Value)
+                    CombinedDateTime = cs?.Date!.Value.Add(cs.ScheduledSailingTime!.Value)
                 })
                 .Where(cs => cs.CombinedDateTime >= startDate && cs.CombinedDateTime <= endDate)
                 .OrderBy(cs => cs.CombinedDateTime)

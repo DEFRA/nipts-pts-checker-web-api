@@ -1,11 +1,11 @@
-﻿using entity = Defra.PTS.Checker.Entities;
+﻿using Entity = Defra.PTS.Checker.Entities;
 
 namespace Defra.PTS.Checker.Repositories.Interface
 {
-    public interface IOwnerRepository : IRepository<entity.Owner>
+    public interface IOwnerRepository : IRepository<Entity.Owner>
     {
         Task<bool> DoesOwnerExists(string ownerEmailAddress);
 
-        Task<entity.Owner> GetOwner(Guid ownerId);
+        Task<Entity.Owner> GetOwner(Guid ownerId);
     }
 }
