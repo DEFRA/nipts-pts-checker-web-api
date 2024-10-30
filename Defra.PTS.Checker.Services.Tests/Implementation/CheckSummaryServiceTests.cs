@@ -311,7 +311,6 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
         }
 
 
-        [Ignore("Test wokring locally but failing on azure")]
         public async Task GetRecentCheckOutcomesAsync_ReturnsGroupedResults()
         {
             // Arrange
