@@ -1,14 +1,14 @@
-﻿using Defra.PTS.Checker.Entities;
-using Defra.PTS.Checker.Models;
+﻿using Defra.PTS.Checker.Models;
 using Defra.PTS.Checker.Models.Constants;
 using Defra.PTS.Checker.Models.Search;
 using Defra.PTS.Checker.Services.Interface;
 using Defra.PTS.Checker.Web.Api.Controllers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.Management.AppService.Fluent.Models;
 using Moq;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
 using NUnit.Framework;
 using entities = Defra.PTS.Checker.Entities;
 
@@ -691,11 +691,102 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
             Assert.That(errorResponse.details, Is.EqualTo("Mock Exception"));
         }
 
+ 
 
+[Test]
+    public async Task GetSpsCheckDetailsByRoute_InternalServerError_ReturnsStatus500()
+    {
+        // Arrange
+        var model = new SpsCheckRequestModel
+        {
+            Route = "TestRoute",
+            SailingDate = DateTime.UtcNow,
+            TimeWindowInHours = 48
+        };
 
+        // Simulate an exception thrown by the service
+        _checkSummaryServiceMock!
+            .Setup(service => service.GetSpsCheckDetailsByRouteAsync(model.Route, model.SailingDate, model.TimeWindowInHours))
+            .ThrowsAsync(new Exception("Mock Exception"));
+
+        // Act
+        var result = await _controller!.GetSpsCheckDetailsByRoute(model);
+
+        // Assert
+        Assert.That(result, Is.InstanceOf<ObjectResult>());
+        var objectResult = result as ObjectResult;
+        Assert.That(objectResult, Is.Not.Null);
+        Assert.That(objectResult!.StatusCode, Is.EqualTo(StatusCodes.Status500InternalServerError));
+
+        // Convert result to JObject and verify error and details fields
+        var errorResponse = JObject.FromObject(objectResult.Value);
+        Assert.That(errorResponse["error"]?.ToString(), Is.EqualTo("An error occurred during processing."));
+        Assert.That(errorResponse["details"]?.ToString(), Is.EqualTo("Mock Exception"));
     }
 
-    public class ErrorResponse
+    [Test]
+    public async Task GetSpsCheckDetailsByRoute_InvalidRequest_ReturnsBadRequestResult()
+    {
+        // Arrange
+        var model = new SpsCheckRequestModel
+        {
+            Route = string.Empty, // Invalid Route
+            SailingDate = DateTime.UtcNow,
+            TimeWindowInHours = 48
+        };
+
+        // Simulate model validation error
+        _controller!.ModelState.AddModelError("Route", "Route is required");
+
+        // Act
+        var result = await _controller!.GetSpsCheckDetailsByRoute(model);
+
+        // Assert
+        Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+        var badRequestResult = result as BadRequestObjectResult;
+        Assert.That(badRequestResult, Is.Not.Null);
+        Assert.That(badRequestResult!.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
+
+        // Convert result to JObject and verify error field
+        var errorResponse = JObject.FromObject(badRequestResult.Value);
+        Assert.That(errorResponse["error"]?.ToString(), Is.EqualTo("Invalid request."));
+    }
+
+    [Test]
+    public async Task GetSpsCheckDetailsByRoute_NoCheckDetailsFound_ReturnsNotFoundResult()
+    {
+        // Arrange
+        var model = new SpsCheckRequestModel
+        {
+            Route = "TestRoute",
+            SailingDate = DateTime.UtcNow,
+            TimeWindowInHours = 48
+        };
+
+        _checkSummaryServiceMock!
+            .Setup(service => service.GetSpsCheckDetailsByRouteAsync(model.Route, model.SailingDate, model.TimeWindowInHours))
+            .ReturnsAsync(new List<SpsCheckDetailResponseModel>());
+
+        // Act
+        var result = await _controller!.GetSpsCheckDetailsByRoute(model);
+
+        // Assert
+        Assert.That(result, Is.InstanceOf<NotFoundObjectResult>());
+        var notFoundResult = result as NotFoundObjectResult;
+        Assert.That(notFoundResult, Is.Not.Null);
+        Assert.That(notFoundResult!.StatusCode, Is.EqualTo(StatusCodes.Status404NotFound));
+
+        // Convert result to JObject and verify message field
+        var messageResponse = JObject.FromObject(notFoundResult.Value);
+        Assert.That(messageResponse["message"]?.ToString(), Is.EqualTo("No SPS check details found."));
+    }
+
+
+
+
+}
+
+public class ErrorResponse
     {
         public string message { get; set; }
         public List<FieldError> errors { get; set; }

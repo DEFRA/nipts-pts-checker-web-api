@@ -243,6 +243,191 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             Assert.That(result, Is.Not.Null, "The result should not be null.");
             Assert.That(result.Count(), Is.EqualTo(2), $"The result should contain two grouped items but contains {result.Count()}.");
         }
+
+
+        [Test]
+        public async Task GetSpsCheckDetailsByRouteAsync_ReturnsCheckNeeded_WhenNoLinkedCheck()
+        {
+            // Arrange
+            var specificDate = DateTime.UtcNow.Date.AddDays(-1);
+
+            var route = new Entities.Route { RouteName = "Route1" };
+            await _dbContext.Route.AddAsync(route);
+            await _dbContext.SaveChangesAsync();
+
+            var colour = new Entities.Colour { Name = "Brown", SpeciesId = 1 };
+            await _dbContext.Colour.AddAsync(colour);
+            await _dbContext.SaveChangesAsync();
+
+            var pet = new Entities.Pet
+            {
+                MicrochipNumber = "1234567890",
+                SpeciesId = 1,
+                Colour = colour
+            };
+            await _dbContext.Pet.AddAsync(pet);
+            await _dbContext.SaveChangesAsync();
+
+            var travelDocument = new Entities.TravelDocument
+            {
+                DocumentReferenceNumber = "PTD001",
+                PetId = pet.Id
+            };
+            await _dbContext.TravelDocument.AddAsync(travelDocument);
+            await _dbContext.SaveChangesAsync();
+
+            var checkSummary = new Entities.CheckSummary
+            {
+                RouteId = 1, // Setting RouteId to 1 as specified
+                TravelDocumentId = travelDocument.Id,
+                Date = specificDate,
+                ScheduledSailingTime = TimeSpan.FromHours(10),
+                GBCheck = true,
+                CheckOutcome = false
+            };
+            await _dbContext.CheckSummary.AddAsync(checkSummary);
+            await _dbContext.SaveChangesAsync();
+            _dbContext.ChangeTracker.Clear();
+
+            // Act
+            var result = await _service.GetSpsCheckDetailsByRouteAsync("Route1", specificDate, 48);
+
+            // Assert
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.Count(), Is.EqualTo(1));
+            Assert.That(result.First().SPSOutcome, Is.EqualTo("Check Needed"));
+        }
+
+        [Test]
+        public async Task GetSpsCheckDetailsByRouteAsync_ReturnsAllowed_WhenLinkedCheckHasAllowedOutcome()
+        {
+            // Arrange
+            var specificDate = DateTime.UtcNow.Date.AddDays(-1);
+
+            var route = new Entities.Route { RouteName = "Route1" };
+            await _dbContext.Route.AddAsync(route);
+            await _dbContext.SaveChangesAsync();
+
+            var colour = new Entities.Colour { Name = "Black", SpeciesId = 1 };
+            await _dbContext.Colour.AddAsync(colour);
+            await _dbContext.SaveChangesAsync();
+
+            var pet = new Entities.Pet
+            {
+                MicrochipNumber = "1234567890",
+                SpeciesId = 1,
+                Colour = colour
+            };
+            await _dbContext.Pet.AddAsync(pet);
+            await _dbContext.SaveChangesAsync();
+
+            var travelDocument = new Entities.TravelDocument
+            {
+                DocumentReferenceNumber = "PTD002",
+                PetId = pet.Id
+            };
+            await _dbContext.TravelDocument.AddAsync(travelDocument);
+            await _dbContext.SaveChangesAsync();
+
+            var checkOutcome = new Entities.CheckOutcome
+            {
+                SPSOutcome = true,
+                PassengerTypeId = 1
+            };
+            await _dbContext.CheckOutcome.AddAsync(checkOutcome);
+            await _dbContext.SaveChangesAsync();
+
+            var checkSummary = new Entities.CheckSummary
+            {
+                RouteId = 1, // Setting RouteId to 1 as specified
+                TravelDocumentId = travelDocument.Id,
+                Date = specificDate,
+                ScheduledSailingTime = TimeSpan.FromHours(10),
+                LinkedCheckId = checkOutcome.Id,
+                GBCheck = true,
+                CheckOutcomeId = checkOutcome.Id,
+                CheckOutcome = false
+            };
+            await _dbContext.CheckSummary.AddAsync(checkSummary);
+            await _dbContext.SaveChangesAsync();
+            _dbContext.ChangeTracker.Clear();
+
+            // Act
+            var result = await _service.GetSpsCheckDetailsByRouteAsync("Route1", specificDate, 48);
+
+            // Assert
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.Count(), Is.EqualTo(1));
+            Assert.That(result.First().SPSOutcome, Is.EqualTo("Allowed"));
+            Assert.That(result.First().TravelBy, Is.EqualTo("Foot"));
+        }
+
+        [Test]
+        public async Task GetSpsCheckDetailsByRouteAsync_ReturnsNotAllowed_WhenLinkedCheckHasNotAllowedOutcome()
+        {
+            // Arrange
+            var specificDate = DateTime.UtcNow.Date.AddDays(-1);
+
+            var route = new Entities.Route { RouteName = "Route1" };
+            await _dbContext.Route.AddAsync(route);
+            await _dbContext.SaveChangesAsync();
+
+            var colour = new Entities.Colour { Name = "White", SpeciesId = 2 };
+            await _dbContext.Colour.AddAsync(colour);
+            await _dbContext.SaveChangesAsync();
+
+            var pet = new Entities.Pet
+            {
+                MicrochipNumber = "9876543210",
+                SpeciesId = 2,
+                Colour = colour
+            };
+            await _dbContext.Pet.AddAsync(pet);
+            await _dbContext.SaveChangesAsync();
+
+            var travelDocument = new Entities.TravelDocument
+            {
+                DocumentReferenceNumber = "PTD003",
+                PetId = pet.Id
+            };
+            await _dbContext.TravelDocument.AddAsync(travelDocument);
+            await _dbContext.SaveChangesAsync();
+
+            var checkOutcome = new Entities.CheckOutcome
+            {
+                SPSOutcome = false,
+                PassengerTypeId = 2
+            };
+            await _dbContext.CheckOutcome.AddAsync(checkOutcome);
+            await _dbContext.SaveChangesAsync();
+
+            var checkSummary = new Entities.CheckSummary
+            {
+                RouteId = 1, // Setting RouteId to 1 as specified
+                TravelDocumentId = travelDocument.Id,
+                Date = specificDate,
+                ScheduledSailingTime = TimeSpan.FromHours(10),
+                LinkedCheckId = checkOutcome.Id,
+                GBCheck = true,
+                CheckOutcomeId = checkOutcome.Id,
+                CheckOutcome = false
+            };
+            await _dbContext.CheckSummary.AddAsync(checkSummary);
+            await _dbContext.SaveChangesAsync();
+            _dbContext.ChangeTracker.Clear();
+
+            // Act
+            var result = await _service.GetSpsCheckDetailsByRouteAsync("Route1", specificDate, 48);
+
+            // Assert
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.Count(), Is.EqualTo(1));
+            Assert.That(result.First().SPSOutcome, Is.EqualTo("Not allowed"));
+            Assert.That(result.First().TravelBy, Is.EqualTo("Vehicle"));
+        }
+
+
+
     }
 
     public static class DataHelper

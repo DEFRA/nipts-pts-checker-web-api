@@ -283,4 +283,33 @@ public class CheckerController : ControllerBase
             return StatusCode(500, new { error = "An error occurred while fetching check outcomes", details = ex.Message });
         }
     }
+
+    [HttpPost("getSpsCheckDetailsByRoute")]
+    [SwaggerResponse(StatusCodes.Status200OK, "OK: Returns SPS check details", typeof(IEnumerable<SpsCheckDetailResponseModel>))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request: Invalid request", typeof(object))]
+    [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error: An error has occurred")]
+    public async Task<IActionResult> GetSpsCheckDetailsByRoute([FromBody] SpsCheckRequestModel model)
+    {
+        try
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new { error = "Invalid request." });
+            }
+
+            var checkDetails = await _checkSummaryService.GetSpsCheckDetailsByRouteAsync(model.Route, model.SailingDate, model.TimeWindowInHours);
+
+            if (!checkDetails.Any())
+            {
+                return NotFound(new { message = "No SPS check details found." });
+            }
+
+            return Ok(checkDetails);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = "An error occurred during processing.", details = ex.Message });
+        }
+    }
+
 }
