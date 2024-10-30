@@ -46,12 +46,11 @@ public class CheckSummaryService : ICheckSummaryService
 
         var timeSpan = endTime - startTime;
 
-        
         var checkSummaryEntity = new CheckSummary
         {
             ApplicationId = travelDocument.ApplicationId,
             CheckerId = checkOutcomeModel.CheckerId,
-            CheckOutcome = outcome.Id == 1,
+            CheckOutcome = outcome.Type == "Pass",
             ChipNumber = travelDocument.Application?.Pet?.MicrochipNumber,
             TravelDocumentId = travelDocument.Id,
             GBCheck = checkOutcomeModel.IsGBCheck,

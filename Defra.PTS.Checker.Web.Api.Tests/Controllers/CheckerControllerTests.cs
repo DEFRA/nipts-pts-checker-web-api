@@ -1,6 +1,7 @@
 ﻿using Defra.PTS.Checker.Entities;
 using Defra.PTS.Checker.Models;
 using Defra.PTS.Checker.Models.Constants;
+using Defra.PTS.Checker.Models.Enums;
 using Defra.PTS.Checker.Models.Search;
 using Defra.PTS.Checker.Services.Interface;
 using Defra.PTS.Checker.Web.Api.Controllers;
@@ -325,7 +326,7 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
                 CheckOutcome = string.Empty,
                 ApplicationId = new Guid("FF0DF803-8033-4CF8-B877-AB69BEFE63D2"),
                 RouteId = 1,
-                SailingTime = DateTime.UtcNow,
+                SailingTime = DateTime.UtcNow
             };
 
             _applicationServiceMock!.Setup(service => service.GetApplicationById(It.IsAny<Guid>()))!.ReturnsAsync(new Entities.Application());
