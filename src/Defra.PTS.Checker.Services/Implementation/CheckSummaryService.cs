@@ -6,6 +6,7 @@ using Defra.PTS.Checker.Services.Interface;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.SqlServer; // Include this namespace
 using Microsoft.Extensions.Logging;
+using Microsoft.Rest.ClientRuntime.Azure.Authentication.Utilities;
 using System;
 using System.ComponentModel;
 using System.Globalization;
@@ -193,7 +194,8 @@ public class CheckSummaryService : ICheckSummaryService
         }
     }
 
-    public async Task<IEnumerable<SpsCheckDetailResponseModel>> GetSpsCheckDetailsByRouteAsync(string route, DateTime sailingDate, int timeWindowInHours)
+    public async Task<IEnumerable<SpsCheckDetailResponseModel>> GetSpsCheckDetailsByRouteAsync(
+     string route, DateTime sailingDate, int timeWindowInHours)
     {
         var endDate = sailingDate.AddHours(timeWindowInHours);
 
@@ -210,34 +212,32 @@ public class CheckSummaryService : ICheckSummaryService
 
         int routeId = routeEntity.Id;
 
-        // Retrieve only relevant records and fields, with approximate filtering by Date range
+        // Retrieve records with date range filtering
         var checkSummaries = await _dbContext.CheckSummary
-    .Where(cs => cs.RouteId == routeId && cs.Date.HasValue
-                 && cs.GBCheck == true
-                 && cs.Date.Value >= sailingDate.Date && cs.Date.Value <= endDate.Date)
-    .Select(cs => new
-    {
-        cs.Date,
-        cs.ScheduledSailingTime,
-        cs.LinkedCheckId,
-        cs.CheckOutcomeId,
-        DocumentReferenceNumber = cs.TravelDocument != null ? cs.TravelDocument.DocumentReferenceNumber : null,
-        PetSpeciesId = cs.TravelDocument != null && cs.TravelDocument.Pet != null ? cs.TravelDocument.Pet.SpeciesId : (int?)null,
-        PetColourName = cs.TravelDocument != null && cs.TravelDocument.Pet != null && cs.TravelDocument.Pet.Colour != null ? cs.TravelDocument.Pet.Colour.Name : null,
-        PetOtherColour = cs.TravelDocument != null && cs.TravelDocument.Pet != null ? cs.TravelDocument.Pet.OtherColour : null,
-        MicrochipNumber = cs.TravelDocument != null && cs.TravelDocument.Pet != null ? cs.TravelDocument.Pet.MicrochipNumber : null
-    })
-    .ToListAsync();
-
+            .Where(cs => cs.RouteId == routeId && cs.Date.HasValue && cs.ScheduledSailingTime.HasValue
+                         && cs.GBCheck == true
+                         && cs.Date.Value >= sailingDate.Date && cs.Date.Value <= endDate.Date)
+            .Select(cs => new
+            {
+                cs.Date,
+                cs.ScheduledSailingTime,
+                cs.LinkedCheckId,
+                cs.CheckOutcomeId,
+                DocumentReferenceNumber = cs.TravelDocument != null ? cs.TravelDocument.DocumentReferenceNumber : null,
+                PetSpeciesId = cs.TravelDocument != null && cs.TravelDocument.Pet != null ? cs.TravelDocument.Pet.SpeciesId : (int?)null,
+                PetColourName = cs.TravelDocument != null && cs.TravelDocument.Pet != null && cs.TravelDocument.Pet.Colour != null ? cs.TravelDocument.Pet.Colour.Name : null,
+                PetOtherColour = cs.TravelDocument != null && cs.TravelDocument.Pet != null ? cs.TravelDocument.Pet.OtherColour : null,
+                MicrochipNumber = cs.TravelDocument != null && cs.TravelDocument.Pet != null ? cs.TravelDocument.Pet.MicrochipNumber : null
+            })
+            .ToListAsync();
 
         var responseList = new List<SpsCheckDetailResponseModel>();
 
         foreach (var cs in checkSummaries)
         {
-            // Combine Date and ScheduledSailingTime
-            var combinedDateTime = cs.Date.HasValue && cs.ScheduledSailingTime.HasValue
-                ? cs.Date.Value.Add(cs.ScheduledSailingTime.Value)
-                : DateTime.MinValue;
+            // Combine Date and ScheduledSailingTime in memory            
+            var combinedDateTime = cs.Date?.Add(cs.ScheduledSailingTime ?? TimeSpan.Zero) ?? DateTime.MinValue;
+
 
             if (combinedDateTime < sailingDate || combinedDateTime > endDate)
             {
@@ -248,6 +248,23 @@ public class CheckSummaryService : ICheckSummaryService
             string status;
             string travelBy;
 
+            var niCheck = await _dbContext.CheckOutcome
+                 .Where(co => co.Id == cs.CheckOutcomeId)
+                 .Select(co => new { co.SPSOutcome, co.PassengerTypeId })
+                 .FirstOrDefaultAsync();
+
+            if (niCheck == null)
+            {
+                continue; // Skip cases without a linked check
+            }
+
+            travelBy = niCheck.PassengerTypeId switch
+            {
+                1 => "Foot",
+                2 => "Vehicle",
+                _ => "" // Default to empty if PassengerTypeId is not 1 or 2
+            };
+
             if (cs.LinkedCheckId == null)
             {
                 var timeSinceSailing = DateTime.Now - combinedDateTime;
@@ -255,36 +272,16 @@ public class CheckSummaryService : ICheckSummaryService
                 {
                     continue; // Skip "Did Not Attend" cases
                 }
+
                 status = "Check Needed";
-                travelBy = ""; // Default to empty if no linked check exists
             }
             else
             {
-                var niCheck = await _dbContext.CheckOutcome
-                   .Where(co => co.Id == cs.CheckOutcomeId)
-                   .Select(co => new { co.SPSOutcome, co.PassengerTypeId })
-                   .FirstOrDefaultAsync();
-
-                if (niCheck == null)
-                {
-                    continue; // Skip cases without a linked check
-                }
-
-                // Determine status from SPSOutcome
                 status = niCheck.SPSOutcome == true ? "Allowed" : "Not allowed";
-
-                // Map PassengerTypeId to TravelBy
-                travelBy = niCheck.PassengerTypeId switch
-                {
-                    1 => "Foot",
-                    2 => "Vehicle",
-                    _ => "" // Default to empty if PassengerTypeId is not 1 or 2
-                };
             }
 
             // Get species description from PetSpeciesType enum
             var petSpeciesDescription = GetEnumDescription((PetSpeciesType)(cs.PetSpeciesId ?? 0));
-
 
             // Get Colour name or use OtherColour as fallback if Colour is null
             var colourDescription = cs.PetColourName ?? cs.PetOtherColour ?? "";

@@ -1,4 +1,6 @@
-﻿using Defra.PTS.Checker.Entities;
+﻿
+
+using Defra.PTS.Checker.Entities;
 using Defra.PTS.Checker.Models;
 using Defra.PTS.Checker.Services.Implementation;
 using Defra.PTS.Checker.Repositories;
@@ -20,7 +22,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
         [SetUp]
         public void Setup()
         {
-            
+
             var options = new DbContextOptionsBuilder<CommonDbContext>()
                 .UseInMemoryDatabase(Guid.NewGuid().ToString())
                 .Options;
@@ -30,7 +32,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             _loggerMock = new Mock<ILogger<CheckerService>>();
             _service = new CheckSummaryService(_dbContext, _loggerMock.Object);
 
-            
+
             DataHelper.AddRoutes(_dbContext);
         }
 
@@ -187,7 +189,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
                 FlightNumber = "AB1234",
             };
 
-            
+
             var outcome = await _dbContext.Outcome.FirstOrDefaultAsync(o => o.Type == model.CheckOutcome);
             if (outcome == null)
             {
@@ -400,6 +402,14 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
                 await _dbContext.TravelDocument.AddAsync(travelDocument);
                 await _dbContext.SaveChangesAsync();
 
+                var checkOutcome = new Entities.CheckOutcome
+                {
+                    SPSOutcome = true,
+                    PassengerTypeId = 1
+                };
+                await _dbContext.CheckOutcome.AddAsync(checkOutcome);
+                await _dbContext.SaveChangesAsync();
+
                 var checkSummary = new Entities.CheckSummary
                 {
                     RouteId = 1, // Setting RouteId to 1 as specified
@@ -407,6 +417,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
                     Date = specificDate,
                     ScheduledSailingTime = TimeSpan.FromHours(10),
                     GBCheck = true,
+                    CheckOutcomeId = checkOutcome.Id,
                     CheckOutcome = false
                 };
                 await _dbContext.CheckSummary.AddAsync(checkSummary);
@@ -590,7 +601,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             context.SaveChanges();
         }
 
-        
+
     }
 
 }
