@@ -212,22 +212,23 @@ public class CheckSummaryService : ICheckSummaryService
 
         // Retrieve only relevant records and fields, with approximate filtering by Date range
         var checkSummaries = await _dbContext.CheckSummary
-            .Where(cs => cs.RouteId == routeId && cs.Date.HasValue
-                         && cs.GBCheck == true
-                         && cs.Date.Value >= sailingDate.Date && cs.Date.Value <= endDate.Date)
-            .Select(cs => new
-            {
-                cs.Date,
-                cs.ScheduledSailingTime,
-                cs.LinkedCheckId,
-                cs.CheckOutcomeId,
-                cs.TravelDocument.DocumentReferenceNumber,
-                PetSpeciesId = cs.TravelDocument.Pet.SpeciesId,
-                PetColourName = cs.TravelDocument.Pet.Colour.Name,
-                PetOtherColour = cs.TravelDocument.Pet.OtherColour,
-                MicrochipNumber = cs.TravelDocument.Pet.MicrochipNumber
-            })
-            .ToListAsync();
+    .Where(cs => cs.RouteId == routeId && cs.Date.HasValue
+                 && cs.GBCheck == true
+                 && cs.Date.Value >= sailingDate.Date && cs.Date.Value <= endDate.Date)
+    .Select(cs => new
+    {
+        cs.Date,
+        cs.ScheduledSailingTime,
+        cs.LinkedCheckId,
+        cs.CheckOutcomeId,
+        DocumentReferenceNumber = cs.TravelDocument != null ? cs.TravelDocument.DocumentReferenceNumber : null,
+        PetSpeciesId = cs.TravelDocument != null && cs.TravelDocument.Pet != null ? cs.TravelDocument.Pet.SpeciesId : (int?)null,
+        PetColourName = cs.TravelDocument != null && cs.TravelDocument.Pet != null && cs.TravelDocument.Pet.Colour != null ? cs.TravelDocument.Pet.Colour.Name : null,
+        PetOtherColour = cs.TravelDocument != null && cs.TravelDocument.Pet != null ? cs.TravelDocument.Pet.OtherColour : null,
+        MicrochipNumber = cs.TravelDocument != null && cs.TravelDocument.Pet != null ? cs.TravelDocument.Pet.MicrochipNumber : null
+    })
+    .ToListAsync();
+
 
         var responseList = new List<SpsCheckDetailResponseModel>();
 
@@ -282,7 +283,8 @@ public class CheckSummaryService : ICheckSummaryService
             }
 
             // Get species description from PetSpeciesType enum
-            var petSpeciesDescription = GetEnumDescription((PetSpeciesType)cs.PetSpeciesId);
+            var petSpeciesDescription = GetEnumDescription((PetSpeciesType)(cs.PetSpeciesId ?? 0));
+
 
             // Get Colour name or use OtherColour as fallback if Colour is null
             var colourDescription = cs.PetColourName ?? cs.PetOtherColour ?? "";
