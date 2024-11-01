@@ -372,7 +372,8 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
         public async Task GetSpsCheckDetailsByRouteAsync_ReturnsCheckNeeded_WhenNoLinkedCheck()
         {
             // Arrange
-            var specificDate = DateTime.UtcNow.Date.AddDays(-1);
+            var specificDate = DateTime.Today.AddDays(-1); // Yesterday's date at midnight
+            var scheduledSailingTime = TimeSpan.Zero; // 00:00:00
 
             var route = new Entities.Route { RouteName = "Route1" };
 
@@ -389,7 +390,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
                 {
                     MicrochipNumber = "1234567890",
                     SpeciesId = 1,
-                    Colour = colour
+                    ColourId = colour.Id
                 };
                 await _dbContext.Pet.AddAsync(pet);
                 await _dbContext.SaveChangesAsync();
@@ -402,47 +403,43 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
                 await _dbContext.TravelDocument.AddAsync(travelDocument);
                 await _dbContext.SaveChangesAsync();
 
-                var checkOutcome = new Entities.CheckOutcome
-                {
-                    SPSOutcome = true,
-                    PassengerTypeId = 1
-                };
-                await _dbContext.CheckOutcome.AddAsync(checkOutcome);
-                await _dbContext.SaveChangesAsync();
+                // No CheckOutcome needed since LinkedCheckId is null
 
                 var checkSummary = new Entities.CheckSummary
                 {
-                    RouteId = 1, // Setting RouteId to 1 as specified
+                    RouteId = 1,
                     TravelDocumentId = travelDocument.Id,
-                    Date = specificDate,
-                    ScheduledSailingTime = TimeSpan.FromHours(10),
+                    Date = specificDate.Date,
+                    ScheduledSailingTime = scheduledSailingTime,
                     GBCheck = true,
-                    CheckOutcomeId = checkOutcome.Id,
-                    CheckOutcome = false
+                    LinkedCheckId = null, // No linked check
+                    CheckOutcomeId = null // No outcome
                 };
                 await _dbContext.CheckSummary.AddAsync(checkSummary);
                 await _dbContext.SaveChangesAsync();
+
                 _dbContext.ChangeTracker.Clear();
             }
 
             // Act
+            var timeWindowInHours = 48;
             if (_service != null)
             {
-                var result = await _service.GetSpsCheckDetailsByRouteAsync("Route1", specificDate, 48);
+                var result = await _service.GetSpsCheckDetailsByRouteAsync("Route1", specificDate, timeWindowInHours);
 
                 // Assert
                 Assert.That(result, Is.Not.Null);
                 Assert.That(result.Count(), Is.EqualTo(1));
                 Assert.That(result.First().SPSOutcome, Is.EqualTo("Check Needed"));
             }
-
         }
 
         [Test]
         public async Task GetSpsCheckDetailsByRouteAsync_ReturnsAllowed_WhenLinkedCheckHasAllowedOutcome()
         {
             // Arrange
-            var specificDate = DateTime.UtcNow.Date.AddDays(-1);
+            var specificDate = DateTime.Today.AddDays(-1);
+            var scheduledSailingTime = TimeSpan.Zero;
 
             var route = new Entities.Route { RouteName = "Route1" };
 
@@ -459,7 +456,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
                 {
                     MicrochipNumber = "1234567890",
                     SpeciesId = 1,
-                    Colour = colour
+                    ColourId = colour.Id
                 };
                 await _dbContext.Pet.AddAsync(pet);
                 await _dbContext.SaveChangesAsync();
@@ -474,32 +471,33 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
 
                 var checkOutcome = new Entities.CheckOutcome
                 {
-                    SPSOutcome = true,
-                    PassengerTypeId = 1
+                    SPSOutcome = true, // Allowed
+                    PassengerTypeId = 1 // Foot
                 };
                 await _dbContext.CheckOutcome.AddAsync(checkOutcome);
                 await _dbContext.SaveChangesAsync();
 
                 var checkSummary = new Entities.CheckSummary
                 {
-                    RouteId = 1, // Setting RouteId to 1 as specified
+                    RouteId = 1,
                     TravelDocumentId = travelDocument.Id,
-                    Date = specificDate,
-                    ScheduledSailingTime = TimeSpan.FromHours(10),
-                    LinkedCheckId = checkOutcome.Id,
+                    Date = specificDate.Date,
+                    ScheduledSailingTime = scheduledSailingTime,
                     GBCheck = true,
-                    CheckOutcomeId = checkOutcome.Id,
-                    CheckOutcome = false
+                    LinkedCheckId = Guid.NewGuid(), // Non-null linked check
+                    CheckOutcomeId = checkOutcome.Id
                 };
                 await _dbContext.CheckSummary.AddAsync(checkSummary);
                 await _dbContext.SaveChangesAsync();
+
                 _dbContext.ChangeTracker.Clear();
             }
 
             // Act
+            var timeWindowInHours = 48;
             if (_service != null)
             {
-                var result = await _service.GetSpsCheckDetailsByRouteAsync("Route1", specificDate, 48);
+                var result = await _service.GetSpsCheckDetailsByRouteAsync("Route1", specificDate, timeWindowInHours);
 
                 // Assert
                 Assert.That(result, Is.Not.Null);
@@ -507,14 +505,14 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
                 Assert.That(result.First().SPSOutcome, Is.EqualTo("Allowed"));
                 Assert.That(result.First().TravelBy, Is.EqualTo("Foot"));
             }
-
         }
 
         [Test]
         public async Task GetSpsCheckDetailsByRouteAsync_ReturnsNotAllowed_WhenLinkedCheckHasNotAllowedOutcome()
         {
             // Arrange
-            var specificDate = DateTime.UtcNow.Date.AddDays(-1);
+            var specificDate = DateTime.Today.AddDays(-1);
+            var scheduledSailingTime = TimeSpan.Zero;
 
             var route = new Entities.Route { RouteName = "Route1" };
 
@@ -531,7 +529,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
                 {
                     MicrochipNumber = "9876543210",
                     SpeciesId = 2,
-                    Colour = colour
+                    ColourId = colour.Id
                 };
                 await _dbContext.Pet.AddAsync(pet);
                 await _dbContext.SaveChangesAsync();
@@ -546,32 +544,33 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
 
                 var checkOutcome = new Entities.CheckOutcome
                 {
-                    SPSOutcome = false,
-                    PassengerTypeId = 2
+                    SPSOutcome = false, // Not allowed
+                    PassengerTypeId = 2 // Vehicle
                 };
                 await _dbContext.CheckOutcome.AddAsync(checkOutcome);
                 await _dbContext.SaveChangesAsync();
 
                 var checkSummary = new Entities.CheckSummary
                 {
-                    RouteId = 1, // Setting RouteId to 1 as specified
+                    RouteId = 1,
                     TravelDocumentId = travelDocument.Id,
-                    Date = specificDate,
-                    ScheduledSailingTime = TimeSpan.FromHours(10),
-                    LinkedCheckId = checkOutcome.Id,
+                    Date = specificDate.Date,
+                    ScheduledSailingTime = scheduledSailingTime,
                     GBCheck = true,
-                    CheckOutcomeId = checkOutcome.Id,
-                    CheckOutcome = false
+                    LinkedCheckId = Guid.NewGuid(), // Non-null linked check
+                    CheckOutcomeId = checkOutcome.Id
                 };
                 await _dbContext.CheckSummary.AddAsync(checkSummary);
                 await _dbContext.SaveChangesAsync();
+
                 _dbContext.ChangeTracker.Clear();
             }
 
             // Act
+            var timeWindowInHours = 48;
             if (_service != null)
             {
-                var result = await _service.GetSpsCheckDetailsByRouteAsync("Route1", specificDate, 48);
+                var result = await _service.GetSpsCheckDetailsByRouteAsync("Route1", specificDate, timeWindowInHours);
 
                 // Assert
                 Assert.That(result, Is.Not.Null);
@@ -579,9 +578,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
                 Assert.That(result.First().SPSOutcome, Is.EqualTo("Not allowed"));
                 Assert.That(result.First().TravelBy, Is.EqualTo("Vehicle"));
             }
-
         }
-
 
 
     }

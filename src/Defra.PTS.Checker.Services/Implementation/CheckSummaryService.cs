@@ -195,9 +195,11 @@ public class CheckSummaryService : ICheckSummaryService
     }
 
     public async Task<IEnumerable<SpsCheckDetailResponseModel>> GetSpsCheckDetailsByRouteAsync(
-     string route, DateTime sailingDate, int timeWindowInHours)
+    string route, DateTime sailingDate, int timeWindowInHours)
     {
-        var endDate = sailingDate.AddHours(timeWindowInHours);
+        // Extract date and time from sailingDate
+        DateTime sailingDateOnly = sailingDate.Date;
+        TimeSpan sailingTimeOnly = sailingDate.TimeOfDay;
 
         // Find RouteId based on the route name
         var routeEntity = await _dbContext.Route
@@ -212,11 +214,24 @@ public class CheckSummaryService : ICheckSummaryService
 
         int routeId = routeEntity.Id;
 
-        // Retrieve records with date range filtering
+        // Check if there is a scheduled ferry at the specified date and time
+        var scheduledFerryExists = await _dbContext.CheckSummary
+            .AnyAsync(cs => cs.RouteId == routeId
+                            && cs.Date == sailingDateOnly
+                            && cs.ScheduledSailingTime == sailingTimeOnly);
+
+        if (!scheduledFerryExists)
+        {
+            // No ferry is scheduled at this date and time for this route
+            return new List<SpsCheckDetailResponseModel>();
+        }
+
+        // Fetch records matching the specific sailing
         var checkSummaries = await _dbContext.CheckSummary
-            .Where(cs => cs.RouteId == routeId && cs.Date.HasValue && cs.ScheduledSailingTime.HasValue
-                         && cs.GBCheck == true
-                         && cs.Date.Value >= sailingDate.Date && cs.Date.Value <= endDate.Date)
+            .Where(cs => cs.RouteId == routeId
+                         && cs.Date == sailingDateOnly
+                         && cs.ScheduledSailingTime == sailingTimeOnly
+                         && cs.GBCheck == true)
             .Select(cs => new
             {
                 cs.Date,
@@ -235,35 +250,13 @@ public class CheckSummaryService : ICheckSummaryService
 
         foreach (var cs in checkSummaries)
         {
-            // Combine Date and ScheduledSailingTime in memory            
+            // Combine Date and ScheduledSailingTime using Value property
             var combinedDateTime = cs.Date?.Add(cs.ScheduledSailingTime ?? TimeSpan.Zero) ?? DateTime.MinValue;
 
 
-            if (combinedDateTime < sailingDate || combinedDateTime > endDate)
-            {
-                continue; // Skip records outside the precise time range
-            }
-
             // Determine the status based on LinkedCheckId and other conditions
             string status;
-            string travelBy;
-
-            var niCheck = await _dbContext.CheckOutcome
-                 .Where(co => co.Id == cs.CheckOutcomeId)
-                 .Select(co => new { co.SPSOutcome, co.PassengerTypeId })
-                 .FirstOrDefaultAsync();
-
-            if (niCheck == null)
-            {
-                continue; // Skip cases without a linked check
-            }
-
-            travelBy = niCheck.PassengerTypeId switch
-            {
-                1 => "Foot",
-                2 => "Vehicle",
-                _ => "" // Default to empty if PassengerTypeId is not 1 or 2
-            };
+            string travelBy = "";
 
             if (cs.LinkedCheckId == null)
             {
@@ -277,7 +270,26 @@ public class CheckSummaryService : ICheckSummaryService
             }
             else
             {
-                status = niCheck.SPSOutcome == true ? "Allowed" : "Not allowed";
+                var niCheck = await _dbContext.CheckOutcome
+                     .Where(co => co.Id == cs.CheckOutcomeId)
+                     .Select(co => new { co.SPSOutcome, co.PassengerTypeId })
+                     .FirstOrDefaultAsync();
+
+                if (niCheck == null)
+                {
+                    status = "Check Outcome Pending";
+                }
+                else
+                {
+                    travelBy = niCheck.PassengerTypeId switch
+                    {
+                        1 => "Foot",
+                        2 => "Vehicle",
+                        _ => ""
+                    };
+
+                    status = niCheck.SPSOutcome == true ? "Allowed" : "Not allowed";
+                }
             }
 
             // Get species description from PetSpeciesType enum
@@ -287,20 +299,26 @@ public class CheckSummaryService : ICheckSummaryService
             var colourDescription = cs.PetColourName ?? cs.PetOtherColour ?? "";
 
             // Populate response model with relevant details, defaulting nulls to empty strings
-            responseList.Add(new SpsCheckDetailResponseModel
+            var responseItem = new SpsCheckDetailResponseModel
             {
                 PTDNumber = cs.DocumentReferenceNumber ?? "",
                 PetDescription = $"{petSpeciesDescription}, {colourDescription}",
                 Microchip = cs.MicrochipNumber ?? "",
                 TravelBy = travelBy,
                 SPSOutcome = status
-            });
+            };
+
+            // Add to response list if not already present
+            if (!responseList.Contains(responseItem))
+            {
+                responseList.Add(responseItem);
+            }
         }
 
         return responseList;
     }
 
-    // Helper method to retrieve enum description
+    
     private string GetEnumDescription(PetSpeciesType speciesType)
     {
         var field = speciesType.GetType().GetField(speciesType.ToString());
@@ -309,6 +327,7 @@ public class CheckSummaryService : ICheckSummaryService
                               .FirstOrDefault();
         return attribute?.Description ?? speciesType.ToString();
     }
+
 
 }
 
