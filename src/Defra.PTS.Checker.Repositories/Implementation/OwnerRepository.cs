@@ -2,12 +2,12 @@
 using Defra.PTS.Checker.Repositories.Interface;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics.CodeAnalysis;
-using entity = Defra.PTS.Checker.Entities;
+using Entity = Defra.PTS.Checker.Entities;
 
 namespace Defra.PTS.Checker.Repositories.Implementation
 {
     [ExcludeFromCodeCoverage]
-    public class OwnerRepository : Repository<entity.Owner>, IOwnerRepository
+    public class OwnerRepository : Repository<Entity.Owner>, IOwnerRepository
     {
 
         private CommonDbContext? UserContext

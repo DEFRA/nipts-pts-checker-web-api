@@ -63,20 +63,14 @@ public class CheckOutcomeModel : IValidatableObject
             yield return new ValidationResult($"Sailing time is not valid", new[] { nameof(SailingTime) });
         }
 
-        if (SailingOption.GetValueOrDefault() == (int)sailOptions.Ferry)
+        if (SailingOption.GetValueOrDefault() == (int)sailOptions.Ferry && RouteId != null && RouteId.GetValueOrDefault() == 0)
         {
-            if (RouteId != null && RouteId.GetValueOrDefault() == 0)
-            {
-                yield return new ValidationResult($"RouteId is required", new[] { nameof(RouteId) });
-            }            
+            yield return new ValidationResult($"RouteId is required", new[] { nameof(RouteId) });
         }
 
-        if (SailingOption.GetValueOrDefault() == (int)sailOptions.Flight)
+        if (SailingOption.GetValueOrDefault() == (int)sailOptions.Flight && (string.IsNullOrEmpty(FlightNumber) || string.IsNullOrWhiteSpace(FlightNumber)))
         {
-            if (string.IsNullOrEmpty(FlightNumber) || string.IsNullOrWhiteSpace(FlightNumber))
-            {
-                yield return new ValidationResult($"Flight Number is required", new[] { nameof(FlightNumber) });
-            }
+            yield return new ValidationResult($"Flight Number is required", new[] { nameof(FlightNumber) });
         }
     }
 }

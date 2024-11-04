@@ -36,7 +36,7 @@ namespace Defra.PTS.Checker.Models
         public int? PassengerTypeId { get; set; }
 
         [SwaggerSchema("Relevant Comments")]
-        [StringLength(300, ErrorMessage = "Relevant Comments cannot exceed 300 characters.")]
+        [StringLength(500, ErrorMessage = "Relevant Comments cannot exceed 500 characters.")]
         public string? RelevantComments { get; set; }
 
         [SwaggerSchema("GB Outcome Passenger referred to DAERA/SPS at NI port")]
@@ -52,7 +52,7 @@ namespace Defra.PTS.Checker.Models
         public bool? SPSOutcome { get; set; }
 
         [SwaggerSchema("SPS Outcome Details")]
-        [StringLength(300, ErrorMessage = "SPS Outcome Details cannot exceed 300 characters.")]
+        [StringLength(500, ErrorMessage = "SPS Outcome Details cannot exceed 500 characters.")]
         public string? SPSOutcomeDetails { get; set; }
 
         public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
@@ -79,20 +79,14 @@ namespace Defra.PTS.Checker.Models
                 yield return new ValidationResult($"Sailing time is not valid", new[] { nameof(SailingTime) });
             }
 
-            if (SailingOption.GetValueOrDefault() == (int)sailOptions.Ferry)
+            if (SailingOption.GetValueOrDefault() == (int)sailOptions.Ferry && RouteId != null && RouteId.GetValueOrDefault() == 0)
             {
-                if (RouteId != null && RouteId.GetValueOrDefault() == 0)
-                {
-                    yield return new ValidationResult($"RouteId is required", new[] { nameof(RouteId) });
-                }                
+                yield return new ValidationResult($"RouteId is required", new[] { nameof(RouteId) });
             }
 
-            if (SailingOption.GetValueOrDefault() == (int)sailOptions.Flight)
+            if (SailingOption.GetValueOrDefault() == (int)sailOptions.Flight && (string.IsNullOrEmpty(FlightNumber) || string.IsNullOrWhiteSpace(FlightNumber)))
             {
-                if (string.IsNullOrEmpty(FlightNumber) || string.IsNullOrWhiteSpace(FlightNumber))
-                {
-                    yield return new ValidationResult($"Flight Number is required", new[] { nameof(FlightNumber) });
-                }
+                yield return new ValidationResult($"Flight Number is required", new[] { nameof(FlightNumber) });
             }
         }
     }

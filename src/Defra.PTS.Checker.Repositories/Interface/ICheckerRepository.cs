@@ -1,7 +1,7 @@
-﻿using entity = Defra.PTS.Checker.Entities;
+﻿using Entity = Defra.PTS.Checker.Entities;
 
 namespace Defra.PTS.Checker.Repositories.Interface;
 
-public interface ICheckerRepository : IRepository<entity.Checker>
+public interface ICheckerRepository : IRepository<Entity.Checker>
 {
 }
