@@ -231,7 +231,8 @@ public class CheckSummaryService : ICheckSummaryService
             .Where(cs => cs.RouteId == routeId
                          && cs.Date == sailingDateOnly
                          && cs.ScheduledSailingTime == sailingTimeOnly
-                         && cs.GBCheck == true)
+                         && cs.GBCheck == true
+                         && cs.CheckOutcome == false)
             .Select(cs => new
             {
                 cs.Date,

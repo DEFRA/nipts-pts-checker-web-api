@@ -412,6 +412,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
                     Date = specificDate.Date,
                     ScheduledSailingTime = scheduledSailingTime,
                     GBCheck = true,
+                    CheckOutcome = false,
                     LinkedCheckId = null, // No linked check
                     CheckOutcomeId = null // No outcome
                 };
@@ -484,6 +485,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
                     Date = specificDate.Date,
                     ScheduledSailingTime = scheduledSailingTime,
                     GBCheck = true,
+                    CheckOutcome = false,
                     LinkedCheckId = Guid.NewGuid(), // Non-null linked check
                     CheckOutcomeId = checkOutcome.Id
                 };
@@ -557,6 +559,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
                     Date = specificDate.Date,
                     ScheduledSailingTime = scheduledSailingTime,
                     GBCheck = true,
+                    CheckOutcome = false,
                     LinkedCheckId = Guid.NewGuid(), // Non-null linked check
                     CheckOutcomeId = checkOutcome.Id
                 };
