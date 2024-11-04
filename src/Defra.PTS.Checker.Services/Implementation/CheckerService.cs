@@ -131,6 +131,7 @@ public class CheckerService : ICheckerService
                             PetName = pet.Name,
                             Species = Enum.GetName(typeof(PetSpecies), pet.SpeciesId),
                             BreedName = pet.Breed?.Name,
+                            BreedAdditionalInfo = pet.AdditionalInfoMixedBreedOrUnknown,
                             Sex = Enum.GetName(typeof(PetGender), pet.SexId),
                             DateOfBirth = pet.DOB,
                             ColourName = pet.Colour?.Name,
