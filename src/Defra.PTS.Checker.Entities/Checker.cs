@@ -30,6 +30,9 @@ namespace Defra.PTS.Checker.Entities
         [Column("Role")]
         public int? RoleId { get; set; }
 
+        [Column("OrganisationId")]
+        public Guid? OrganisationId { get; set; }
+
         // Navigation property
         [ForeignKey("RoleId")]
         public virtual Role? RoleNavigation { get; set; }

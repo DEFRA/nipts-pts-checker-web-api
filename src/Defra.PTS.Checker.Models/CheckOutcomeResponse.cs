@@ -5,6 +5,7 @@ namespace Defra.PTS.Checker.Models;
 [ExcludeFromCodeCoverage]
 public class CheckOutcomeResponse
 {
+    public int? RouteId { get; set; }
     public string? RouteName { get; set; }
     public string? OperatorName { get; set; }
     public string? DeparturePort { get; set; }

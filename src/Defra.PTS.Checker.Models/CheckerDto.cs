@@ -16,4 +16,6 @@ public class CheckerDto
     public string? LastName { get; set; }
 
     public int? RoleId { get; set; }
+
+    public Guid? OrganisationId { get; set; }
 }

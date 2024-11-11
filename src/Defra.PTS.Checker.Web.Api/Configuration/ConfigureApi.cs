@@ -22,6 +22,7 @@ namespace Defra.PTS.Checker.Web.Api.Configuration
             services.AddTransient<ITravelDocumentService, TravelDocumentService>();
             services.AddTransient<ISailingService, SailingService>();
             services.AddTransient<ICheckSummaryService, CheckSummaryService>();
+            services.AddTransient<IOrganisationService, OrganisationService>();
 
             services.AddTransient<IPlacesApi>((provider) =>
             new PlacesApi(CreateApiClientConfigurationSettings(provider, configuration)));

@@ -71,7 +71,8 @@ public class CheckSummaryService : ICheckSummaryService
             checkSummaryEntity.RouteId = checkOutcomeModel?.RouteId;
         }
 
-
+        var nonComplianceModel = checkOutcomeModel as NonComplianceModel;
+        Guid gbCheckId = nonComplianceModel?.GBCheckId ?? Guid.Empty;
         if ((bool)checkSummaryEntity.CheckOutcome)
         {
             //Pass
@@ -79,8 +80,7 @@ public class CheckSummaryService : ICheckSummaryService
         }
         else
         {
-            //Fail
-            var nonComplianceModel = checkOutcomeModel as NonComplianceModel;
+            //Fail            
             var checkOutcomeEntity = new CheckOutcome
             {
                 MCNotMatch = nonComplianceModel?.MCNotMatch,
@@ -102,11 +102,28 @@ public class CheckSummaryService : ICheckSummaryService
             checkSummaryEntity.CheckOutcomeId = checkOutcomeEntity.Id;
             checkSummaryEntity.CheckOutcomeEntity = checkOutcomeEntity;
 
+            // Mapping LinkedCheckId to NI Entry          
+            if (!checkOutcomeModel.IsGBCheck && gbCheckId != Guid.Empty)
+            {
+                checkSummaryEntity.LinkedCheckId = gbCheckId;                
+            }
+
             _dbContext.Add(checkOutcomeEntity);
             _dbContext.Add(checkSummaryEntity);
         }
 
         await _dbContext.SaveChangesAsync();
+
+        // On Fail Reverse Mapping LinkedCheckId to GB Entry 
+        if (!checkOutcomeModel.IsGBCheck && gbCheckId != Guid.Empty && !(bool)checkSummaryEntity.CheckOutcome)
+        {
+            var gbSummary = await _dbContext.CheckSummary.FindAsync(gbCheckId);
+            gbSummary.LinkedCheckId = checkSummaryEntity.Id;
+
+            _dbContext.Update(gbSummary);
+            await _dbContext.SaveChangesAsync();
+        }
+
         var response = new CheckOutcomeResponseModel
         {
             CheckSummaryId = checkSummaryEntity.Id
@@ -124,6 +141,7 @@ public class CheckSummaryService : ICheckSummaryService
 
             var results = checkOutcomes.Select(co => new CheckOutcomeResponse
             {
+                RouteId = co.RouteId,
                 RouteName = co.RouteNavigation?.RouteName ?? "Unknown",
                 DepartureDate = co.Date.HasValue
                     ? co.Date.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture)
@@ -138,9 +156,10 @@ public class CheckSummaryService : ICheckSummaryService
                 FailCount = co.CheckOutcome == false ? 1 : 0
             })
             .Where(x => x.CombinedDateTime != DateTime.MinValue) // Ensure CombinedDateTime is valid
-            .GroupBy(x => new { x.RouteName, x.DepartureDate, x.DepartureTime, x.CombinedDateTime })
+            .GroupBy(x => new { x.RouteId, x.RouteName, x.DepartureDate, x.DepartureTime, x.CombinedDateTime })
             .Select(group => new CheckOutcomeResponse
             {
+                RouteId = group.Key.RouteId,
                 RouteName = group.Key.RouteName,
                 DepartureDate = group.Key.DepartureDate,
                 DepartureTime = group.Key.DepartureTime,
@@ -194,8 +213,7 @@ public class CheckSummaryService : ICheckSummaryService
         }
     }
 
-    public async Task<IEnumerable<SpsCheckDetailResponseModel>> GetSpsCheckDetailsByRouteAsync(
-    string route, DateTime sailingDate, int timeWindowInHours)
+    public async Task<IEnumerable<SpsCheckDetailResponseModel>> GetSpsCheckDetailsByRouteAsync(string route, DateTime sailingDate, int timeWindowInHours)
     {
         // Extract date and time from sailingDate
         DateTime sailingDateOnly = sailingDate.Date;
@@ -235,6 +253,7 @@ public class CheckSummaryService : ICheckSummaryService
                          && cs.CheckOutcome == false)
             .Select(cs => new
             {
+                cs.Id,
                 cs.Date,
                 cs.ScheduledSailingTime,
                 cs.LinkedCheckId,
@@ -306,7 +325,8 @@ public class CheckSummaryService : ICheckSummaryService
                 PetDescription = $"{petSpeciesDescription}, {colourDescription}",
                 Microchip = cs.MicrochipNumber ?? "",
                 TravelBy = travelBy,
-                SPSOutcome = status
+                SPSOutcome = status,
+                CheckSummaryId = cs.Id
             };
 
             // Add to response list if not already present
