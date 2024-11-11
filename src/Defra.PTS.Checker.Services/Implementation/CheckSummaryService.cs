@@ -253,13 +253,13 @@ public class CheckSummaryService : ICheckSummaryService
                          && cs.ScheduledSailingTime == sailingTimeOnly
                          && cs.GBCheck == true
                          && cs.CheckOutcome == false)
-            .Select(cs => new
+            .Select(cs => new InterimCheckSummary
             {
-                cs.Id,
-                cs.Date,
-                cs.ScheduledSailingTime,
-                cs.LinkedCheckId,
-                cs.CheckOutcomeId,
+                Id = cs.Id,
+                Date = cs.Date,
+                ScheduledSailingTime = cs.ScheduledSailingTime,
+                LinkedCheckId = cs.LinkedCheckId,
+                CheckOutcomeId = cs.CheckOutcomeId,
                 DocumentReferenceNumber = cs.TravelDocument != null ? cs.TravelDocument.DocumentReferenceNumber : null,
                 PetSpeciesId = cs.TravelDocument != null && cs.TravelDocument.Pet != null ? cs.TravelDocument.Pet.SpeciesId : (int?)null,
                 PetColourName = cs.TravelDocument != null && cs.TravelDocument.Pet != null && cs.TravelDocument.Pet.Colour != null ? cs.TravelDocument.Pet.Colour.Name : null,
@@ -268,6 +268,11 @@ public class CheckSummaryService : ICheckSummaryService
             })
             .ToListAsync();
 
+        return await getSpsCheckDetailResponse(timeWindowInHours, checkSummaries);
+    }
+
+    private async Task<IEnumerable<SpsCheckDetailResponseModel>> getSpsCheckDetailResponse(int timeWindowInHours, List<InterimCheckSummary> checkSummaries)
+    {
         var responseList = new List<SpsCheckDetailResponseModel>();
 
         foreach (var cs in checkSummaries)
@@ -341,7 +346,6 @@ public class CheckSummaryService : ICheckSummaryService
         return responseList;
     }
 
-    
     private string GetEnumDescription(PetSpeciesType speciesType)
     {
         var field = speciesType.GetType().GetField(speciesType.ToString());
@@ -352,6 +356,20 @@ public class CheckSummaryService : ICheckSummaryService
     }
 
 
+}
+
+public class InterimCheckSummary
+{
+    public Guid Id { get; set; }
+    public DateTime? Date { get; set; }
+    public TimeSpan? ScheduledSailingTime { get; set; }
+    public Guid? LinkedCheckId { get; set; }
+    public Guid? CheckOutcomeId { get; set; }
+    public string? DocumentReferenceNumber { get; set; }
+    public int? PetSpeciesId { get; set; }
+    public string? PetColourName { get; set; }
+    public string? PetOtherColour { get; set; }
+    public string? MicrochipNumber { get; set; }
 }
 
 
