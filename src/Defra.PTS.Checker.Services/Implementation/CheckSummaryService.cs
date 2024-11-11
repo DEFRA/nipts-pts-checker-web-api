@@ -47,7 +47,7 @@ public class CheckSummaryService : ICheckSummaryService
         }
 
         var timeSpan = endTime - startTime;
-
+        bool isGbCheck = checkOutcomeModel.IsGBCheck;
         var checkSummaryEntity = new CheckSummary
         {
             ApplicationId = travelDocument.ApplicationId,
@@ -55,7 +55,7 @@ public class CheckSummaryService : ICheckSummaryService
             CheckOutcome = outcome.Type == "Pass",
             ChipNumber = travelDocument.Application?.Pet?.MicrochipNumber,
             TravelDocumentId = travelDocument.Id,
-            GBCheck = checkOutcomeModel.IsGBCheck,
+            GBCheck = isGbCheck,
             Date = startTime,
             ScheduledSailingTime = timeSpan,
             CreatedBy = checkOutcomeModel.CheckerId,
@@ -103,7 +103,7 @@ public class CheckSummaryService : ICheckSummaryService
             checkSummaryEntity.CheckOutcomeEntity = checkOutcomeEntity;
 
             // Mapping LinkedCheckId to NI Entry          
-            if (!checkOutcomeModel.IsGBCheck && gbCheckId != Guid.Empty)
+            if (!isGbCheck && gbCheckId != Guid.Empty)
             {
                 checkSummaryEntity.LinkedCheckId = gbCheckId;                
             }
@@ -115,13 +115,15 @@ public class CheckSummaryService : ICheckSummaryService
         await _dbContext.SaveChangesAsync();
 
         // On Fail Reverse Mapping LinkedCheckId to GB Entry 
-        if (!checkOutcomeModel.IsGBCheck && gbCheckId != Guid.Empty && !(bool)checkSummaryEntity.CheckOutcome)
+        if (!isGbCheck && gbCheckId != Guid.Empty && !(bool)checkSummaryEntity.CheckOutcome)
         {
-            var gbSummary = await _dbContext.CheckSummary.FindAsync(gbCheckId);
-            gbSummary.LinkedCheckId = checkSummaryEntity.Id;
-
-            _dbContext.Update(gbSummary);
-            await _dbContext.SaveChangesAsync();
+            var gbSummary = await _dbContext.CheckSummary.FirstOrDefaultAsync(a => a.Id == gbCheckId);
+            if (gbSummary != null)
+            {
+                gbSummary.LinkedCheckId = checkSummaryEntity.Id;
+                _dbContext.Update(gbSummary);
+                await _dbContext.SaveChangesAsync();
+            }      
         }
 
         var response = new CheckOutcomeResponseModel

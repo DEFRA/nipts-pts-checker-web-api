@@ -17,7 +17,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
     {
         private Mock<IRepository<Organisation>> _organisationRepository;
         private Mock<ILogger<OrganisationService>>? _loggerMock;
-        private OrganisationService? _organisationService;
+        private OrganisationService _organisationService;
         public OrganisationServiceTests()
         {
             _organisationRepository = new Mock<IRepository<Organisation>>();
@@ -39,7 +39,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             };
             _organisationRepository.Setup(a => a.Find(It.IsAny<Guid>())).ReturnsAsync(organisation);
 
-            var result = await _organisationService.GetOrganisation(new Guid());
+            var result = await _organisationService.GetOrganisation(Guid.NewGuid());
 
             Assert.That(result, Is.Not.Null);
             Assert.That(result, Is.TypeOf<OrganisationResponseModel>());
@@ -51,10 +51,10 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
         [Test]
         public async Task GetOrganisation_When_Organisation_Null_ReturnsValidObject()
         {
-            Organisation organisation = null;
+            Organisation? organisation = null;
             _organisationRepository.Setup(a => a.Find(It.IsAny<Guid>())).ReturnsAsync(organisation);
 
-            var result = await _organisationService.GetOrganisation(new Guid());
+            var result = await _organisationService.GetOrganisation(Guid.NewGuid());
 
             Assert.That(result, Is.Null);
 

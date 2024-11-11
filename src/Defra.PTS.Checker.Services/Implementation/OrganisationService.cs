@@ -23,11 +23,12 @@ namespace Defra.PTS.Checker.Services.Implementation
         }
 
 
-        public async Task<OrganisationResponseModel> GetOrganisation(Guid organisationId)
+        public async Task<OrganisationResponseModel?> GetOrganisation(Guid organisationId)
         {
             var organisation = await _organisationRepository.Find(organisationId);
             if (organisation == null)
             {
+                _log.LogInformation("No organisation found with organisationId: {organisationId}", organisationId);
                 return null;
             }
 

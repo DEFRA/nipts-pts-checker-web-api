@@ -16,6 +16,6 @@ namespace Defra.PTS.Checker.Models
     {
         [SwaggerSchema("The OrganisationId")]
         [Required(ErrorMessage = "OrganisationId is required")]
-        public string OrganisationId { get; set; }
+        public string OrganisationId { get; set; } = string.Empty;
     }
 }

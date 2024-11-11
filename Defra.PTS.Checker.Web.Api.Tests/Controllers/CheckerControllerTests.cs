@@ -835,8 +835,7 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
                 OrganisationId = "FF0DF803-8033-4CF8-B877-AB69BEFE63D2",
             };
 
-            OrganisationResponseModel response = null;
-                //new OrganisationResponseModel { Id = Guid.NewGuid() };
+            OrganisationResponseModel? response = null;
             _organisationServiceMock!.Setup(service => service.GetOrganisation(It.IsAny<Guid>()))!.ReturnsAsync(response);
 
             // Act

@@ -9,6 +9,6 @@ namespace Defra.PTS.Checker.Services.Interface
 {
     public interface IOrganisationService
     {
-        public Task<OrganisationResponseModel> GetOrganisation(Guid organisationId);
+        public Task<OrganisationResponseModel?> GetOrganisation(Guid organisationId);
     }
 }
