@@ -43,16 +43,15 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
 
             Assert.That(result, Is.Not.Null);
             Assert.That(result, Is.TypeOf<OrganisationResponseModel>());
-            Assert.That(result.Id, Is.EqualTo(organisation.Id));
-            Assert.That(result.Name, Is.EqualTo("Test"));
-            Assert.That(result.IsActive, Is.True);
+            Assert.That(result?.Id, Is.EqualTo(organisation.Id));
+            Assert.That(result?.Name, Is.EqualTo("Test"));
+            Assert.That(result?.IsActive, Is.True);
         }
 
         [Test]
         public async Task GetOrganisation_When_Organisation_Null_ReturnsValidObject()
         {
-            Organisation? organisation = null;
-            _organisationRepository.Setup(a => a.Find(It.IsAny<Guid>())).ReturnsAsync(organisation);
+            _organisationRepository.Setup(a => a.Find(It.IsAny<Guid>())).ReturnsAsync((Organisation?)null);
 
             var result = await _organisationService.GetOrganisation(Guid.NewGuid());
 
