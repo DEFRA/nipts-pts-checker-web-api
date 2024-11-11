@@ -51,7 +51,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
         [Test]
         public async Task GetOrganisation_When_Organisation_Null_ReturnsValidObject()
         {
-            _organisationRepository.Setup(a => a.Find(It.IsAny<Guid>())).ReturnsAsync((Organisation?)null);
+            _organisationRepository.Setup(a => a.Find(It.IsAny<Guid>())).ReturnsAsync((Organisation?)null!);
 
             var result = await _organisationService.GetOrganisation(Guid.NewGuid());
 
