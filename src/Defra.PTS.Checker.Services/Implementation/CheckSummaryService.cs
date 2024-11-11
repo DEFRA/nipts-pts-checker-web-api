@@ -247,7 +247,14 @@ public class CheckSummaryService : ICheckSummaryService
         }
 
         // Fetch records matching the specific sailing
-        var checkSummaries = await _dbContext.CheckSummary
+        List<InterimCheckSummary> checkSummaries = await getCheckSummariesBySailing(sailingDateOnly, sailingTimeOnly, routeId);
+
+        return await getSpsCheckDetailResponse(timeWindowInHours, checkSummaries);
+    }
+
+    private async Task<List<InterimCheckSummary>> getCheckSummariesBySailing(DateTime sailingDateOnly, TimeSpan sailingTimeOnly, int routeId)
+    {
+        return await _dbContext.CheckSummary
             .Where(cs => cs.RouteId == routeId
                          && cs.Date == sailingDateOnly
                          && cs.ScheduledSailingTime == sailingTimeOnly
@@ -267,8 +274,6 @@ public class CheckSummaryService : ICheckSummaryService
                 MicrochipNumber = cs.TravelDocument != null && cs.TravelDocument.Pet != null ? cs.TravelDocument.Pet.MicrochipNumber : null
             })
             .ToListAsync();
-
-        return await getSpsCheckDetailResponse(timeWindowInHours, checkSummaries);
     }
 
     private async Task<IEnumerable<SpsCheckDetailResponseModel>> getSpsCheckDetailResponse(int timeWindowInHours, List<InterimCheckSummary> checkSummaries)
