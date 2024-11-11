@@ -282,64 +282,17 @@ public class CheckSummaryService : ICheckSummaryService
 
         foreach (var cs in checkSummaries)
         {
-            // Combine Date and ScheduledSailingTime using Value property
-            var combinedDateTime = cs.Date?.Add(cs.ScheduledSailingTime ?? TimeSpan.Zero) ?? DateTime.MinValue;
+            var combinedDateTime = GetCombinedDateTime(cs);
 
+            // Determine the status and travel method
+            var (status, travelBy) = await GetStatusAndTravelMethod(cs, timeWindowInHours, combinedDateTime);
 
-            // Determine the status based on LinkedCheckId and other conditions
-            string status;
-            string travelBy = "";
+            // Get species description and colour
+            var petSpeciesDescription = GetPetSpeciesDescription(cs.PetSpeciesId);
+            var colourDescription = GetColourDescription(cs.PetColourName, cs.PetOtherColour);
 
-            if (cs.LinkedCheckId == null)
-            {
-                var timeSinceSailing = DateTime.Now - combinedDateTime;
-                if (timeSinceSailing.TotalHours > timeWindowInHours)
-                {
-                    continue; // Skip "Did Not Attend" cases
-                }
-
-                status = "Check Needed";
-            }
-            else
-            {
-                var niCheck = await _dbContext.CheckOutcome
-                     .Where(co => co.Id == cs.CheckOutcomeId)
-                     .Select(co => new { co.SPSOutcome, co.PassengerTypeId })
-                     .FirstOrDefaultAsync();
-
-                if (niCheck == null)
-                {
-                    status = "Check Outcome Pending";
-                }
-                else
-                {
-                    travelBy = niCheck.PassengerTypeId switch
-                    {
-                        1 => "Foot",
-                        2 => "Vehicle",
-                        _ => ""
-                    };
-
-                    status = niCheck.SPSOutcome == true ? "Allowed" : "Not allowed";
-                }
-            }
-
-            // Get species description from PetSpeciesType enum
-            var petSpeciesDescription = GetEnumDescription((PetSpeciesType)(cs.PetSpeciesId ?? 0));
-
-            // Get Colour name or use OtherColour as fallback if Colour is null
-            var colourDescription = cs.PetColourName ?? cs.PetOtherColour ?? "";
-
-            // Populate response model with relevant details, defaulting nulls to empty strings
-            var responseItem = new SpsCheckDetailResponseModel
-            {
-                PTDNumber = cs.DocumentReferenceNumber ?? "",
-                PetDescription = $"{petSpeciesDescription}, {colourDescription}",
-                Microchip = cs.MicrochipNumber ?? "",
-                TravelBy = travelBy,
-                SPSOutcome = status,
-                CheckSummaryId = cs.Id
-            };
+            // Populate response model
+            var responseItem = CreateResponseItem(cs, petSpeciesDescription, colourDescription, travelBy, status);
 
             // Add to response list if not already present
             if (!responseList.Contains(responseItem))
@@ -349,6 +302,83 @@ public class CheckSummaryService : ICheckSummaryService
         }
 
         return responseList;
+    }
+
+    private DateTime GetCombinedDateTime(InterimCheckSummary cs)
+    {
+        return cs.Date?.Add(cs.ScheduledSailingTime ?? TimeSpan.Zero) ?? DateTime.MinValue;
+    }
+
+    private async Task<(string status, string travelBy)> GetStatusAndTravelMethod(InterimCheckSummary cs, int timeWindowInHours, DateTime combinedDateTime)
+    {
+        if (cs.LinkedCheckId == null)
+        {
+            return GetStatusForMissingLinkedCheckId(combinedDateTime, timeWindowInHours);
+        }
+
+        return await GetStatusForLinkedCheckId(cs);
+    }
+
+    private (string status, string travelBy) GetStatusForMissingLinkedCheckId(DateTime combinedDateTime, int timeWindowInHours)
+    {
+        var timeSinceSailing = DateTime.Now - combinedDateTime;
+        if (timeSinceSailing.TotalHours > timeWindowInHours)
+        {
+            return ("", ""); // Skip "Did Not Attend" cases
+        }
+
+        return ("Check Needed", "");
+    }
+
+    private async Task<(string status, string travelBy)> GetStatusForLinkedCheckId(InterimCheckSummary cs)
+    {
+        var niCheck = await _dbContext.CheckOutcome
+            .Where(co => co.Id == cs.CheckOutcomeId)
+            .Select(co => new { co.SPSOutcome, co.PassengerTypeId })
+            .FirstOrDefaultAsync();
+
+        if (niCheck == null)
+        {
+            return ("Check Outcome Pending", "");
+        }
+
+        var travelBy = GetTravelMethod(niCheck.PassengerTypeId);
+        var status = niCheck.SPSOutcome == true ? "Allowed" : "Not allowed";
+
+        return (status, travelBy);
+    }
+
+    private string GetTravelMethod(int? passengerTypeId)
+    {
+        return passengerTypeId switch
+        {
+            1 => "Foot",
+            2 => "Vehicle",
+            _ => ""
+        };
+    }
+
+    private string GetPetSpeciesDescription(int? petSpeciesId)
+    {
+        return GetEnumDescription((PetSpeciesType)(petSpeciesId ?? 0));
+    }
+
+    private string GetColourDescription(string petColourName, string petOtherColour)
+    {
+        return petColourName ?? petOtherColour ?? "";
+    }
+
+    private SpsCheckDetailResponseModel CreateResponseItem(InterimCheckSummary cs, string petSpeciesDescription, string colourDescription, string travelBy, string status)
+    {
+        return new SpsCheckDetailResponseModel
+        {
+            PTDNumber = cs.DocumentReferenceNumber ?? "",
+            PetDescription = $"{petSpeciesDescription}, {colourDescription}",
+            Microchip = cs.MicrochipNumber ?? "",
+            TravelBy = travelBy,
+            SPSOutcome = status,
+            CheckSummaryId = cs.Id
+        };
     }
 
     private string GetEnumDescription(PetSpeciesType speciesType)
