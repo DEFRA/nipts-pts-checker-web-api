@@ -304,7 +304,7 @@ public class CheckSummaryService : ICheckSummaryService
         return responseList;
     }
 
-    private DateTime GetCombinedDateTime(InterimCheckSummary cs)
+    private static DateTime GetCombinedDateTime(InterimCheckSummary cs)
     {
         return cs.Date?.Add(cs.ScheduledSailingTime ?? TimeSpan.Zero) ?? DateTime.MinValue;
     }
@@ -319,7 +319,7 @@ public class CheckSummaryService : ICheckSummaryService
         return await GetStatusForLinkedCheckId(cs);
     }
 
-    private (string status, string travelBy) GetStatusForMissingLinkedCheckId(DateTime combinedDateTime, int timeWindowInHours)
+    private static (string status, string travelBy) GetStatusForMissingLinkedCheckId(DateTime combinedDateTime, int timeWindowInHours)
     {
         var timeSinceSailing = DateTime.Now - combinedDateTime;
         if (timeSinceSailing.TotalHours > timeWindowInHours)
@@ -348,7 +348,7 @@ public class CheckSummaryService : ICheckSummaryService
         return (status, travelBy);
     }
 
-    private string GetTravelMethod(int? passengerTypeId)
+    private static string GetTravelMethod(int? passengerTypeId)
     {
         return passengerTypeId switch
         {
@@ -363,12 +363,12 @@ public class CheckSummaryService : ICheckSummaryService
         return GetEnumDescription((PetSpeciesType)(petSpeciesId ?? 0));
     }
 
-    private string GetColourDescription(string petColourName, string petOtherColour)
+    private static string GetColourDescription(string? petColourName, string? petOtherColour)
     {
         return petColourName ?? petOtherColour ?? "";
     }
 
-    private SpsCheckDetailResponseModel CreateResponseItem(InterimCheckSummary cs, string petSpeciesDescription, string colourDescription, string travelBy, string status)
+    private static SpsCheckDetailResponseModel CreateResponseItem(InterimCheckSummary cs, string petSpeciesDescription, string colourDescription, string travelBy, string status)
     {
         return new SpsCheckDetailResponseModel
         {
