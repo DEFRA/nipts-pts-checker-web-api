@@ -15,12 +15,14 @@ public class CheckerController : ControllerBase
     private readonly IApplicationService _applicationService;
     private readonly ICheckerService _checkerService;
     private readonly ICheckSummaryService _checkSummaryService;
+    private readonly IOrganisationService _organisationService;
 
-    public CheckerController(IApplicationService applicationService, ICheckerService checkerService, ICheckSummaryService checkSummaryService)
+    public CheckerController(IApplicationService applicationService, ICheckerService checkerService, ICheckSummaryService checkSummaryService, IOrganisationService organisationService)
     {
         _applicationService = applicationService;
         _checkerService = checkerService;
         _checkSummaryService = checkSummaryService;
+        _organisationService = organisationService;
     }
 
     [HttpPost("checkApplicationNumber")]
@@ -32,6 +34,7 @@ public class CheckerController : ControllerBase
             OperationId = "checkApplicationNumber",
             Tags = new[] { "Checker" },
             Summary = "Retrieves a specific application by Reference Number",
+
             Description = "Returns the application details for the specified Application Number"
         )]
     public async Task<IActionResult> CheckApplicationNumber([FromBody] SearchByApplicationNumberRequest request)
@@ -185,8 +188,6 @@ public class CheckerController : ControllerBase
         return Ok(response);
     }
 
-
-
     [HttpPost]
     [Route("checkerUser")]
     [SwaggerResponse(StatusCodes.Status200OK, "OK: Returns the Id of checker", typeof(Guid))]
@@ -310,6 +311,35 @@ public class CheckerController : ControllerBase
         {
             return StatusCode(500, new { error = "An error occurred during processing.", details = ex.Message });
         }
+    }
+
+
+    [HttpPost]
+    [Route("getOrganisation")]
+    [SwaggerResponse(StatusCodes.Status200OK, "OK: Returns the Organisation", typeof(OrganisationResponseModel))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request: OrganisationId is not provided or is not valid", typeof(IDictionary<string, string>))]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Not Found: There is no Organisation matching this OrganisationId")]
+    [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error: An error has occurred")]
+    [SwaggerOperation(
+        OperationId = "organisationId",
+        Tags = new[] { "Organisation" },
+        Summary = "Retrieves a specific Organisation by OrganisationId",
+        Description = "Returns the Organisation details for the specified OrganisationId"
+    )]
+    public async Task<IActionResult> GetOrganisationById([FromBody, SwaggerRequestBody("The search payload", Required = true)] OrganisationRequestModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var organisation = await _organisationService.GetOrganisation(Guid.Parse(model.OrganisationId));
+        if (organisation == null)
+        {
+            return new NotFoundObjectResult(ApiConstants.OrganisationNotFound);
+        }
+
+       return Ok(organisation);
     }
 
 }

@@ -307,7 +307,8 @@ namespace Defra.PTS.Checker.Tests.Services
                 Id = Guid.NewGuid(),
                 FirstName = "Test",
                 LastName = "Test",
-                RoleId = null
+                RoleId = null,
+                OrganisationId = Guid.NewGuid(),
             };
 
             _checkerRepositoryMock!.Setup(repo => repo.Add(It.IsAny<Entities.Checker>()))
@@ -324,13 +325,15 @@ namespace Defra.PTS.Checker.Tests.Services
         [Test]
         public async Task CheckerUser_UpdateChecker()
         {
+            Guid organisationId = Guid.NewGuid();
             // Arrange
             var checkerDto = new Models.CheckerDto
             {
                 Id = Guid.NewGuid(),
                 FirstName = "Test",
                 LastName = "Test",
-                RoleId = null
+                RoleId = null,
+                OrganisationId = organisationId,
             };
 
             var checkerEntity = new Entities.Checker
@@ -339,7 +342,8 @@ namespace Defra.PTS.Checker.Tests.Services
                 FirstName = checkerDto.FirstName,
                 LastName = checkerDto.LastName,
                 FullName = $"{checkerDto.FirstName} {checkerDto.LastName}",
-                RoleId = null
+                RoleId = null,
+                OrganisationId = organisationId,
             };
 
             _checkerRepositoryMock!.Setup(repo => repo.Find(It.IsAny<Guid>()))

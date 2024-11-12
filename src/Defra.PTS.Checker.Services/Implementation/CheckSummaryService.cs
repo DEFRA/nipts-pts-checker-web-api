@@ -47,7 +47,7 @@ public class CheckSummaryService : ICheckSummaryService
         }
 
         var timeSpan = endTime - startTime;
-
+        bool isGbCheck = checkOutcomeModel.IsGBCheck;
         var checkSummaryEntity = new CheckSummary
         {
             ApplicationId = travelDocument.ApplicationId,
@@ -55,7 +55,7 @@ public class CheckSummaryService : ICheckSummaryService
             CheckOutcome = outcome.Type == "Pass",
             ChipNumber = travelDocument.Application?.Pet?.MicrochipNumber,
             TravelDocumentId = travelDocument.Id,
-            GBCheck = checkOutcomeModel.IsGBCheck,
+            GBCheck = isGbCheck,
             Date = startTime,
             ScheduledSailingTime = timeSpan,
             CreatedBy = checkOutcomeModel.CheckerId,
@@ -71,7 +71,8 @@ public class CheckSummaryService : ICheckSummaryService
             checkSummaryEntity.RouteId = checkOutcomeModel?.RouteId;
         }
 
-
+        var nonComplianceModel = checkOutcomeModel as NonComplianceModel;
+        Guid gbCheckId = nonComplianceModel?.GBCheckId ?? Guid.Empty;
         if ((bool)checkSummaryEntity.CheckOutcome)
         {
             //Pass
@@ -79,8 +80,7 @@ public class CheckSummaryService : ICheckSummaryService
         }
         else
         {
-            //Fail
-            var nonComplianceModel = checkOutcomeModel as NonComplianceModel;
+            //Fail            
             var checkOutcomeEntity = new CheckOutcome
             {
                 MCNotMatch = nonComplianceModel?.MCNotMatch,
@@ -102,11 +102,30 @@ public class CheckSummaryService : ICheckSummaryService
             checkSummaryEntity.CheckOutcomeId = checkOutcomeEntity.Id;
             checkSummaryEntity.CheckOutcomeEntity = checkOutcomeEntity;
 
+            // Mapping LinkedCheckId to NI Entry          
+            if (!isGbCheck && gbCheckId != Guid.Empty)
+            {
+                checkSummaryEntity.LinkedCheckId = gbCheckId;                
+            }
+
             _dbContext.Add(checkOutcomeEntity);
             _dbContext.Add(checkSummaryEntity);
         }
 
         await _dbContext.SaveChangesAsync();
+
+        // On Fail Reverse Mapping LinkedCheckId to GB Entry 
+        if (!isGbCheck && gbCheckId != Guid.Empty && !(bool)checkSummaryEntity.CheckOutcome)
+        {
+            var gbSummary = await _dbContext.CheckSummary.FirstOrDefaultAsync(a => a.Id == gbCheckId);
+            if (gbSummary != null)
+            {
+                gbSummary.LinkedCheckId = checkSummaryEntity.Id;
+                _dbContext.Update(gbSummary);
+                await _dbContext.SaveChangesAsync();
+            }      
+        }
+
         var response = new CheckOutcomeResponseModel
         {
             CheckSummaryId = checkSummaryEntity.Id
@@ -124,6 +143,7 @@ public class CheckSummaryService : ICheckSummaryService
 
             var results = checkOutcomes.Select(co => new CheckOutcomeResponse
             {
+                RouteId = co.RouteId,
                 RouteName = co.RouteNavigation?.RouteName ?? "Unknown",
                 DepartureDate = co.Date.HasValue
                     ? co.Date.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture)
@@ -138,9 +158,10 @@ public class CheckSummaryService : ICheckSummaryService
                 FailCount = co.CheckOutcome == false ? 1 : 0
             })
             .Where(x => x.CombinedDateTime != DateTime.MinValue) // Ensure CombinedDateTime is valid
-            .GroupBy(x => new { x.RouteName, x.DepartureDate, x.DepartureTime, x.CombinedDateTime })
+            .GroupBy(x => new { x.RouteId, x.RouteName, x.DepartureDate, x.DepartureTime, x.CombinedDateTime })
             .Select(group => new CheckOutcomeResponse
             {
+                RouteId = group.Key.RouteId,
                 RouteName = group.Key.RouteName,
                 DepartureDate = group.Key.DepartureDate,
                 DepartureTime = group.Key.DepartureTime,
@@ -194,8 +215,7 @@ public class CheckSummaryService : ICheckSummaryService
         }
     }
 
-    public async Task<IEnumerable<SpsCheckDetailResponseModel>> GetSpsCheckDetailsByRouteAsync(
-    string route, DateTime sailingDate, int timeWindowInHours)
+    public async Task<IEnumerable<SpsCheckDetailResponseModel>> GetSpsCheckDetailsByRouteAsync(string route, DateTime sailingDate, int timeWindowInHours)
     {
         // Extract date and time from sailingDate
         DateTime sailingDateOnly = sailingDate.Date;
@@ -227,18 +247,26 @@ public class CheckSummaryService : ICheckSummaryService
         }
 
         // Fetch records matching the specific sailing
-        var checkSummaries = await _dbContext.CheckSummary
+        List<InterimCheckSummary> checkSummaries = await getCheckSummariesBySailing(sailingDateOnly, sailingTimeOnly, routeId);
+
+        return await getSpsCheckDetailResponse(timeWindowInHours, checkSummaries);
+    }
+
+    private async Task<List<InterimCheckSummary>> getCheckSummariesBySailing(DateTime sailingDateOnly, TimeSpan sailingTimeOnly, int routeId)
+    {
+        return await _dbContext.CheckSummary
             .Where(cs => cs.RouteId == routeId
                          && cs.Date == sailingDateOnly
                          && cs.ScheduledSailingTime == sailingTimeOnly
                          && cs.GBCheck == true
                          && cs.CheckOutcome == false)
-            .Select(cs => new
+            .Select(cs => new InterimCheckSummary
             {
-                cs.Date,
-                cs.ScheduledSailingTime,
-                cs.LinkedCheckId,
-                cs.CheckOutcomeId,
+                Id = cs.Id,
+                Date = cs.Date,
+                ScheduledSailingTime = cs.ScheduledSailingTime,
+                LinkedCheckId = cs.LinkedCheckId,
+                CheckOutcomeId = cs.CheckOutcomeId,
                 DocumentReferenceNumber = cs.TravelDocument != null ? cs.TravelDocument.DocumentReferenceNumber : null,
                 PetSpeciesId = cs.TravelDocument != null && cs.TravelDocument.Pet != null ? cs.TravelDocument.Pet.SpeciesId : (int?)null,
                 PetColourName = cs.TravelDocument != null && cs.TravelDocument.Pet != null && cs.TravelDocument.Pet.Colour != null ? cs.TravelDocument.Pet.Colour.Name : null,
@@ -246,68 +274,25 @@ public class CheckSummaryService : ICheckSummaryService
                 MicrochipNumber = cs.TravelDocument != null && cs.TravelDocument.Pet != null ? cs.TravelDocument.Pet.MicrochipNumber : null
             })
             .ToListAsync();
+    }
 
+    private async Task<IEnumerable<SpsCheckDetailResponseModel>> getSpsCheckDetailResponse(int timeWindowInHours, List<InterimCheckSummary> checkSummaries)
+    {
         var responseList = new List<SpsCheckDetailResponseModel>();
 
         foreach (var cs in checkSummaries)
         {
-            // Combine Date and ScheduledSailingTime using Value property
-            var combinedDateTime = cs.Date?.Add(cs.ScheduledSailingTime ?? TimeSpan.Zero) ?? DateTime.MinValue;
+            var combinedDateTime = GetCombinedDateTime(cs);
 
+            // Determine the status and travel method
+            var (status, travelBy) = await GetStatusAndTravelMethod(cs, timeWindowInHours, combinedDateTime);
 
-            // Determine the status based on LinkedCheckId and other conditions
-            string status;
-            string travelBy = "";
+            // Get species description and colour
+            var petSpeciesDescription = GetPetSpeciesDescription(cs.PetSpeciesId);
+            var colourDescription = GetColourDescription(cs.PetColourName, cs.PetOtherColour);
 
-            if (cs.LinkedCheckId == null)
-            {
-                var timeSinceSailing = DateTime.Now - combinedDateTime;
-                if (timeSinceSailing.TotalHours > timeWindowInHours)
-                {
-                    continue; // Skip "Did Not Attend" cases
-                }
-
-                status = "Check Needed";
-            }
-            else
-            {
-                var niCheck = await _dbContext.CheckOutcome
-                     .Where(co => co.Id == cs.CheckOutcomeId)
-                     .Select(co => new { co.SPSOutcome, co.PassengerTypeId })
-                     .FirstOrDefaultAsync();
-
-                if (niCheck == null)
-                {
-                    status = "Check Outcome Pending";
-                }
-                else
-                {
-                    travelBy = niCheck.PassengerTypeId switch
-                    {
-                        1 => "Foot",
-                        2 => "Vehicle",
-                        _ => ""
-                    };
-
-                    status = niCheck.SPSOutcome == true ? "Allowed" : "Not allowed";
-                }
-            }
-
-            // Get species description from PetSpeciesType enum
-            var petSpeciesDescription = GetEnumDescription((PetSpeciesType)(cs.PetSpeciesId ?? 0));
-
-            // Get Colour name or use OtherColour as fallback if Colour is null
-            var colourDescription = cs.PetColourName ?? cs.PetOtherColour ?? "";
-
-            // Populate response model with relevant details, defaulting nulls to empty strings
-            var responseItem = new SpsCheckDetailResponseModel
-            {
-                PTDNumber = cs.DocumentReferenceNumber ?? "",
-                PetDescription = $"{petSpeciesDescription}, {colourDescription}",
-                Microchip = cs.MicrochipNumber ?? "",
-                TravelBy = travelBy,
-                SPSOutcome = status
-            };
+            // Populate response model
+            var responseItem = CreateResponseItem(cs, petSpeciesDescription, colourDescription, travelBy, status);
 
             // Add to response list if not already present
             if (!responseList.Contains(responseItem))
@@ -319,7 +304,83 @@ public class CheckSummaryService : ICheckSummaryService
         return responseList;
     }
 
-    
+    private static DateTime GetCombinedDateTime(InterimCheckSummary cs)
+    {
+        return cs.Date?.Add(cs.ScheduledSailingTime ?? TimeSpan.Zero) ?? DateTime.MinValue;
+    }
+
+    private async Task<(string status, string travelBy)> GetStatusAndTravelMethod(InterimCheckSummary cs, int timeWindowInHours, DateTime combinedDateTime)
+    {
+        if (cs.LinkedCheckId == null)
+        {
+            return GetStatusForMissingLinkedCheckId(combinedDateTime, timeWindowInHours);
+        }
+
+        return await GetStatusForLinkedCheckId(cs);
+    }
+
+    private static (string status, string travelBy) GetStatusForMissingLinkedCheckId(DateTime combinedDateTime, int timeWindowInHours)
+    {
+        var timeSinceSailing = DateTime.Now - combinedDateTime;
+        if (timeSinceSailing.TotalHours > timeWindowInHours)
+        {
+            return ("", ""); // Skip "Did Not Attend" cases
+        }
+
+        return ("Check Needed", "");
+    }
+
+    private async Task<(string status, string travelBy)> GetStatusForLinkedCheckId(InterimCheckSummary cs)
+    {
+        var niCheck = await _dbContext.CheckOutcome
+            .Where(co => co.Id == cs.CheckOutcomeId)
+            .Select(co => new { co.SPSOutcome, co.PassengerTypeId })
+            .FirstOrDefaultAsync();
+
+        if (niCheck == null)
+        {
+            return ("Check Outcome Pending", "");
+        }
+
+        var travelBy = GetTravelMethod(niCheck.PassengerTypeId);
+        var status = niCheck.SPSOutcome == true ? "Allowed" : "Not allowed";
+
+        return (status, travelBy);
+    }
+
+    private static string GetTravelMethod(int? passengerTypeId)
+    {
+        return passengerTypeId switch
+        {
+            1 => "Foot",
+            2 => "Vehicle",
+            _ => ""
+        };
+    }
+
+    private string GetPetSpeciesDescription(int? petSpeciesId)
+    {
+        return GetEnumDescription((PetSpeciesType)(petSpeciesId ?? 0));
+    }
+
+    private static string GetColourDescription(string? petColourName, string? petOtherColour)
+    {
+        return petColourName ?? petOtherColour ?? "";
+    }
+
+    private static SpsCheckDetailResponseModel CreateResponseItem(InterimCheckSummary cs, string petSpeciesDescription, string colourDescription, string travelBy, string status)
+    {
+        return new SpsCheckDetailResponseModel
+        {
+            PTDNumber = cs.DocumentReferenceNumber ?? "",
+            PetDescription = $"{petSpeciesDescription}, {colourDescription}",
+            Microchip = cs.MicrochipNumber ?? "",
+            TravelBy = travelBy,
+            SPSOutcome = status,
+            CheckSummaryId = cs.Id
+        };
+    }
+
     private string GetEnumDescription(PetSpeciesType speciesType)
     {
         var field = speciesType.GetType().GetField(speciesType.ToString());
@@ -330,6 +391,20 @@ public class CheckSummaryService : ICheckSummaryService
     }
 
 
+}
+
+public class InterimCheckSummary
+{
+    public Guid Id { get; set; }
+    public DateTime? Date { get; set; }
+    public TimeSpan? ScheduledSailingTime { get; set; }
+    public Guid? LinkedCheckId { get; set; }
+    public Guid? CheckOutcomeId { get; set; }
+    public string? DocumentReferenceNumber { get; set; }
+    public int? PetSpeciesId { get; set; }
+    public string? PetColourName { get; set; }
+    public string? PetOtherColour { get; set; }
+    public string? MicrochipNumber { get; set; }
 }
 
 

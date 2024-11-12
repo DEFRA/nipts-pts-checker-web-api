@@ -41,7 +41,8 @@ public class CheckerService : ICheckerService
                 LastName = checkerDto.LastName,
                 FullName = $"{checkerDto.FirstName} {checkerDto.LastName}",
                 RoleId = checkerDto.RoleId,
-            };
+                OrganisationId = checkerDto.OrganisationId,
+        };
 
             await _checkerRepository.Add(entity);
         }
@@ -51,6 +52,7 @@ public class CheckerService : ICheckerService
             entity.LastName = checkerDto.LastName;
             entity.FullName = $"{checkerDto.FirstName} {checkerDto.LastName}";
             entity.RoleId = checkerDto.RoleId;
+            entity.OrganisationId = checkerDto.OrganisationId;
 
             _checkerRepository.Update(entity);
         }

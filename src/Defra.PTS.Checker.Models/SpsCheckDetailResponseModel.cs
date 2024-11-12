@@ -10,5 +10,7 @@ namespace Defra.PTS.Checker.Models
         public string? Microchip { get; set; }
         public string? TravelBy { get; set; }
         public string? SPSOutcome { get; set; }
+        public Guid CheckSummaryId { get; set; }
+
     }
 }
