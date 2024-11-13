@@ -193,6 +193,7 @@ public class CheckSummaryService : ICheckSummaryService
                 .Include(cs => cs.RouteNavigation)
                 .Where(cs => cs.Date.HasValue && cs.ScheduledSailingTime.HasValue && cs.RouteId.HasValue)
                 .Where(cs => cs.Date!.Value >= preliminaryStartDate && cs.Date.Value <= preliminaryEndDate)
+                .Where(cs => cs.GBCheck == true)
                 .ToListAsync();
 
             // Precise filtering and combining Date and Time in memory
