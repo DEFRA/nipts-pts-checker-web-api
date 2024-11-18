@@ -312,41 +312,60 @@ public class CheckSummaryService : ICheckSummaryService
 
     private async Task<(string status, string travelBy)> GetStatusAndTravelMethod(InterimCheckSummary cs, int timeWindowInHours, DateTime combinedDateTime)
     {
+
+        var check = await _dbContext.CheckOutcome
+            .Where(co => co.Id == cs.CheckOutcomeId)
+            .Select(co => new { co.PassengerTypeId })
+            .FirstOrDefaultAsync();
+
+        var status = "";
+        var travelBy = "";
+
         if (cs.LinkedCheckId == null)
         {
-            return GetStatusForMissingLinkedCheckId(combinedDateTime, timeWindowInHours);
+            status = GetStatusForMissingLinkedCheckId(combinedDateTime, timeWindowInHours);
+        }
+        else
+        {
+            status = await GetStatusForLinkedCheckId(cs);
         }
 
-        return await GetStatusForLinkedCheckId(cs);
+
+        if (check != null) 
+        {
+            travelBy = GetTravelMethod(check!.PassengerTypeId);
+        }
+
+        return (status, travelBy);
     }
 
-    private static (string status, string travelBy) GetStatusForMissingLinkedCheckId(DateTime combinedDateTime, int timeWindowInHours)
+    private static string GetStatusForMissingLinkedCheckId(DateTime combinedDateTime, int timeWindowInHours)
     {
         var timeSinceSailing = DateTime.Now - combinedDateTime;
         if (timeSinceSailing.TotalHours > timeWindowInHours)
         {
-            return ("", ""); // Skip "Did Not Attend" cases
+            return (""); // Skip "Did Not Attend" cases
         }
 
-        return ("Check Needed", "");
+        return ("Check Needed");
     }
 
-    private async Task<(string status, string travelBy)> GetStatusForLinkedCheckId(InterimCheckSummary cs)
+    private async Task<string> GetStatusForLinkedCheckId(InterimCheckSummary cs)
     {
         var niCheck = await _dbContext.CheckOutcome
             .Where(co => co.Id == cs.CheckOutcomeId)
-            .Select(co => new { co.SPSOutcome, co.PassengerTypeId })
+            .Select(co => new { co.SPSOutcome })
             .FirstOrDefaultAsync();
 
         if (niCheck == null)
         {
-            return ("Check Outcome Pending", "");
+            return ("Check Outcome Pending");
         }
 
-        var travelBy = GetTravelMethod(niCheck.PassengerTypeId);
+        //travelBy = GetTravelMethod(niCheck.PassengerTypeId);
         var status = niCheck.SPSOutcome == true ? "Allowed" : "Not allowed";
 
-        return (status, travelBy);
+        return (status);
     }
 
     private static string GetTravelMethod(int? passengerTypeId)
