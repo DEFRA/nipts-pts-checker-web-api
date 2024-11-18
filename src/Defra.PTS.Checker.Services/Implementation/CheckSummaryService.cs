@@ -358,7 +358,7 @@ public class CheckSummaryService : ICheckSummaryService
 
         if (niCheckSummaryRecord == null || niCheckSummaryRecord.CheckOutcomeId == null)
         {
-            return ("Check Outcome Pending", "");
+            return ("Check Outcome Pending");
         }
 
         var niCheck = await _dbContext.CheckOutcome
