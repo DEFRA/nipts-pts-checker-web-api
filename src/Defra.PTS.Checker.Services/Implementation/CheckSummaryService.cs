@@ -257,19 +257,21 @@ public class CheckSummaryService : ICheckSummaryService
     private async Task<List<InterimCheckSummary>> getCheckSummariesBySailing(DateTime sailingDateOnly, TimeSpan sailingTimeOnly, int routeId)
     {
         return await _dbContext.CheckSummary
-           .Join(_dbContext.Application,
-                 cs => cs.ApplicationId,
-                 a => a.Id,              
-                 (cs, a) => new
-                 {
-                     CheckSummary = cs,
-                     Application = a
-                 })
-           .Where(i => i.CheckSummary.RouteId == routeId
-                        && i.CheckSummary.Date == sailingDateOnly
-                        && i.CheckSummary.ScheduledSailingTime == sailingTimeOnly
-                        && i.CheckSummary.GBCheck == true
-                        && i.CheckSummary.CheckOutcome == false)
+            .GroupJoin(
+                _dbContext.Application,
+                cs => cs.ApplicationId,  // Key from CheckSummary
+                a => a.Id,               // Key from Application
+                (cs, applications) => new { CheckSummary = cs, Applications = applications.DefaultIfEmpty() }
+            )
+            .SelectMany(
+                x => x.Applications.Select(a => new { x.CheckSummary, Application = a }),
+                (x, result) => new { x.CheckSummary, Application = result.Application }
+            )
+            .Where(i => i.CheckSummary.RouteId == routeId
+                         && i.CheckSummary.Date == sailingDateOnly
+                         && i.CheckSummary.ScheduledSailingTime == sailingTimeOnly
+                         && i.CheckSummary.GBCheck == true
+                         && i.CheckSummary.CheckOutcome == false)
             .Select(i => new InterimCheckSummary
             {
                 Id = i.CheckSummary.Id,
@@ -277,9 +279,9 @@ public class CheckSummaryService : ICheckSummaryService
                 ScheduledSailingTime = i.CheckSummary.ScheduledSailingTime,
                 LinkedCheckId = i.CheckSummary.LinkedCheckId,
                 CheckOutcomeId = i.CheckSummary.CheckOutcomeId,
-                DocumentReferenceNumber = i.Application.Status != "Authorised" && i.Application.Status != "Revoked"
-                                            ? i.Application.ReferenceNumber
-                                            : GetTravelDocumentReferenceNumber(i.CheckSummary.TravelDocument!),
+                DocumentReferenceNumber = i.Application != null && i.Application.Status != "Authorised" && i.Application.Status != "Revoked"
+                            ? i.Application.ReferenceNumber
+                            : GetTravelDocumentReferenceNumber(i.CheckSummary.TravelDocument!),
                 PetSpeciesId = i.CheckSummary.TravelDocument != null && i.CheckSummary.TravelDocument.Pet != null
                                 ? i.CheckSummary.TravelDocument.Pet.SpeciesId
                                 : (int?)null,
@@ -294,7 +296,8 @@ public class CheckSummaryService : ICheckSummaryService
                                     ? i.CheckSummary.TravelDocument.Pet.MicrochipNumber
                                     : null
             })
-           .ToListAsync();
+            .ToListAsync();
+
     }
 
     private static string? GetTravelDocumentReferenceNumber(TravelDocument travelDocument)
