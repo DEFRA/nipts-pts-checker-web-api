@@ -259,8 +259,8 @@ public class CheckSummaryService : ICheckSummaryService
         return await _dbContext.CheckSummary
             .GroupJoin(
                 _dbContext.Application,
-                cs => cs.ApplicationId,  // Key from CheckSummary
-                a => a.Id,               // Key from Application
+                cs => cs.ApplicationId, 
+                a => a.Id,             
                 (cs, applications) => new { CheckSummary = cs, Applications = applications.DefaultIfEmpty() }
             )
             .SelectMany(
