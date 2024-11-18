@@ -282,27 +282,13 @@ public class CheckSummaryService : ICheckSummaryService
                 DocumentReferenceNumber = i.Application != null && i.Application.Status != "Authorised" && i.Application.Status != "Revoked"
                             ? i.Application.ReferenceNumber
                             : GetTravelDocumentReferenceNumber(i.CheckSummary.TravelDocument!),
-                PetSpeciesId = i.CheckSummary.TravelDocument != null && i.CheckSummary.TravelDocument.Pet != null
-                                ? i.CheckSummary.TravelDocument.Pet.SpeciesId
-                                : (int?)null,
-                PetColourName = i.CheckSummary.TravelDocument != null && i.CheckSummary.TravelDocument.Pet != null
-                                 && i.CheckSummary.TravelDocument.Pet.Colour != null
-                                    ? i.CheckSummary.TravelDocument.Pet.Colour.Name
-                                    : null,
-                PetOtherColour = i.CheckSummary.TravelDocument != null && i.CheckSummary.TravelDocument.Pet != null
-                                   ? i.CheckSummary.TravelDocument.Pet.OtherColour
-                                   : null,
-                MicrochipNumber = i.CheckSummary.TravelDocument != null && i.CheckSummary.TravelDocument.Pet != null
-                                    ? i.CheckSummary.TravelDocument.Pet.MicrochipNumber
-                                    : null
+                PetSpeciesId = GetSpeciesId(i.CheckSummary.TravelDocument!),
+                PetColourName = GetPetColourName(i.CheckSummary.TravelDocument!),
+                PetOtherColour = GetPetOtherColour(i.CheckSummary.TravelDocument!),
+                MicrochipNumber = GetMicrochipNumber(i.CheckSummary.TravelDocument!)
             })
             .ToListAsync();
 
-    }
-
-    private static string? GetTravelDocumentReferenceNumber(TravelDocument travelDocument)
-    {
-        return travelDocument?.DocumentReferenceNumber;
     }
 
     private async Task<IEnumerable<SpsCheckDetailResponseModel>> getSpsCheckDetailResponse(int timeWindowInHours, List<InterimCheckSummary> checkSummaries)
@@ -419,7 +405,30 @@ public class CheckSummaryService : ICheckSummaryService
         return attribute?.Description ?? speciesType.ToString();
     }
 
+    private static string? GetTravelDocumentReferenceNumber(TravelDocument travelDocument)
+    {
+        return travelDocument?.DocumentReferenceNumber;
+    }
 
+    private static int? GetSpeciesId(TravelDocument travelDocument)
+    {
+        return travelDocument?.Pet?.SpeciesId;
+    }
+
+    private static string? GetPetColourName(TravelDocument travelDocument)
+    {
+        return travelDocument?.Pet?.Colour?.Name;
+    }
+
+    private static string? GetPetOtherColour(TravelDocument travelDocument)
+    {
+        return travelDocument?.Pet?.OtherColour;
+    }
+
+    private static string? GetMicrochipNumber(TravelDocument travelDocument)
+    {
+        return travelDocument?.Pet?.MicrochipNumber;
+    }
 }
 
 public class InterimCheckSummary
