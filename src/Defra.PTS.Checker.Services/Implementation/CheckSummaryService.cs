@@ -330,7 +330,6 @@ public class CheckSummaryService : ICheckSummaryService
             status = await GetStatusForLinkedCheckId(cs);
         }
 
-
         if (check != null) 
         {
             travelBy = GetTravelMethod(check!.PassengerTypeId);
@@ -352,9 +351,20 @@ public class CheckSummaryService : ICheckSummaryService
 
     private async Task<string> GetStatusForLinkedCheckId(InterimCheckSummary cs)
     {
+        var niCheckSummaryRecord = await _dbContext.CheckSummary
+           .Where(co => co.Id == cs.LinkedCheckId)
+           .Select(co => new { co.CheckOutcomeId })
+           .FirstOrDefaultAsync();
+
+        if (niCheckSummaryRecord == null || niCheckSummaryRecord.CheckOutcomeId == null)
+        {
+            return ("Check Outcome Pending", "");
+        }
+
         var niCheck = await _dbContext.CheckOutcome
-            .Where(co => co.Id == cs.CheckOutcomeId)
-            .Select(co => new { co.SPSOutcome })
+
+            .Where(co => co.Id == niCheckSummaryRecord.CheckOutcomeId)
+            .Select(co => new { co.SPSOutcome, co.PassengerTypeId })
             .FirstOrDefaultAsync();
 
         if (niCheck == null)
@@ -362,11 +372,11 @@ public class CheckSummaryService : ICheckSummaryService
             return ("Check Outcome Pending");
         }
 
-        //travelBy = GetTravelMethod(niCheck.PassengerTypeId);
         var status = niCheck.SPSOutcome == true ? "Allowed" : "Not allowed";
 
         return (status);
     }
+
 
     private static string GetTravelMethod(int? passengerTypeId)
     {

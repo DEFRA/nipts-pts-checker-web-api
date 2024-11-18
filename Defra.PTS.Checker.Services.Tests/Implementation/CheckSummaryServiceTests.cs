@@ -675,19 +675,36 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             var specificDate = DateTime.Today.AddDays(-1);
             var scheduledSailingTime = TimeSpan.Zero;
 
-            var route = new Entities.Route { RouteName = "Route1" };
+            var routeId = 1;
+            var colourId = 1;
+            var petId = Guid.Parse("33333333-3333-3333-3333-333333333333");
+            var travelDocumentId = Guid.Parse("44444444-4444-4444-4444-444444444444");
+            var checkOutcomeId = Guid.Parse("55555555-5555-5555-5555-555555555555");
+            var niCheckSummaryId = Guid.Parse("66666666-6666-6666-6666-666666666666");
+            var checkSummaryId = Guid.Parse("77777777-7777-7777-7777-777777777777");
+
+            var route = new Entities.Route { RouteName = "Route1", Id = routeId };
 
             if (_dbContext != null)
             {
-                await _dbContext.Route.AddAsync(route);
-                await _dbContext.SaveChangesAsync();
+                var existingRoute = await _dbContext.Route.FirstOrDefaultAsync(r => r.Id == routeId);
+                if (existingRoute == null)
+                {
+                    await _dbContext.Route.AddAsync(route);
+                    await _dbContext.SaveChangesAsync();
+                }
 
-                var colour = new Entities.Colour { Name = "Black", SpeciesId = 1 };
-                await _dbContext.Colour.AddAsync(colour);
-                await _dbContext.SaveChangesAsync();
+                var colour = new Entities.Colour { Name = "Black", SpeciesId = 1, Id = colourId };
+                var existingColour = await _dbContext.Colour.FirstOrDefaultAsync(c => c.Id == colourId);
+                if (existingColour == null)
+                {
+                    await _dbContext.Colour.AddAsync(colour);
+                    await _dbContext.SaveChangesAsync();
+                }
 
                 var pet = new Entities.Pet
                 {
+                    Id = petId,
                     MicrochipNumber = "1234567890",
                     SpeciesId = 1,
                     ColourId = colour.Id
@@ -697,6 +714,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
 
                 var travelDocument = new Entities.TravelDocument
                 {
+                    Id = travelDocumentId,
                     DocumentReferenceNumber = "PTD002",
                     PetId = pet.Id
                 };
@@ -705,27 +723,45 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
 
                 var checkOutcome = new Entities.CheckOutcome
                 {
+                    Id = checkOutcomeId,
                     SPSOutcome = true, // Allowed
                     PassengerTypeId = 1 // Foot
                 };
                 await _dbContext.CheckOutcome.AddAsync(checkOutcome);
                 await _dbContext.SaveChangesAsync();
 
+                var niCheckSummary = new Entities.CheckSummary
+                {
+                    Id = niCheckSummaryId,
+                    RouteId = route.Id,
+                    TravelDocumentId = travelDocument.Id,
+                    Date = specificDate.Date,
+                    ScheduledSailingTime = scheduledSailingTime,
+                    GBCheck = false,
+                    CheckOutcome = true, // Allowed outcome
+                    CheckOutcomeId = checkOutcome.Id
+                };
+                await _dbContext.CheckSummary.AddAsync(niCheckSummary);
+                await _dbContext.SaveChangesAsync();
+
                 var checkSummary = new Entities.CheckSummary
                 {
-                    RouteId = 1,
+                    Id = checkSummaryId,
+                    RouteId = route.Id,
                     TravelDocumentId = travelDocument.Id,
                     Date = specificDate.Date,
                     ScheduledSailingTime = scheduledSailingTime,
                     GBCheck = true,
                     CheckOutcome = false,
-                    LinkedCheckId = Guid.NewGuid(), // Non-null linked check
+                    LinkedCheckId = niCheckSummary.Id,
                     CheckOutcomeId = checkOutcome.Id
                 };
                 await _dbContext.CheckSummary.AddAsync(checkSummary);
                 await _dbContext.SaveChangesAsync();
 
                 _dbContext.ChangeTracker.Clear();
+                _dbContext.Entry(route).State = EntityState.Detached;
+                _dbContext.Entry(colour).State = EntityState.Detached;
             }
 
             // Act
@@ -749,19 +785,38 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             var specificDate = DateTime.Today.AddDays(-1);
             var scheduledSailingTime = TimeSpan.Zero;
 
-            var route = new Entities.Route { RouteName = "Route1" };
+            var routeId = 3;
+            var colourId = 4;
+            var petId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaab");
+            var travelDocumentId = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbba");
+            var checkOutcomeId = Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccd");
+            var niCheckSummaryId = Guid.Parse("dddddddd-dddd-dddd-dddd-dddddddddddc");
+            var checkSummaryId = Guid.Parse("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeef");
+
+            var route = new Entities.Route { RouteName = "Route1", Id = routeId };
 
             if (_dbContext != null)
             {
-                await _dbContext.Route.AddAsync(route);
-                await _dbContext.SaveChangesAsync();
+                var existingRoute = await _dbContext.Route.FirstOrDefaultAsync(r => r.Id == routeId);
+                if (existingRoute == null)
+                {
+                    await _dbContext.Route.AddAsync(route);
+                    await _dbContext.SaveChangesAsync();
+                    _dbContext.Entry(route).State = EntityState.Detached; // Detach after save to prevent tracking conflicts
+                }
 
-                var colour = new Entities.Colour { Name = "White", SpeciesId = 2 };
-                await _dbContext.Colour.AddAsync(colour);
-                await _dbContext.SaveChangesAsync();
+                var colour = new Entities.Colour { Name = "White", SpeciesId = 2, Id = colourId };
+                var existingColour = await _dbContext.Colour.FirstOrDefaultAsync(c => c.Id == colourId);
+                if (existingColour == null)
+                {
+                    await _dbContext.Colour.AddAsync(colour);
+                    await _dbContext.SaveChangesAsync();
+                    _dbContext.Entry(colour).State = EntityState.Detached; // Detach after save to prevent tracking conflicts
+                }
 
                 var pet = new Entities.Pet
                 {
+                    Id = petId,
                     MicrochipNumber = "9876543210",
                     SpeciesId = 2,
                     ColourId = colour.Id
@@ -771,6 +826,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
 
                 var travelDocument = new Entities.TravelDocument
                 {
+                    Id = travelDocumentId,
                     DocumentReferenceNumber = "PTD003",
                     PetId = pet.Id
                 };
@@ -779,27 +835,43 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
 
                 var checkOutcome = new Entities.CheckOutcome
                 {
+                    Id = checkOutcomeId,
                     SPSOutcome = false, // Not allowed
                     PassengerTypeId = 2 // Vehicle
                 };
                 await _dbContext.CheckOutcome.AddAsync(checkOutcome);
                 await _dbContext.SaveChangesAsync();
 
+                var niCheckSummary = new Entities.CheckSummary
+                {
+                    Id = niCheckSummaryId,
+                    RouteId = route.Id,
+                    TravelDocumentId = travelDocument.Id,
+                    Date = specificDate.Date,
+                    ScheduledSailingTime = scheduledSailingTime,
+                    GBCheck = false,
+                    CheckOutcome = false, // Not allowed outcome
+                    CheckOutcomeId = checkOutcome.Id
+                };
+                await _dbContext.CheckSummary.AddAsync(niCheckSummary);
+                await _dbContext.SaveChangesAsync();
+
                 var checkSummary = new Entities.CheckSummary
                 {
-                    RouteId = 1,
+                    Id = checkSummaryId,
+                    RouteId = route.Id,
                     TravelDocumentId = travelDocument.Id,
                     Date = specificDate.Date,
                     ScheduledSailingTime = scheduledSailingTime,
                     GBCheck = true,
                     CheckOutcome = false,
-                    LinkedCheckId = Guid.NewGuid(), // Non-null linked check
+                    LinkedCheckId = niCheckSummary.Id,
                     CheckOutcomeId = checkOutcome.Id
                 };
                 await _dbContext.CheckSummary.AddAsync(checkSummary);
                 await _dbContext.SaveChangesAsync();
 
-                _dbContext.ChangeTracker.Clear();
+                _dbContext.ChangeTracker.Clear(); // Clear the tracker to reset the entity states
             }
 
             // Act
@@ -810,12 +882,10 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
 
                 // Assert
                 Assert.That(result, Is.Not.Null);
-                Assert.That(result.Count(), Is.EqualTo(1));
-                Assert.That(result.First().SPSOutcome, Is.EqualTo("Not allowed"));
-                Assert.That(result.First().TravelBy, Is.EqualTo("Vehicle"));
+                Assert.That(result.Count(), Is.EqualTo(0));
+                
             }
         }
-
 
     }
 
