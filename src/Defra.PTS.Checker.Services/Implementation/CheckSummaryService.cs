@@ -277,7 +277,8 @@ public class CheckSummaryService : ICheckSummaryService
                 ScheduledSailingTime = i.CheckSummary.ScheduledSailingTime,
                 LinkedCheckId = i.CheckSummary.LinkedCheckId,
                 CheckOutcomeId = i.CheckSummary.CheckOutcomeId,
-                DocumentReferenceNumber = GetTravelDocumentReferenceNumber(i.CheckSummary.TravelDocument!),
+                DocumentReferenceNumber = i.Application.Status != "Authorised" && i.Application.Status != "Revoked"
+                            ? i.Application.ReferenceNumber : (GetTravelDocumentReferenceNumber(i.CheckSummary.TravelDocument!)),
                 PetSpeciesId = i.CheckSummary.TravelDocument != null && i.CheckSummary.TravelDocument.Pet != null
                                 ? i.CheckSummary.TravelDocument.Pet.SpeciesId
                                 : (int?)null,
