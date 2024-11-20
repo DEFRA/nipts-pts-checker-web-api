@@ -257,16 +257,14 @@ public class CheckSummaryService : ICheckSummaryService
     private async Task<List<InterimCheckSummary>> getCheckSummariesBySailing(DateTime sailingDateOnly, TimeSpan sailingTimeOnly, int routeId)
     {
         return await _dbContext.CheckSummary
-            .GroupJoin(
-                _dbContext.Application,
-                cs => cs.ApplicationId,
-                a => a.Id,
-                (cs, applications) => new { CheckSummary = cs, Applications = applications.DefaultIfEmpty() }
-            )
-            .SelectMany(
-                x => x.Applications.Select(a => new { x.CheckSummary, Application = a }),
-                (x, result) => new { x.CheckSummary, Application = result.Application }
-            )
+            .Join(_dbContext.Application,
+                  cs => cs.ApplicationId,
+                  a => a.Id,
+                  (cs, a) => new
+                  {
+                      CheckSummary = cs,
+                      Application = a
+                  })
             .Where(i => i.CheckSummary.RouteId == routeId
                          && i.CheckSummary.Date == sailingDateOnly
                          && i.CheckSummary.ScheduledSailingTime == sailingTimeOnly
@@ -279,13 +277,20 @@ public class CheckSummaryService : ICheckSummaryService
                 ScheduledSailingTime = i.CheckSummary.ScheduledSailingTime,
                 LinkedCheckId = i.CheckSummary.LinkedCheckId,
                 CheckOutcomeId = i.CheckSummary.CheckOutcomeId,
-                DocumentReferenceNumber = i.Application != null && i.Application.Status != "Authorised" && i.Application.Status != "Revoked"
-                            ? i.Application.ReferenceNumber
-                            : GetTravelDocumentReferenceNumber(i.CheckSummary.TravelDocument!),
-                PetSpeciesId = GetSpeciesId(i.CheckSummary.TravelDocument!),
-                PetColourName = GetPetColourName(i.CheckSummary.TravelDocument!),
-                PetOtherColour = GetPetOtherColour(i.CheckSummary.TravelDocument!),
-                MicrochipNumber = GetMicrochipNumber(i.CheckSummary.TravelDocument!)
+                DocumentReferenceNumber = GetTravelDocumentReferenceNumber(i.CheckSummary.TravelDocument!),
+                PetSpeciesId = i.CheckSummary.TravelDocument != null && i.CheckSummary.TravelDocument.Pet != null
+                                ? i.CheckSummary.TravelDocument.Pet.SpeciesId
+                                : (int?)null,
+                PetColourName = i.CheckSummary.TravelDocument != null && i.CheckSummary.TravelDocument.Pet != null
+                                 && i.CheckSummary.TravelDocument.Pet.Colour != null
+                                    ? i.CheckSummary.TravelDocument.Pet.Colour.Name
+                                    : null,
+                PetOtherColour = i.CheckSummary.TravelDocument != null && i.CheckSummary.TravelDocument.Pet != null
+                                   ? i.CheckSummary.TravelDocument.Pet.OtherColour
+                                   : null,
+                MicrochipNumber = i.CheckSummary.TravelDocument != null && i.CheckSummary.TravelDocument.Pet != null
+                                    ? i.CheckSummary.TravelDocument.Pet.MicrochipNumber
+                                    : null
             })
             .ToListAsync();
 
@@ -437,26 +442,6 @@ public class CheckSummaryService : ICheckSummaryService
     private static string? GetTravelDocumentReferenceNumber(TravelDocument travelDocument)
     {
         return travelDocument?.DocumentReferenceNumber;
-    }
-
-    private static int? GetSpeciesId(TravelDocument travelDocument)
-    {
-        return travelDocument?.Pet?.SpeciesId;
-    }
-
-    private static string? GetPetColourName(TravelDocument travelDocument)
-    {
-        return travelDocument?.Pet?.Colour?.Name;
-    }
-
-    private static string? GetPetOtherColour(TravelDocument travelDocument)
-    {
-        return travelDocument?.Pet?.OtherColour;
-    }
-
-    private static string? GetMicrochipNumber(TravelDocument travelDocument)
-    {
-        return travelDocument?.Pet?.MicrochipNumber;
     }
 }
 
