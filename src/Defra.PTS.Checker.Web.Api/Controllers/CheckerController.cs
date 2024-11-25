@@ -1,6 +1,7 @@
 ﻿using Defra.PTS.Checker.Entities;
 using Defra.PTS.Checker.Models;
 using Defra.PTS.Checker.Models.Constants;
+using Defra.PTS.Checker.Models.SchemaFilters;
 using Defra.PTS.Checker.Models.Search;
 using Defra.PTS.Checker.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
@@ -317,7 +318,7 @@ public class CheckerController : ControllerBase
     [HttpPost]
     [Route("getOrganisation")]
     [SwaggerResponse(StatusCodes.Status200OK, "OK: Returns the Organisation", typeof(OrganisationResponseModel))]
-    [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request: OrganisationId is not provided or is not valid", typeof(IDictionary<string, string>))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request: OrganisationId is not provided or is not valid", typeof(object))]
     [SwaggerResponse(StatusCodes.Status404NotFound, "Not Found: There is no Organisation matching this OrganisationId")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error: An error has occurred")]
     [SwaggerOperation(
@@ -340,6 +341,35 @@ public class CheckerController : ControllerBase
         }
 
        return Ok(organisation);
+    }
+
+
+    [HttpPost]
+    [Route("getGbCheck")]
+    [SwaggerResponse(StatusCodes.Status200OK, "OK: Returns the GbCheck", typeof(GbCheckReportResponseModel))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request: GbCheckSummaryId is not provided or is not valid", typeof(object))]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Not Found: There is no GbCheck matching this GbCheckSummaryId")]
+    [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error: An error has occurred")]
+    [SwaggerOperation(
+     OperationId = "gbCheckSummaryId",
+     Tags = new[] { "GbCheck" },
+     Summary = "Retrieves a specific GbCheck by GbCheckSummaryId",
+     Description = "Returns the GbCheck details for the specified GbCheckSummaryId"
+    )]
+    public async Task<IActionResult> GetGbCheckById([FromBody, SwaggerRequestBody("The search payload", Required = true)] GbCheckReportRequestModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var checkReport = await _checkSummaryService.GetGbCheckReport(Guid.Parse(model.GbCheckSummaryId));
+        if (checkReport == null)
+        {
+            return new NotFoundObjectResult(ApiConstants.GbCheckReportNotFound);
+        }
+
+        return Ok(checkReport);
     }
 
 }
