@@ -302,7 +302,7 @@ public class CheckSummaryService : ICheckSummaryService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error in GetGbCheckReport " + ex.Message);
+            _logger.LogError(ex, "Error in GetGbCheckReport");
             throw new CheckerApiException("Error in GetGbCheckReport", ex);
         }
     }
