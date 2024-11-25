@@ -14,6 +14,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using TravelDocument = Defra.PTS.Checker.Entities.TravelDocument;
 using CheckOutcome = Defra.PTS.Checker.Entities.CheckOutcome;
+using Defra.PTS.Checker.Models.CustomException;
 
 namespace Defra.PTS.Checker.Services.Implementation;
 
@@ -301,8 +302,8 @@ public class CheckSummaryService : ICheckSummaryService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error in GetGbCheckReport");
-            throw;
+            _logger.LogError(ex, "Error in GetGbCheckReport " + ex.Message);
+            throw new CheckerApiException("Error in GetGbCheckReport", ex);
         }
     }
 
