@@ -255,7 +255,7 @@ public class CheckSummaryService : ICheckSummaryService
         return await getSpsCheckDetailResponse(timeWindowInHours, checkSummaries);
     }
 
-    public async Task<GbCheckReportResponseModel> GetGbCheckReport(Guid gbCheckSummaryId)
+    public async Task<GbCheckReportResponseModel?> GetGbCheckReport(Guid gbCheckSummaryId)
     {
         try
         {
