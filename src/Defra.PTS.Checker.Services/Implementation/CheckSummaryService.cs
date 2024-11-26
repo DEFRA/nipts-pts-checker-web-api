@@ -253,6 +253,8 @@ public class CheckSummaryService : ICheckSummaryService
         // Fetch records matching the specific sailing
         List<InterimCheckSummary> checkSummaries = await getCheckSummariesBySailing(sailingDateOnly, sailingTimeOnly, routeId);
 
+        checkSummaries = checkSummaries.OrderBy(x => x.DocumentReferenceNumber).ToList();
+
         return await getSpsCheckDetailResponse(timeWindowInHours, checkSummaries);
     }
 

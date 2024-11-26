@@ -4,6 +4,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Defra.PTS.Checker.Web.Api</RootNamespace>
+    <UserSecretsId>a082d655-1c0d-436e-bf9a-60f3720e3cce</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Defra.Trade.Address.V1.ApiClient" Version="1.0.8" />
