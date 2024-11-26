@@ -9,6 +9,8 @@ using Moq;
 using NUnit.Framework;
 using Microsoft.EntityFrameworkCore;
 using Defra.PTS.Checker.Models.Enums;
+using Defra.PTS.Checker.Services.Interface;
+using Microsoft.AspNetCore.Routing;
 
 namespace Defra.PTS.Checker.Services.Tests.Implementation
 {
@@ -45,7 +47,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             var route = await _dbContext?.Route?.FirstOrDefaultAsync()!;
             if (route == null)
             {
-                route = new Route { RouteName = "Test Route" };
+                route = new Entities.Route { RouteName = "Test Route" };
                 await _dbContext.Route.AddAsync(route);
                 await _dbContext.SaveChangesAsync();
             }
@@ -108,7 +110,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             var route = await _dbContext?.Route?.FirstOrDefaultAsync()!;
             if (route == null)
             {
-                route = new Route { RouteName = "Test Route" };
+                route = new Entities.Route { RouteName = "Test Route" };
                 await _dbContext.Route.AddAsync(route);
                 await _dbContext.SaveChangesAsync();
             }
@@ -171,7 +173,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             var route = await _dbContext?.Route?.FirstOrDefaultAsync()!;
             if (route == null)
             {
-                route = new Route { RouteName = "Test Route" };
+                route = new Entities.Route { RouteName = "Test Route" };
                 await _dbContext.Route.AddAsync(route);
                 await _dbContext.SaveChangesAsync();
             }
@@ -240,7 +242,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             var route = await _dbContext?.Route?.FirstOrDefaultAsync()!;
             if (route == null)
             {
-                route = new Route { Id = 1, RouteName = "Test Route" };
+                route = new Entities.Route { Id = 1, RouteName = "Test Route" };
                 await _dbContext.Route.AddAsync(route);
                 await _dbContext.SaveChangesAsync();
             }
@@ -309,7 +311,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             var route = await _dbContext?.Route?.FirstOrDefaultAsync()!;
             if (route == null)
             {
-                route = new Route { RouteName = "Test Route" };
+                route = new Entities.Route { RouteName = "Test Route" };
                 await _dbContext.Route.AddAsync(route);
                 await _dbContext.SaveChangesAsync();
             }
@@ -389,7 +391,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             var route = await _dbContext?.Route?.FirstOrDefaultAsync()!;
             if (route == null)
             {
-                route = new Route { RouteName = "Test Route" };
+                route = new Entities.Route { RouteName = "Test Route" };
                 await _dbContext.Route.AddAsync(route);
                 await _dbContext.SaveChangesAsync();
             }
@@ -468,12 +470,12 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             var route = await _dbContext?.Route?.FirstOrDefaultAsync()!;
             if (route == null)
             {
-                route = new Route { RouteName = "Test Route" };
+                route = new Entities.Route { RouteName = "Test Route" };
                 await _dbContext.Route.AddAsync(route);
                 await _dbContext.SaveChangesAsync();
             }
 
-            var model = new CheckOutcomeModel
+            var model = new CheckOutcomeModel   
             {
                 CheckerId = Guid.NewGuid(),
                 CheckOutcome = "Fail",
@@ -499,7 +501,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             var route1 = await _dbContext?.Route?.FirstOrDefaultAsync(r => r.RouteName == "Route1")!;
             if (route1 == null)
             {
-                route1 = new Route { RouteName = "Route1" };
+                route1 = new Entities.Route { RouteName = "Route1" };
                 await _dbContext.Route.AddAsync(route1);
                 await _dbContext.SaveChangesAsync();
             }
@@ -507,7 +509,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             var route2 = await _dbContext.Route.FirstOrDefaultAsync(r => r.RouteName == "Route2");
             if (route2 == null)
             {
-                route2 = new Route { RouteName = "Route2" };
+                route2 = new Entities.Route { RouteName = "Route2" };
                 await _dbContext.Route.AddAsync(route2);
                 await _dbContext.SaveChangesAsync();
             }
@@ -556,7 +558,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             var route1 = await _dbContext?.Route?.FirstOrDefaultAsync(r => r.RouteName == "Route1")!;
             if (route1 == null)
             {
-                route1 = new Route { RouteName = "Route1" };
+                route1 = new Entities.Route { RouteName = "Route1" };
                 await _dbContext.Route.AddAsync(route1);
                 await _dbContext.SaveChangesAsync();
             }
@@ -564,7 +566,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             var route2 = await _dbContext.Route.FirstOrDefaultAsync(r => r.RouteName == "Route2");
             if (route2 == null)
             {
-                route2 = new Route { RouteName = "Route2" };
+                route2 = new Entities.Route { RouteName = "Route2" };
                 await _dbContext.Route.AddAsync(route2);
                 await _dbContext.SaveChangesAsync();
             }
@@ -917,6 +919,53 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             }
         }
 
+        [Test]
+        public async Task GetGbReport_When_Report_Null_ReturnsValidObject()
+        {
+            Guid gbCheckSummaryID = Guid.NewGuid();
+
+            if (_service != null)
+            {
+                var result = await _service.GetGbCheckReport(gbCheckSummaryID);
+
+                Assert.That(result, Is.Null);
+            }
+
+        }
+
+        [Test]
+        public async Task GetGbReport_When_Report_IsNotNull_ReturnsValidObject()
+        {
+            Guid gbCheckSummaryID = Guid.Empty;
+            if (_dbContext != null)
+            {
+                var checker = new Entities.Checker() { FullName = "N G", FirstName = "N", LastName = "G"  };
+                await _dbContext.Checker.AddAsync(checker);
+                await _dbContext.SaveChangesAsync();
+
+
+                var checkOutcome = new Entities.CheckOutcome() { };
+                await _dbContext.CheckOutcome.AddAsync(checkOutcome);
+                await _dbContext.SaveChangesAsync();
+
+
+                var checkSummary = new Entities.CheckSummary() { CheckerId = checker.Id, CheckOutcome = false, CheckOutcomeId = checkOutcome.Id };
+
+                await _dbContext.CheckSummary.AddAsync(checkSummary);
+                await _dbContext.SaveChangesAsync();
+
+                gbCheckSummaryID = checkSummary.Id;
+            }
+
+            if (_service != null)
+            {
+                var result = await _service.GetGbCheckReport(gbCheckSummaryID);
+
+                Assert.That(result, Is.Not.Null);
+                Assert.That(result, Is.TypeOf<GbCheckReportResponseModel>());
+                Assert.That(result?.GbCheckSummaryId, Is.EqualTo(gbCheckSummaryID));
+            }
+        }
     }
 
     public static class DataHelper
@@ -925,11 +974,11 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
         {
             if (!context.Route.Any(r => r.RouteName == "Route1"))
             {
-                context.Route.Add(new Route { RouteName = "Route1" });
+                context.Route.Add(new Entities.Route { RouteName = "Route1" });
             }
             if (!context.Route.Any(r => r.RouteName == "Route2"))
             {
-                context.Route.Add(new Route { RouteName = "Route2" });
+                context.Route.Add(new Entities.Route { RouteName = "Route2" });
             }
             context.SaveChanges();
         }

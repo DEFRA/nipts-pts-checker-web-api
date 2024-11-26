@@ -13,6 +13,8 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using TravelDocument = Defra.PTS.Checker.Entities.TravelDocument;
+using CheckOutcome = Defra.PTS.Checker.Entities.CheckOutcome;
+using Defra.PTS.Checker.Models.CustomException;
 
 namespace Defra.PTS.Checker.Services.Implementation;
 
@@ -254,6 +256,57 @@ public class CheckSummaryService : ICheckSummaryService
         return await getSpsCheckDetailResponse(timeWindowInHours, checkSummaries);
     }
 
+    public async Task<GbCheckReportResponseModel?> GetGbCheckReport(Guid gbCheckSummaryId)
+    {
+        try
+        {
+            var checkReport = await _dbContext!.CheckSummary
+                .Include(t => t.CheckOutcomeEntity)
+                .Include(t => t.Checker)
+                .SingleOrDefaultAsync(x => x.Id == gbCheckSummaryId);
+
+            if (checkReport == null)
+            {
+                _logger.LogInformation("No check report found with gbCheckSummaryId: {gbCheckSummaryId}", gbCheckSummaryId);
+                return null;
+            }
+
+            return new GbCheckReportResponseModel
+            {
+                GbCheckSummaryId = gbCheckSummaryId,
+                CheckDetails = new CheckDetails() 
+                {
+                    CheckersName = checkReport.Checker?.FullName ?? checkReport.Checker?.FirstName + " " + checkReport.Checker?.LastName,
+                    DateAndTimeChecked = checkReport.CreatedOn,
+                    DepartureDate = checkReport.Date.HasValue? checkReport.Date.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture): null,
+                    DepartureTime = checkReport.ScheduledSailingTime.HasValue ? checkReport.ScheduledSailingTime.Value.ToString(@"hh\:mm") : null,
+                    RouteId = checkReport.RouteId,
+                },
+                CheckOutcome = new Models.CheckOutcome()
+                {                    
+                    GBRefersToDAERAOrSPS = checkReport.CheckOutcomeEntity?.GBRefersToDAERAOrSPS,
+                    GBAdviseNoTravel = checkReport.CheckOutcomeEntity?.GBAdviseNoTravel,
+                    GBPassengerSaysNoTravel = checkReport.CheckOutcomeEntity?.GBPassengerSaysNoTravel,
+
+                    MCNotMatch = checkReport.CheckOutcomeEntity?.MCNotMatch,
+                    MCNotMatchActual = checkReport.CheckOutcomeEntity?.MCNotMatchActual,
+                    MCNotFound = checkReport.CheckOutcomeEntity?.MCNotFound,
+                    VCNotMatchPTD = checkReport.CheckOutcomeEntity?.VCNotMatchPTD,
+                    OIFailPotentialCommercial = checkReport.CheckOutcomeEntity?.OIFailPotentialCommercial,
+                    OIFailAuthTravellerNoConfirmation = checkReport.CheckOutcomeEntity?.OIFailAuthTravellerNoConfirmation,
+                    OIFailOther = checkReport.CheckOutcomeEntity?.OIFailOther,
+
+                    RelevantComments = checkReport.CheckOutcomeEntity?.RelevantComments,
+                }
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in GetGbCheckReport");
+            throw new CheckerApiException("Error in GetGbCheckReport", ex);
+        }
+    }
+
     private async Task<List<InterimCheckSummary>> getCheckSummariesBySailing(DateTime sailingDateOnly, TimeSpan sailingTimeOnly, int routeId)
     {
         return await _dbContext.CheckSummary
@@ -396,7 +449,6 @@ public class CheckSummaryService : ICheckSummaryService
 
         return (status);
     }
-
 
     private static string GetTravelMethod(int? passengerTypeId)
     {

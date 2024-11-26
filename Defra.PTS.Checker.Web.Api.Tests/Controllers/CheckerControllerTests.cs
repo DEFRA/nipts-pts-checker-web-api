@@ -3,6 +3,7 @@ using Defra.PTS.Checker.Models;
 using Defra.PTS.Checker.Models.Constants;
 using Defra.PTS.Checker.Models.Enums;
 using Defra.PTS.Checker.Models.Search;
+using Defra.PTS.Checker.Services.Implementation;
 using Defra.PTS.Checker.Services.Interface;
 using Defra.PTS.Checker.Web.Api.Controllers;
 using Microsoft.AspNetCore.Http;
@@ -873,6 +874,79 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
             Assert.That(objectResult, Is.Not.Null);
             Assert.That(objectResult!.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
         }
+
+
+        [Test]
+        public async Task GetGbCheckById_ReturnsOkResult()
+        {
+            Guid gbCheckSummaryId = Guid.NewGuid();
+            // Arrange
+            var request = new GbCheckReportRequestModel
+            {
+                GbCheckSummaryId = gbCheckSummaryId.ToString(),
+            };
+
+            var response = new GbCheckReportResponseModel { GbCheckSummaryId = gbCheckSummaryId };
+            _checkSummaryServiceMock!.Setup(service => service.GetGbCheckReport(It.IsAny<Guid>()))!.ReturnsAsync(response);
+
+            // Act
+            var result = await _controller!.GetGbCheckById(request);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+            var okResult = result as OkObjectResult;
+            Assert.That(okResult, Is.Not.Null);
+            Assert.That(okResult!.StatusCode, Is.EqualTo(200));
+        }
+
+        [Test]
+        public async Task GetGbCheckById_ValidRequestButNoCheck_ReturnsNotFoundResult()
+        {
+            // Arrange
+            var request = new GbCheckReportRequestModel
+            {
+                GbCheckSummaryId = "FF0DF803-8033-4CF8-B877-AB69BEFE63D2",
+            };
+
+            GbCheckReportResponseModel? response = null;
+            _checkSummaryServiceMock!.Setup(service => service.GetGbCheckReport(It.IsAny<Guid>()))!.ReturnsAsync(response);
+
+            // Act
+            var result = await _controller!.GetGbCheckById(request);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<NotFoundObjectResult>());
+
+            var objectResult = result as NotFoundObjectResult;
+            Assert.That(objectResult, Is.Not.Null);
+            Assert.That(objectResult!.StatusCode, Is.EqualTo(StatusCodes.Status404NotFound));
+        }
+
+        [Test]
+        public async Task GetGbCheckById_InvalidRequest_ReturnsBadRequestResult()
+        {
+            // Arrange
+            var request = new GbCheckReportRequestModel
+            {
+                GbCheckSummaryId = "FF0DF803-8033-4CF8-B877-AB69BEFE63D2",
+            };
+
+            _checkSummaryServiceMock!.Setup(service => service.GetGbCheckReport(It.IsAny<Guid>()))!.ReturnsAsync(new GbCheckReportResponseModel());
+
+
+            // Act
+            _controller!.ModelState.AddModelError("GbCheckSummaryId", "GbCheckSummaryId is required");
+            var result = await _controller!.GetGbCheckById(request);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+
+            var objectResult = result as BadRequestObjectResult;
+            Assert.That(objectResult, Is.Not.Null);
+            Assert.That(objectResult!.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
+        }
+
+
     }
 
     public class ErrorResponse
