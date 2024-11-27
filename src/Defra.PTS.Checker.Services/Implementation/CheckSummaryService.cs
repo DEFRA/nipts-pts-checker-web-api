@@ -16,6 +16,9 @@ using TravelDocument = Defra.PTS.Checker.Entities.TravelDocument;
 using CheckOutcome = Defra.PTS.Checker.Entities.CheckOutcome;
 using Defra.PTS.Checker.Models.CustomException;
 using Microsoft.Extensions.Azure;
+using System.Collections.Generic;
+using Microsoft.VisualBasic;
+using Defra.PTS.Checker.Services.Helpers;
 
 namespace Defra.PTS.Checker.Services.Implementation;
 
@@ -377,18 +380,41 @@ public class CheckSummaryService : ICheckSummaryService
             }
         }
 
-        //Sort the list
+        //Split list into check needed and not needed
         var responseListCheckNeeded = responseList
             .Where(x => x.SPSOutcome == checkNeededText)
-            .OrderBy(x => x.PTDNumber)
             .ToList();
         var responseListNoCheckNeeded = responseList
             .Where(x => x.SPSOutcome != checkNeededText)
-            .OrderBy(x => x.PTDNumber)
             .ToList();
+
+        // Sort both lists
+        responseListCheckNeeded = responseListCheckNeeded
+            .OrderBy(s => GetStringType(s.PTDNumber))    // Group by type (letters, mixed, numbers)
+            .ThenBy(s => s.PTDNumber, new MixedStringComparer()) // Custom comparer for mixed strings
+            .ToList();
+        responseListNoCheckNeeded = responseListNoCheckNeeded
+            .OrderBy(s => GetStringType(s.PTDNumber))    // Group by type (letters, mixed, numbers)
+            .ThenBy(s => s.PTDNumber, new MixedStringComparer()) // Custom comparer for mixed strings
+            .ToList();
+
+        //Merge sorted lists
         var mergedList = responseListCheckNeeded.Concat(responseListNoCheckNeeded).ToList();
 
         return mergedList;
+    }
+
+    private static int GetStringType(string str)
+    {
+        bool hasLetters = str.Any(char.IsLetter);
+        bool hasDigits = str.Any(char.IsDigit);
+
+        if (hasLetters && !hasDigits)
+            return 0; // Only letters
+        else if (hasDigits && !hasLetters)
+            return 2; // Only numbers
+        else
+            return 1; // Mixed letters and numbers
     }
 
     private static DateTime GetCombinedDateTime(InterimCheckSummary cs)
@@ -524,5 +550,6 @@ public class InterimCheckSummary
     public string? PetOtherColour { get; set; }
     public string? MicrochipNumber { get; set; }
 }
+
 
 
