@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using TravelDocument = Defra.PTS.Checker.Entities.TravelDocument;
 using CheckOutcome = Defra.PTS.Checker.Entities.CheckOutcome;
 using Defra.PTS.Checker.Models.CustomException;
+using Microsoft.Extensions.Azure;
 
 namespace Defra.PTS.Checker.Services.Implementation;
 
@@ -253,8 +254,6 @@ public class CheckSummaryService : ICheckSummaryService
         // Fetch records matching the specific sailing
         List<InterimCheckSummary> checkSummaries = await getCheckSummariesBySailing(sailingDateOnly, sailingTimeOnly, routeId);
 
-        checkSummaries = checkSummaries.OrderBy(x => x.DocumentReferenceNumber).ToList();
-
         return await getSpsCheckDetailResponse(timeWindowInHours, checkSummaries);
     }
 
@@ -355,6 +354,7 @@ public class CheckSummaryService : ICheckSummaryService
     private async Task<IEnumerable<SpsCheckDetailResponseModel>> getSpsCheckDetailResponse(int timeWindowInHours, List<InterimCheckSummary> checkSummaries)
     {
         var responseList = new List<SpsCheckDetailResponseModel>();
+        string checkNeededText = "Check Needed";
 
         foreach (var cs in checkSummaries)
         {
@@ -377,7 +377,18 @@ public class CheckSummaryService : ICheckSummaryService
             }
         }
 
-        return responseList;
+        //Sort the list
+        var responseListCheckNeeded = responseList
+            .Where(x => x.SPSOutcome == checkNeededText)
+            .OrderBy(x => x.PTDNumber)
+            .ToList();
+        var responseListNoCheckNeeded = responseList
+            .Where(x => x.SPSOutcome != checkNeededText)
+            .OrderBy(x => x.PTDNumber)
+            .ToList();
+        var mergedList = responseListCheckNeeded.Concat(responseListNoCheckNeeded).ToList();
+
+        return mergedList;
     }
 
     private static DateTime GetCombinedDateTime(InterimCheckSummary cs)
