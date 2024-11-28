@@ -390,12 +390,10 @@ public class CheckSummaryService : ICheckSummaryService
 
         // Sort both lists
         responseListCheckNeeded = responseListCheckNeeded
-            .OrderBy(s => GetStringType(s.PTDNumber))    // Group by type (letters, mixed, numbers)
-            .ThenBy(s => s.PTDNumber, new MixedStringComparer()) // Custom comparer for mixed strings
+            .OrderBy(s => s.PTDNumber, new MixedStringComparer()) // Custom comparer for mixed strings
             .ToList();
         responseListNoCheckNeeded = responseListNoCheckNeeded
-            .OrderBy(s => GetStringType(s.PTDNumber))    // Group by type (letters, mixed, numbers)
-            .ThenBy(s => s.PTDNumber, new MixedStringComparer()) // Custom comparer for mixed strings
+            .OrderBy(s => s.PTDNumber, new MixedStringComparer()) // Custom comparer for mixed strings
             .ToList();
 
         //Merge sorted lists
