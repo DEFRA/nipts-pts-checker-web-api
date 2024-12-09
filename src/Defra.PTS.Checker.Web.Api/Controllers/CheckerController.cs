@@ -372,4 +372,47 @@ public class CheckerController : ControllerBase
         return Ok(checkReport);
     }
 
+    [HttpPost]
+    [Route("getCompleteCheckDetails")]
+    [SwaggerResponse(StatusCodes.Status200OK, "OK: Returns the complete check details", typeof(CompleteCheckDetailsResponse))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request: Identifier is not provided or is not valid", typeof(object))]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Not Found: There is no record matching the provided identifier")]
+    [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error: An error has occurred")]
+    [SwaggerOperation(
+     OperationId = "getCompleteCheckDetails",
+     Tags = new[] { "Checker" },
+     Summary = "Retrieves complete check details by PTD or Application Reference Number",
+     Description = "Returns complete details for the specified PTD Number or Application Reference Number"
+ )]
+    public async Task<IActionResult> GetCompleteCheckDetails(
+     [FromBody, SwaggerRequestBody("The search payload", Required = true)] CheckDetailsRequestModel model)
+    {
+        try
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (string.IsNullOrEmpty(model.Identifier))
+            {
+                return BadRequest(new { error = "Either PTD Number or Application Reference Number is required." });
+            }
+
+            var response = await _checkSummaryService.GetCompleteCheckDetailsAsync(model.Identifier);
+
+            if (response == null)
+            {
+                return new NotFoundObjectResult(new { error = "No data found for the provided PTD Number or Application Reference Number." });
+            }
+
+            return Ok(response);
+        }
+        catch (Exception)
+        {            
+            return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred. Please try again later.");
+        }
+    }
+
+
 }

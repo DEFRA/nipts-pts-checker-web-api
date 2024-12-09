@@ -947,6 +947,92 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
         }
 
 
+
+        [Test]
+        public async Task GetCompleteCheckDetailsAsync_ValidPTDNumber_ReturnsExpectedDetails()
+        {
+            // Arrange
+            var mockResponse = new CompleteCheckDetailsResponse
+            {
+                PTDNumber = "PTD123",
+                ApplicationReference = "APP123",
+                PetName = "Buddy",
+                DateTimeChecked = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")
+            };
+
+            _checkSummaryServiceMock!.Setup(service => service.GetCompleteCheckDetailsAsync(It.IsAny<string>()))
+                .ReturnsAsync(mockResponse);
+
+            // Act
+            var result = await _controller!.GetCompleteCheckDetails(new CheckDetailsRequestModel { Identifier = "PTD123" });
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+            var okResult = result as OkObjectResult;
+            Assert.That(okResult, Is.Not.Null);
+            Assert.That(okResult!.Value, Is.Not.Null);
+            var response = okResult.Value as CompleteCheckDetailsResponse;
+            Assert.That(response, Is.Not.Null);
+            Assert.That(response!.PTDNumber, Is.EqualTo("PTD123"));
+            Assert.That(response.ApplicationReference, Is.EqualTo("APP123"));
+            Assert.That(response.PetName, Is.EqualTo("Buddy"));
+        }
+
+        [Test]
+        public async Task GetCompleteCheckDetailsAsync_InvalidPTDNumber_ReturnsNotFound()
+        {
+            // Arrange
+            _checkSummaryServiceMock!.Setup(service => service.GetCompleteCheckDetailsAsync(It.IsAny<string>()))
+                .ReturnsAsync((CompleteCheckDetailsResponse?)null);
+
+            // Act
+            var result = await _controller!.GetCompleteCheckDetails(new CheckDetailsRequestModel { Identifier = "InvalidPTD" });
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<NotFoundObjectResult>());
+            var notFoundResult = result as NotFoundObjectResult;
+            Assert.That(notFoundResult, Is.Not.Null);
+        }
+
+        [Test]
+        public async Task GetCompleteCheckDetailsAsync_EmptyIdentifier_ReturnsBadRequest()
+        {
+            // Arrange
+            var requestModel = new CheckDetailsRequestModel { Identifier = string.Empty };
+
+            // Act
+            var result = await _controller!.GetCompleteCheckDetails(requestModel);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+            var badRequestResult = result as BadRequestObjectResult;
+            Assert.That(badRequestResult, Is.Not.Null);
+            Assert.That(badRequestResult!.Value, Is.Not.Null);
+        }
+
+        [Test]
+        public async Task GetCompleteCheckDetailsAsync_ServiceThrowsException_ReturnsInternalServerError()
+        {
+            // Arrange
+            _checkSummaryServiceMock!.Setup(service => service.GetCompleteCheckDetailsAsync(It.IsAny<string>()))
+                .ThrowsAsync(new Exception("Test exception"));
+
+            var model = new CheckDetailsRequestModel { Identifier = "PTD123" };
+
+            // Act
+            var result = await _controller!.GetCompleteCheckDetails(model);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<ObjectResult>());
+            var objectResult = result as ObjectResult;
+            Assert.That(objectResult, Is.Not.Null);
+            Assert.That(objectResult!.StatusCode, Is.EqualTo(500));
+            Assert.That(objectResult.Value, Is.EqualTo("An unexpected error occurred. Please try again later."));
+        }
+
+
+
+
     }
 
     public class ErrorResponse

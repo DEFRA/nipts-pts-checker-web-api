@@ -966,6 +966,203 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
                 Assert.That(result?.GbCheckSummaryId, Is.EqualTo(gbCheckSummaryID));
             }
         }
+
+
+
+        [Test]
+        public async Task GetCompleteCheckDetailsAsync_ReturnsValidResponse_ForPTDNumber()
+        {
+            // Arrange
+            var applicationId = Guid.NewGuid();
+            var petId = Guid.NewGuid();
+            var travelDocumentId = Guid.NewGuid();
+
+            var pet = new Entities.Pet { Id = petId, Name = "Buddy", MicrochipNumber = "1234567890" };
+            if (_dbContext != null)
+            {
+                await _dbContext.Pet.AddAsync(pet);
+            }
+            else
+            {                
+                throw new InvalidOperationException("_dbContext is null");
+            }
+
+
+            var application = new Entities.Application
+            {
+                Id = applicationId,
+                PetId = petId,
+                ReferenceNumber = "APP123",
+                Status = "Active",
+                DateAuthorised = DateTime.UtcNow
+            };
+            await _dbContext.Application.AddAsync(application);
+
+            var travelDocument = new Entities.TravelDocument
+            {
+                Id = travelDocumentId,
+                ApplicationId = applicationId,
+                PetId = petId,
+                DocumentReferenceNumber = "PTD123",
+                DateOfIssue = DateTime.UtcNow.AddDays(-1)
+            };
+            await _dbContext.TravelDocument.AddAsync(travelDocument);
+
+            var checkSummary = new Entities.CheckSummary
+            {
+                TravelDocumentId = travelDocumentId,
+                ApplicationId = applicationId,
+                Date = DateTime.UtcNow.AddDays(-2),
+                ScheduledSailingTime = TimeSpan.FromHours(10),
+                UpdatedOn = DateTime.UtcNow,
+                CheckerId = Guid.NewGuid()
+            };
+            await _dbContext.CheckSummary.AddAsync(checkSummary);
+
+            await _dbContext.SaveChangesAsync();
+            _dbContext.ChangeTracker.Clear();
+
+            // Act
+            if (_service != null)
+            {
+                var result = await _service.GetCompleteCheckDetailsAsync("PTD123");
+
+                Assert.That(result, Is.Not.Null);
+
+                if (result != null)
+                {
+                    Assert.That(result.PTDNumber, Is.EqualTo("PTD123"));
+                    Assert.That(result.ApplicationReference, Is.EqualTo("APP123"));
+                    Assert.That(result.PetName, Is.EqualTo("Buddy"));
+                    Assert.That(result.MicrochipNumber, Is.EqualTo("1234567890"));
+                    Assert.That(result.Status, Is.EqualTo("Active"));
+                    Assert.That(result.DateOfIssue, Is.EqualTo(travelDocument.DateOfIssue));
+                }
+                else
+                {
+                    throw new InvalidOperationException("result is null");
+                }
+
+            }
+            else
+            {
+                throw new InvalidOperationException("_service is null");
+            }
+
+        }
+
+        [Test]
+        public async Task GetCompleteCheckDetailsAsync_ReturnsNull_WhenNoMatchingIdentifier()
+        {
+            if (_service != null)
+            {
+                // Act
+                var result = await _service.GetCompleteCheckDetailsAsync("NONEXISTENT");
+
+                // Assert
+                Assert.That(result, Is.Null);
+            }
+            else
+            {
+                throw new InvalidOperationException("_service is null");
+            }
+
+        }
+
+        [Test]
+        public async Task GetCompleteCheckDetailsAsync_ReturnsMostRecentRecord_WhenMultipleRecordsExist()
+        {
+            // Arrange
+            var applicationId = Guid.NewGuid();
+            var petId = Guid.NewGuid();
+            var travelDocumentId1 = Guid.NewGuid();
+            var travelDocumentId2 = Guid.NewGuid();
+
+            if (_dbContext != null)
+            {
+                var pet = new Entities.Pet { Id = petId, Name = "Buddy", MicrochipNumber = "1234567890" };
+                await _dbContext.Pet.AddAsync(pet);
+
+                var application = new Entities.Application
+                {
+                    Id = applicationId,
+                    PetId = petId,
+                    ReferenceNumber = "APP123",
+                    Status = "Active",
+                    DateAuthorised = DateTime.UtcNow
+                };
+                await _dbContext.Application.AddAsync(application);
+
+                var travelDocument1 = new Entities.TravelDocument
+                {
+                    Id = travelDocumentId1,
+                    ApplicationId = applicationId,
+                    PetId = petId,
+                    DocumentReferenceNumber = "PTD123",
+                    DateOfIssue = DateTime.UtcNow.AddDays(-2)
+                };
+                var travelDocument2 = new Entities.TravelDocument
+                {
+                    Id = travelDocumentId2,
+                    ApplicationId = applicationId,
+                    PetId = petId,
+                    DocumentReferenceNumber = "PTD456",
+                    DateOfIssue = DateTime.UtcNow.AddDays(-1)
+                };
+                await _dbContext.TravelDocument.AddRangeAsync(travelDocument1, travelDocument2);
+
+                var checkSummary1 = new Entities.CheckSummary
+                {
+                    TravelDocumentId = travelDocumentId1,
+                    ApplicationId = applicationId,
+                    Date = DateTime.UtcNow.AddDays(-3),
+                    ScheduledSailingTime = TimeSpan.FromHours(8),
+                    UpdatedOn = DateTime.UtcNow.AddDays(-3),
+                    CheckerId = Guid.NewGuid()
+                };
+                var checkSummary2 = new Entities.CheckSummary
+                {
+                    TravelDocumentId = travelDocumentId2,
+                    ApplicationId = applicationId,
+                    Date = DateTime.UtcNow.AddDays(-1),
+                    ScheduledSailingTime = TimeSpan.FromHours(12),
+                    UpdatedOn = DateTime.UtcNow.AddDays(-1),
+                    CheckerId = Guid.NewGuid()
+                };
+                await _dbContext.CheckSummary.AddRangeAsync(checkSummary1, checkSummary2);
+
+                await _dbContext.SaveChangesAsync();
+                _dbContext.ChangeTracker.Clear();
+
+                // Act
+                if (_service != null)
+                {
+                    var result = await _service.GetCompleteCheckDetailsAsync("PTD123");
+
+                    // Assert
+                    Assert.That(result, Is.Not.Null);
+                    if (result != null)
+                    {
+                        Assert.That(result.PTDNumber, Is.EqualTo("PTD123"));
+                        Assert.That(result.ApplicationReference, Is.EqualTo("APP123"));
+                        Assert.That(result.PetName, Is.EqualTo("Buddy"));
+                        Assert.That(result.DateTimeChecked, Is.EqualTo(checkSummary1.UpdatedOn?.ToString("yyyy-MM-dd HH:mm:ss")));
+                    }
+                }
+                else
+                {
+                    throw new InvalidOperationException("_service is null");
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException("_dbContext is null");
+            }
+
+           
+
+        }
+
     }
 
     public static class DataHelper

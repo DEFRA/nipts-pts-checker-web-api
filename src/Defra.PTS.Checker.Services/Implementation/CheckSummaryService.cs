@@ -311,6 +311,89 @@ public class CheckSummaryService : ICheckSummaryService
         }
     }
 
+
+    public async Task<CompleteCheckDetailsResponse?> GetCompleteCheckDetailsAsync(string identifier)
+    {
+        try
+        {            
+            var formattedIdentifier = identifier.Trim().ToLower();
+
+            IQueryable<CheckSummary> query = _dbContext.CheckSummary
+                .Include(cs => cs.Application)
+                    .ThenInclude(app => app != null ? app.Pet : null)
+                        .ThenInclude(pet => pet != null ? pet.Breed : null) 
+                .Include(cs => cs.CheckOutcomeEntity)
+                .Include(cs => cs.Checker)
+                .Include(cs => cs.RouteNavigation);
+
+            query = query.Where(cs =>
+                                     (cs.TravelDocument != null && cs.TravelDocument.DocumentReferenceNumber != null && cs.TravelDocument.DocumentReferenceNumber.ToLower() == formattedIdentifier) ||
+                                     (cs.Application != null && cs.Application.ReferenceNumber != null && cs.Application.ReferenceNumber.ToLower() == formattedIdentifier)
+                                 );
+
+            var checkSummaries = await query.ToListAsync();
+            if (!checkSummaries.Any())
+            {
+                return null; 
+            }
+
+            
+            var checkSummary = checkSummaries.OrderByDescending(cs => cs.UpdatedOn).FirstOrDefault();
+            if (checkSummary == null)
+            {
+                return null;
+            }
+
+            
+            await _dbContext.Entry(checkSummary)
+                .Reference(cs => cs.TravelDocument)
+                .LoadAsync();
+
+            
+            var application = checkSummary.Application;
+            var pet = application?.Pet;
+            var breed = pet?.Breed;
+            var travelDocument = checkSummary.TravelDocument; 
+            var checker = checkSummary.Checker;
+            var checkOutcome = checkSummary.CheckOutcomeEntity;
+
+           
+            _logger.LogInformation("Retrieved CheckSummary with ID: {CheckSummaryId}", checkSummary.Id);
+            _logger.LogInformation("TravelDocument DateOfIssue: {DateOfIssue}", travelDocument?.DateOfIssue);
+            _logger.LogInformation("BreedName: {BreedName}", breed?.Name);
+
+            
+            var response = new CompleteCheckDetailsResponse
+            {
+                CheckOutcome = checkOutcome?.RelevantComments ?? "Passenger referred to DAERA/SPS at NI Port", 
+                PTDNumber = travelDocument?.DocumentReferenceNumber ?? string.Empty,
+                ApplicationReference = application?.ReferenceNumber ?? string.Empty,
+                Status = application?.Status ?? string.Empty,
+                DateAuthorised = application?.DateAuthorised,
+                MicrochipNumber = pet?.MicrochipNumber ?? string.Empty,
+                PetName = pet?.Name ?? string.Empty,
+                Species = pet != null ? Enum.GetName(typeof(PetSpeciesType), pet.SpeciesId) ?? string.Empty : string.Empty,
+                BreedName = breed?.Name ?? string.Empty, 
+                DateOfIssue = travelDocument?.DateOfIssue, 
+                CheckerName = checker?.FullName ?? string.Empty,
+                DateTimeChecked = checkSummary.UpdatedOn?.ToString("yyyy-MM-dd HH:mm:ss") ?? string.Empty,
+                Route = checkSummary.RouteNavigation?.RouteName ?? string.Empty,
+                ScheduledDepartureDate = checkSummary.Date?.ToString("yyyy-MM-dd") ?? string.Empty,
+                ScheduledDepartureTime = checkSummary.ScheduledSailingTime?.ToString(@"hh\:mm\:ss") ?? string.Empty,
+                RelevantComments = checkOutcome?.RelevantComments ?? string.Empty,
+                HasMultipleRecords = checkSummaries.Count > 1
+            };
+
+            return response;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while retrieving complete check details.");
+            return null;
+        }
+    }
+
+
     private async Task<List<InterimCheckSummary>> getCheckSummariesBySailing(DateTime sailingDateOnly, TimeSpan sailingTimeOnly, int routeId)
     {
         return await _dbContext.CheckSummary
