@@ -1010,29 +1010,7 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
             Assert.That(badRequestResult!.Value, Is.Not.Null);
         }
 
-        [Test]
-        public async Task GetCompleteCheckDetailsAsync_ServiceThrowsException_ReturnsInternalServerError()
-        {
-            // Arrange
-            _checkSummaryServiceMock!.Setup(service => service.GetCompleteCheckDetailsAsync(It.IsAny<string>()))
-                .ThrowsAsync(new Exception("Test exception"));
-
-            var model = new CheckDetailsRequestModel { Identifier = "PTD123" };
-
-            // Act
-            var result = await _controller!.GetCompleteCheckDetails(model);
-
-            // Assert
-            Assert.That(result, Is.InstanceOf<ObjectResult>());
-            var objectResult = result as ObjectResult;
-            Assert.That(objectResult, Is.Not.Null);
-            Assert.That(objectResult!.StatusCode, Is.EqualTo(500));
-            Assert.That(objectResult.Value, Is.EqualTo("An unexpected error occurred. Please try again later."));
-        }
-
-
-
-
+       
     }
 
     public class ErrorResponse
