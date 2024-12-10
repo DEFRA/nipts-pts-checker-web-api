@@ -949,68 +949,68 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
 
 
         [Test]
-        public async Task GetCompleteCheckDetailsAsync_ValidPTDNumber_ReturnsExpectedDetails()
+        public async Task GetCompleteCheckDetails_ValidRequest_ReturnsOkResult()
         {
-            // Arrange
-            var mockResponse = new CompleteCheckDetailsResponse
+            var request = new CheckDetailsRequestModel
             {
-                PTDNumber = "PTD123",
-                ApplicationReference = "APP123",
-                PetName = "Buddy",
-                DateTimeChecked = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")
+                Identifier = "valid_identifier"
             };
 
-            _checkSummaryServiceMock!.Setup(service => service.GetCompleteCheckDetailsAsync(It.IsAny<string>()))
-                .ReturnsAsync(mockResponse);
+            var response = new CompleteCheckDetailsResponse
+            {
+                MicrochipNumber = "1234567890",
+                GBCheckerName = "Test Checker",
+                Route = "Test Route"
+            };
 
-            // Act
-            var result = await _controller!.GetCompleteCheckDetails(new CheckDetailsRequestModel { Identifier = "PTD123" });
+            _checkSummaryServiceMock!.Setup(service => service.GetCompleteCheckDetailsAsync(request.Identifier!))
+                .ReturnsAsync(response);
 
-            // Assert
+            var result = await _controller!.GetCompleteCheckDetails(request);
+
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
             var okResult = result as OkObjectResult;
             Assert.That(okResult, Is.Not.Null);
-            Assert.That(okResult!.Value, Is.Not.Null);
-            var response = okResult.Value as CompleteCheckDetailsResponse;
-            Assert.That(response, Is.Not.Null);
-            Assert.That(response!.PTDNumber, Is.EqualTo("PTD123"));
-            Assert.That(response.ApplicationReference, Is.EqualTo("APP123"));
-            Assert.That(response.PetName, Is.EqualTo("Buddy"));
+            Assert.That(okResult!.Value, Is.EqualTo(response));
         }
 
         [Test]
-        public async Task GetCompleteCheckDetailsAsync_InvalidPTDNumber_ReturnsNotFound()
+        public async Task GetCompleteCheckDetails_InvalidRequest_ReturnsBadRequestResult()
         {
-            // Arrange
-            _checkSummaryServiceMock!.Setup(service => service.GetCompleteCheckDetailsAsync(It.IsAny<string>()))
+            var request = new CheckDetailsRequestModel
+            {
+                Identifier = null
+            };
+
+            _controller!.ModelState.AddModelError("Identifier", "Identifier is required");
+
+            var result = await _controller!.GetCompleteCheckDetails(request);
+
+            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+            var badRequestResult = result as BadRequestObjectResult;
+            Assert.That(badRequestResult, Is.Not.Null);
+        }
+
+        [Test]
+        public async Task GetCompleteCheckDetails_IdentifierNotFound_ReturnsNotFoundResult()
+        {
+            var request = new CheckDetailsRequestModel
+            {
+                Identifier = "non_existing_identifier"
+            };
+
+            _checkSummaryServiceMock!.Setup(service => service.GetCompleteCheckDetailsAsync(request.Identifier!))
                 .ReturnsAsync((CompleteCheckDetailsResponse?)null);
 
-            // Act
-            var result = await _controller!.GetCompleteCheckDetails(new CheckDetailsRequestModel { Identifier = "InvalidPTD" });
+            var result = await _controller!.GetCompleteCheckDetails(request);
 
-            // Assert
             Assert.That(result, Is.InstanceOf<NotFoundObjectResult>());
             var notFoundResult = result as NotFoundObjectResult;
             Assert.That(notFoundResult, Is.Not.Null);
         }
 
-        [Test]
-        public async Task GetCompleteCheckDetailsAsync_EmptyIdentifier_ReturnsBadRequest()
-        {
-            // Arrange
-            var requestModel = new CheckDetailsRequestModel { Identifier = string.Empty };
 
-            // Act
-            var result = await _controller!.GetCompleteCheckDetails(requestModel);
 
-            // Assert
-            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
-            var badRequestResult = result as BadRequestObjectResult;
-            Assert.That(badRequestResult, Is.Not.Null);
-            Assert.That(badRequestResult!.Value, Is.Not.Null);
-        }
-
-       
     }
 
     public class ErrorResponse

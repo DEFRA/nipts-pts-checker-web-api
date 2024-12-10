@@ -315,73 +315,71 @@ public class CheckSummaryService : ICheckSummaryService
     public async Task<CompleteCheckDetailsResponse?> GetCompleteCheckDetailsAsync(string identifier)
     {
         try
-        {            
+        {
             var formattedIdentifier = identifier.Trim().ToLower();
 
+            // Query to retrieve CheckSummary with related data
             IQueryable<CheckSummary> query = _dbContext.CheckSummary
                 .Include(cs => cs.Application)
                     .ThenInclude(app => app != null ? app.Pet : null)
-                        .ThenInclude(pet => pet != null ? pet.Breed : null) 
+                        .ThenInclude(pet => pet != null ? pet.Breed : null)
                 .Include(cs => cs.CheckOutcomeEntity)
                 .Include(cs => cs.Checker)
                 .Include(cs => cs.RouteNavigation);
 
             query = query.Where(cs =>
-                                     (cs.TravelDocument != null && cs.TravelDocument.DocumentReferenceNumber != null && cs.TravelDocument.DocumentReferenceNumber.ToLower() == formattedIdentifier) ||
-                                     (cs.Application != null && cs.Application.ReferenceNumber != null && cs.Application.ReferenceNumber.ToLower() == formattedIdentifier)
-                                 );
+                (cs.TravelDocument != null && cs.TravelDocument.DocumentReferenceNumber != null &&
+                 cs.TravelDocument.DocumentReferenceNumber.ToLower() == formattedIdentifier) ||
+                (cs.Application != null && cs.Application.ReferenceNumber != null &&
+                 cs.Application.ReferenceNumber.ToLower() == formattedIdentifier)
+            );
 
+            // Retrieve all matching CheckSummary records
             var checkSummaries = await query.ToListAsync();
             if (!checkSummaries.Any())
             {
-                return null; 
+                return null;
             }
 
-            
+            // Get the most recent CheckSummary based on UpdatedOn
             var checkSummary = checkSummaries.OrderByDescending(cs => cs.UpdatedOn).FirstOrDefault();
             if (checkSummary == null)
             {
                 return null;
             }
 
-            
+            // Explicitly load related TravelDocument if not included in the query
             await _dbContext.Entry(checkSummary)
                 .Reference(cs => cs.TravelDocument)
                 .LoadAsync();
 
-            
             var application = checkSummary.Application;
             var pet = application?.Pet;
             var breed = pet?.Breed;
-            var travelDocument = checkSummary.TravelDocument; 
+            var travelDocument = checkSummary.TravelDocument;
             var checker = checkSummary.Checker;
-            var checkOutcome = checkSummary.CheckOutcomeEntity;
 
-           
-            _logger.LogInformation("Retrieved CheckSummary with ID: {CheckSummaryId}", checkSummary.Id);
-            _logger.LogInformation("TravelDocument DateOfIssue: {DateOfIssue}", travelDocument?.DateOfIssue);
-            _logger.LogInformation("BreedName: {BreedName}", breed?.Name);
+            // Collect all outcomes, referral reasons, and additional comments
+            var checkOutcomes = checkSummaries
+                .SelectMany(cs => _dbContext.CheckOutcome
+                    .Where(co => co.Id == cs.CheckOutcomeId)
+                    .ToList())
+                .ToList();
 
-            
             var response = new CompleteCheckDetailsResponse
             {
-                CheckOutcome = checkOutcome?.RelevantComments ?? "Passenger referred to DAERA/SPS at NI Port", 
-                PTDNumber = travelDocument?.DocumentReferenceNumber ?? string.Empty,
-                ApplicationReference = application?.ReferenceNumber ?? string.Empty,
-                Status = application?.Status ?? string.Empty,
-                DateAuthorised = application?.DateAuthorised,
+                CheckOutcome = checkOutcomes.Select(co => co.RelevantComments ?? "No outcome details").ToList(),
+                ReasonForReferral = checkOutcomes
+                    .Where(co => co.OIFailOther == true || co.OIFailAuthTravellerNoConfirmation == true)
+                    .Select(co => co.RelevantComments ?? "Reason not specified")
+                    .ToList(),
                 MicrochipNumber = pet?.MicrochipNumber ?? string.Empty,
-                PetName = pet?.Name ?? string.Empty,
-                Species = pet != null ? Enum.GetName(typeof(PetSpeciesType), pet.SpeciesId) ?? string.Empty : string.Empty,
-                BreedName = breed?.Name ?? string.Empty, 
-                DateOfIssue = travelDocument?.DateOfIssue, 
-                CheckerName = checker?.FullName ?? string.Empty,
-                DateTimeChecked = checkSummary.UpdatedOn?.ToString("yyyy-MM-dd HH:mm:ss") ?? string.Empty,
+                AdditionalComments = checkOutcomes.Select(co => co.SPSOutcomeDetails ?? "No additional comments").ToList(),
+                GBCheckerName = checker?.FullName ?? string.Empty,
+                DateAndTimeChecked = checkSummary.UpdatedOn?.ToString("yyyy-MM-dd HH:mm:ss") ?? string.Empty,
                 Route = checkSummary.RouteNavigation?.RouteName ?? string.Empty,
                 ScheduledDepartureDate = checkSummary.Date?.ToString("yyyy-MM-dd") ?? string.Empty,
-                ScheduledDepartureTime = checkSummary.ScheduledSailingTime?.ToString(@"hh\:mm\:ss") ?? string.Empty,
-                RelevantComments = checkOutcome?.RelevantComments ?? string.Empty,
-                HasMultipleRecords = checkSummaries.Count > 1
+                ScheduledDepartureTime = checkSummary.ScheduledSailingTime?.ToString(@"hh\:mm\:ss") ?? string.Empty
             };
 
             return response;

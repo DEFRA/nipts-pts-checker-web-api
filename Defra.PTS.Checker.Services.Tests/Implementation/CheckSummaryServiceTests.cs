@@ -967,201 +967,122 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             }
         }
 
-
-
         [Test]
-        public async Task GetCompleteCheckDetailsAsync_ReturnsValidResponse_ForPTDNumber()
+        public async Task GetCompleteCheckDetailsAsync_ValidIdentifier_ReturnsCompleteCheckDetailsResponse()
         {
-            // Arrange
+            var identifier = "valid_identifier";
             var applicationId = Guid.NewGuid();
-            var petId = Guid.NewGuid();
-            var travelDocumentId = Guid.NewGuid();
 
-            var pet = new Entities.Pet { Id = petId, Name = "Buddy", MicrochipNumber = "1234567890" };
-            if (_dbContext != null)
-            {
-                await _dbContext.Pet.AddAsync(pet);
-            }
-            else
-            {                
-                throw new InvalidOperationException("_dbContext is null");
-            }
-
-
+            var pet = new Entities.Pet { MicrochipNumber = "1234567890" };
             var application = new Entities.Application
             {
                 Id = applicationId,
-                PetId = petId,
-                ReferenceNumber = "APP123",
-                Status = "Active",
-                DateAuthorised = DateTime.UtcNow
+                Pet = pet,
+                ReferenceNumber = "REF123",
+                Status = "Authorised"
             };
-            await _dbContext.Application.AddAsync(application);
-
             var travelDocument = new Entities.TravelDocument
             {
-                Id = travelDocumentId,
                 ApplicationId = applicationId,
-                PetId = petId,
-                DocumentReferenceNumber = "PTD123",
-                DateOfIssue = DateTime.UtcNow.AddDays(-1)
+                DocumentReferenceNumber = identifier
             };
-            await _dbContext.TravelDocument.AddAsync(travelDocument);
-
+            var route = new Entities.Route { RouteName = "Test Route" };
+            var checker = new Entities.Checker
+            {
+                FullName = "Test Checker",
+                FirstName = "Test",
+                LastName = "Checker"
+            };
+            var checkOutcome = new Entities.CheckOutcome
+            {
+                RelevantComments = "Outcome Comment",
+                SPSOutcomeDetails = "Additional Comment",
+                OIFailOther = true
+            };
             var checkSummary = new Entities.CheckSummary
             {
-                TravelDocumentId = travelDocumentId,
-                ApplicationId = applicationId,
-                Date = DateTime.UtcNow.AddDays(-2),
-                ScheduledSailingTime = TimeSpan.FromHours(10),
+                Application = application,
+                TravelDocument = travelDocument,
+                Checker = checker,
+                RouteNavigation = route,
                 UpdatedOn = DateTime.UtcNow,
-                CheckerId = Guid.NewGuid()
+                CheckOutcomeId = checkOutcome.Id,
+                CheckOutcomeEntity = checkOutcome
             };
+
+            await _dbContext!.Pet.AddAsync(pet);
+            await _dbContext.Application.AddAsync(application);
+            await _dbContext.TravelDocument.AddAsync(travelDocument);
+            await _dbContext.Route.AddAsync(route);
+            await _dbContext.Checker.AddAsync(checker);
+            await _dbContext.CheckOutcome.AddAsync(checkOutcome);
             await _dbContext.CheckSummary.AddAsync(checkSummary);
-
             await _dbContext.SaveChangesAsync();
-            _dbContext.ChangeTracker.Clear();
 
-            // Act
-            if (_service != null)
-            {
-                var result = await _service.GetCompleteCheckDetailsAsync("PTD123");
+            var result = await _service!.GetCompleteCheckDetailsAsync(identifier);
 
-                Assert.That(result, Is.Not.Null);
-
-                if (result != null)
-                {
-                    Assert.That(result.PTDNumber, Is.EqualTo("PTD123"));
-                    Assert.That(result.ApplicationReference, Is.EqualTo("APP123"));
-                    Assert.That(result.PetName, Is.EqualTo("Buddy"));
-                    Assert.That(result.MicrochipNumber, Is.EqualTo("1234567890"));
-                    Assert.That(result.Status, Is.EqualTo("Active"));
-                    Assert.That(result.DateOfIssue, Is.EqualTo(travelDocument.DateOfIssue));
-                }
-                else
-                {
-                    throw new InvalidOperationException("result is null");
-                }
-
-            }
-            else
-            {
-                throw new InvalidOperationException("_service is null");
-            }
-
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result!.MicrochipNumber, Is.EqualTo("1234567890"));
+            Assert.That(result.Route, Is.EqualTo("Test Route"));
+            Assert.That(result.GBCheckerName, Is.EqualTo("Test Checker"));
+            Assert.That(result.CheckOutcome, Is.Not.Empty);
+            Assert.That(result.CheckOutcome.First(), Is.EqualTo("Outcome Comment"));
+            Assert.That(result.AdditionalComments.First(), Is.EqualTo("Additional Comment"));
+            Assert.That(result.ReasonForReferral, Contains.Item("Outcome Comment"));
         }
 
         [Test]
-        public async Task GetCompleteCheckDetailsAsync_ReturnsNull_WhenNoMatchingIdentifier()
+        public async Task GetCompleteCheckDetailsAsync_EmptyCheckOutcomes_ReturnsEmptyListsInResponse()
         {
-            if (_service != null)
-            {
-                // Act
-                var result = await _service.GetCompleteCheckDetailsAsync("NONEXISTENT");
-
-                // Assert
-                Assert.That(result, Is.Null);
-            }
-            else
-            {
-                throw new InvalidOperationException("_service is null");
-            }
-
-        }
-
-        [Test]
-        public async Task GetCompleteCheckDetailsAsync_ReturnsMostRecentRecord_WhenMultipleRecordsExist()
-        {
-            // Arrange
+            var identifier = "valid_identifier";
             var applicationId = Guid.NewGuid();
-            var petId = Guid.NewGuid();
-            var travelDocumentId1 = Guid.NewGuid();
-            var travelDocumentId2 = Guid.NewGuid();
 
-            if (_dbContext != null)
+            var pet = new Entities.Pet { MicrochipNumber = "1234567890" };
+            var application = new Entities.Application
             {
-                var pet = new Entities.Pet { Id = petId, Name = "Buddy", MicrochipNumber = "1234567890" };
-                await _dbContext.Pet.AddAsync(pet);
-
-                var application = new Entities.Application
-                {
-                    Id = applicationId,
-                    PetId = petId,
-                    ReferenceNumber = "APP123",
-                    Status = "Active",
-                    DateAuthorised = DateTime.UtcNow
-                };
-                await _dbContext.Application.AddAsync(application);
-
-                var travelDocument1 = new Entities.TravelDocument
-                {
-                    Id = travelDocumentId1,
-                    ApplicationId = applicationId,
-                    PetId = petId,
-                    DocumentReferenceNumber = "PTD123",
-                    DateOfIssue = DateTime.UtcNow.AddDays(-2)
-                };
-                var travelDocument2 = new Entities.TravelDocument
-                {
-                    Id = travelDocumentId2,
-                    ApplicationId = applicationId,
-                    PetId = petId,
-                    DocumentReferenceNumber = "PTD456",
-                    DateOfIssue = DateTime.UtcNow.AddDays(-1)
-                };
-                await _dbContext.TravelDocument.AddRangeAsync(travelDocument1, travelDocument2);
-
-                var checkSummary1 = new Entities.CheckSummary
-                {
-                    TravelDocumentId = travelDocumentId1,
-                    ApplicationId = applicationId,
-                    Date = DateTime.UtcNow.AddDays(-3),
-                    ScheduledSailingTime = TimeSpan.FromHours(8),
-                    UpdatedOn = DateTime.UtcNow.AddDays(-3),
-                    CheckerId = Guid.NewGuid()
-                };
-                var checkSummary2 = new Entities.CheckSummary
-                {
-                    TravelDocumentId = travelDocumentId2,
-                    ApplicationId = applicationId,
-                    Date = DateTime.UtcNow.AddDays(-1),
-                    ScheduledSailingTime = TimeSpan.FromHours(12),
-                    UpdatedOn = DateTime.UtcNow.AddDays(-1),
-                    CheckerId = Guid.NewGuid()
-                };
-                await _dbContext.CheckSummary.AddRangeAsync(checkSummary1, checkSummary2);
-
-                await _dbContext.SaveChangesAsync();
-                _dbContext.ChangeTracker.Clear();
-
-                // Act
-                if (_service != null)
-                {
-                    var result = await _service.GetCompleteCheckDetailsAsync("PTD123");
-
-                    // Assert
-                    Assert.That(result, Is.Not.Null);
-                    if (result != null)
-                    {
-                        Assert.That(result.PTDNumber, Is.EqualTo("PTD123"));
-                        Assert.That(result.ApplicationReference, Is.EqualTo("APP123"));
-                        Assert.That(result.PetName, Is.EqualTo("Buddy"));
-                        Assert.That(result.DateTimeChecked, Is.EqualTo(checkSummary1.UpdatedOn?.ToString("yyyy-MM-dd HH:mm:ss")));
-                    }
-                }
-                else
-                {
-                    throw new InvalidOperationException("_service is null");
-                }
-            }
-            else
+                Id = applicationId,
+                Pet = pet,
+                ReferenceNumber = "REF123",
+                Status = "Authorised"
+            };
+            var travelDocument = new Entities.TravelDocument
             {
-                throw new InvalidOperationException("_dbContext is null");
-            }
+                ApplicationId = applicationId,
+                DocumentReferenceNumber = identifier
+            };
+            var route = new Entities.Route { RouteName = "Test Route" };
+            var checker = new Entities.Checker
+            {
+                FullName = "Test Checker",
+                FirstName = "Test",
+                LastName = "Checker"
+            };
+            var checkSummary = new Entities.CheckSummary
+            {
+                Application = application,
+                TravelDocument = travelDocument,
+                Checker = checker,
+                RouteNavigation = route,
+                UpdatedOn = DateTime.UtcNow
+            };
 
-           
+            await _dbContext!.Pet.AddAsync(pet);
+            await _dbContext.Application.AddAsync(application);
+            await _dbContext.TravelDocument.AddAsync(travelDocument);
+            await _dbContext.Route.AddAsync(route);
+            await _dbContext.Checker.AddAsync(checker);
+            await _dbContext.CheckSummary.AddAsync(checkSummary);
+            await _dbContext.SaveChangesAsync();
 
+            var result = await _service!.GetCompleteCheckDetailsAsync(identifier);
+
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result!.CheckOutcome, Is.Empty);
+            Assert.That(result.ReasonForReferral, Is.Empty);
+            Assert.That(result.AdditionalComments, Is.Empty);
         }
+
+
 
     }
 
