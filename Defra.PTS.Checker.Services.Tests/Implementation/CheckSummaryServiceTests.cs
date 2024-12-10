@@ -1022,7 +1022,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             var result = await _service!.GetCompleteCheckDetailsAsync(identifier);
 
             Assert.That(result, Is.Not.Null);
-            Assert.That(result!.MicrochipNumber, Is.EqualTo("1234567890"));
+            Assert.That(result!.MicrochipNumber, Is.Null);
             Assert.That(result.Route, Is.EqualTo("Test Route"));
             Assert.That(result.GBCheckerName, Is.EqualTo("Test Checker"));
             Assert.That(result.CheckOutcome, Is.Not.Empty);

@@ -311,14 +311,12 @@ public class CheckSummaryService : ICheckSummaryService
         }
     }
 
-
     public async Task<CompleteCheckDetailsResponse?> GetCompleteCheckDetailsAsync(string identifier)
     {
         try
         {
             var formattedIdentifier = identifier.Trim().ToLower();
 
-            // Query to retrieve CheckSummary with related data
             IQueryable<CheckSummary> query = _dbContext.CheckSummary
                 .Include(cs => cs.Application)
                     .ThenInclude(app => app != null ? app.Pet : null)
@@ -334,37 +332,35 @@ public class CheckSummaryService : ICheckSummaryService
                  cs.Application.ReferenceNumber.ToLower() == formattedIdentifier)
             );
 
-            // Retrieve all matching CheckSummary records
             var checkSummaries = await query.ToListAsync();
             if (!checkSummaries.Any())
             {
                 return null;
             }
 
-            // Get the most recent CheckSummary based on UpdatedOn
             var checkSummary = checkSummaries.OrderByDescending(cs => cs.UpdatedOn).FirstOrDefault();
             if (checkSummary == null)
             {
                 return null;
             }
 
-            // Explicitly load related TravelDocument if not included in the query
             await _dbContext.Entry(checkSummary)
                 .Reference(cs => cs.TravelDocument)
                 .LoadAsync();
 
             var application = checkSummary.Application;
             var pet = application?.Pet;
-            var breed = pet?.Breed;
             var travelDocument = checkSummary.TravelDocument;
             var checker = checkSummary.Checker;
 
-            // Collect all outcomes, referral reasons, and additional comments
             var checkOutcomes = checkSummaries
                 .SelectMany(cs => _dbContext.CheckOutcome
                     .Where(co => co.Id == cs.CheckOutcomeId)
                     .ToList())
                 .ToList();
+
+            var displayMicrochipNumber = checkOutcomes.Any(co =>
+                co.MCNotMatch == true || !string.IsNullOrWhiteSpace(co.MCNotMatchActual));
 
             var response = new CompleteCheckDetailsResponse
             {
@@ -373,7 +369,7 @@ public class CheckSummaryService : ICheckSummaryService
                     .Where(co => co.OIFailOther == true || co.OIFailAuthTravellerNoConfirmation == true)
                     .Select(co => co.RelevantComments ?? "Reason not specified")
                     .ToList(),
-                MicrochipNumber = pet?.MicrochipNumber ?? string.Empty,
+                MicrochipNumber = displayMicrochipNumber ? pet?.MicrochipNumber ?? string.Empty : null,
                 AdditionalComments = checkOutcomes.Select(co => co.SPSOutcomeDetails ?? "No additional comments").ToList(),
                 GBCheckerName = checker?.FullName ?? string.Empty,
                 DateAndTimeChecked = checkSummary.UpdatedOn?.ToString("yyyy-MM-dd HH:mm:ss") ?? string.Empty,
@@ -390,6 +386,7 @@ public class CheckSummaryService : ICheckSummaryService
             return null;
         }
     }
+
 
 
     private async Task<List<InterimCheckSummary>> getCheckSummariesBySailing(DateTime sailingDateOnly, TimeSpan sailingTimeOnly, int routeId)
