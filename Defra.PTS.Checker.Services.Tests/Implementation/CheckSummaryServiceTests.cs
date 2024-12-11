@@ -967,11 +967,14 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             }
         }
 
+
         [Test]
-        public async Task GetCompleteCheckDetailsAsync_ValidIdentifier_ReturnsCompleteCheckDetailsResponse()
+        public async Task GetCompleteCheckDetailsAsync_ValidIdentifierWithFilters_ReturnsCompleteCheckDetailsResponse()
         {
             var identifier = "valid_identifier";
             var applicationId = Guid.NewGuid();
+            var testDate = DateTime.UtcNow.Date;
+            var testTime = new TimeSpan(10, 30, 0);
 
             var pet = new Entities.Pet { MicrochipNumber = "1234567890" };
             var application = new Entities.Application
@@ -1006,6 +1009,8 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
                 Checker = checker,
                 RouteNavigation = route,
                 UpdatedOn = DateTime.UtcNow,
+                Date = testDate,
+                ScheduledSailingTime = testTime,
                 CheckOutcomeId = checkOutcome.Id,
                 CheckOutcomeEntity = checkOutcome
             };
@@ -1019,23 +1024,25 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             await _dbContext.CheckSummary.AddAsync(checkSummary);
             await _dbContext.SaveChangesAsync();
 
-            var result = await _service!.GetCompleteCheckDetailsAsync(identifier);
+            var result = await _service!.GetCompleteCheckDetailsAsync(identifier, "Test Route", testDate, testTime);
 
             Assert.That(result, Is.Not.Null);
             Assert.That(result!.MicrochipNumber, Is.Null);
             Assert.That(result.Route, Is.EqualTo("Test Route"));
             Assert.That(result.GBCheckerName, Is.EqualTo("Test Checker"));
             Assert.That(result.CheckOutcome, Is.Not.Empty);
-            Assert.That(result.CheckOutcome.First(), Is.EqualTo("Outcome Comment"));
-            Assert.That(result.AdditionalComments.First(), Is.EqualTo("Additional Comment"));
+            Assert.That(result.CheckOutcome!.First(), Is.EqualTo("Outcome Comment"));
+            Assert.That(result.AdditionalComments!.First(), Is.EqualTo("Additional Comment"));
             Assert.That(result.ReasonForReferral, Contains.Item("Outcome Comment"));
         }
 
         [Test]
-        public async Task GetCompleteCheckDetailsAsync_EmptyCheckOutcomes_ReturnsEmptyListsInResponse()
+        public async Task GetCompleteCheckDetailsAsync_EmptyCheckOutcomesWithFilters_ReturnsEmptyListsInResponse()
         {
             var identifier = "valid_identifier";
             var applicationId = Guid.NewGuid();
+            var testDate = DateTime.UtcNow.Date;
+            var testTime = new TimeSpan(10, 30, 0);
 
             var pet = new Entities.Pet { MicrochipNumber = "1234567890" };
             var application = new Entities.Application
@@ -1063,7 +1070,9 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
                 TravelDocument = travelDocument,
                 Checker = checker,
                 RouteNavigation = route,
-                UpdatedOn = DateTime.UtcNow
+                UpdatedOn = DateTime.UtcNow,
+                Date = testDate,
+                ScheduledSailingTime = testTime
             };
 
             await _dbContext!.Pet.AddAsync(pet);
@@ -1074,14 +1083,13 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             await _dbContext.CheckSummary.AddAsync(checkSummary);
             await _dbContext.SaveChangesAsync();
 
-            var result = await _service!.GetCompleteCheckDetailsAsync(identifier);
+            var result = await _service!.GetCompleteCheckDetailsAsync(identifier, "Test Route", testDate, testTime);
 
             Assert.That(result, Is.Not.Null);
             Assert.That(result!.CheckOutcome, Is.Empty);
             Assert.That(result.ReasonForReferral, Is.Empty);
             Assert.That(result.AdditionalComments, Is.Empty);
         }
-
 
 
     }

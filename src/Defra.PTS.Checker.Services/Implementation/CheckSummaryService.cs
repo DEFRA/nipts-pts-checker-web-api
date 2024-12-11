@@ -311,7 +311,8 @@ public class CheckSummaryService : ICheckSummaryService
         }
     }
 
-    public async Task<CompleteCheckDetailsResponse?> GetCompleteCheckDetailsAsync(string identifier)
+
+    public async Task<CompleteCheckDetailsResponse?> GetCompleteCheckDetailsAsync(string identifier, string? routeName = null, DateTime? date = null, TimeSpan? scheduleTime = null)
     {
         try
         {
@@ -319,8 +320,7 @@ public class CheckSummaryService : ICheckSummaryService
 
             IQueryable<CheckSummary> query = _dbContext.CheckSummary
                 .Include(cs => cs.Application)
-                    .ThenInclude(app => app != null ? app.Pet : null)
-                        .ThenInclude(pet => pet != null ? pet.Breed : null)
+                    .ThenInclude(app => app != null ? app.Pet:null)
                 .Include(cs => cs.CheckOutcomeEntity)
                 .Include(cs => cs.Checker)
                 .Include(cs => cs.RouteNavigation);
@@ -331,6 +331,29 @@ public class CheckSummaryService : ICheckSummaryService
                 (cs.Application != null && cs.Application.ReferenceNumber != null &&
                  cs.Application.ReferenceNumber.ToLower() == formattedIdentifier)
             );
+
+            if (!string.IsNullOrWhiteSpace(routeName))
+            {
+                var routeId = await _dbContext.Route
+                    .Where(r => r.RouteName != null && r.RouteName.ToLower() == routeName.ToLower())
+                    .Select(r => r.Id)
+                    .FirstOrDefaultAsync();
+
+                if (routeId > 0)
+                {
+                    query = query.Where(cs => cs.RouteId == routeId);
+                }
+            }
+
+            if (date.HasValue)
+            {
+                query = query.Where(cs => cs.Date.HasValue && cs.Date.Value.Date == date.Value.Date);
+            }
+
+            if (scheduleTime.HasValue)
+            {
+                query = query.Where(cs => cs.ScheduledSailingTime.HasValue && cs.ScheduledSailingTime.Value == scheduleTime.Value);
+            }
 
             var checkSummaries = await query.ToListAsync();
             if (!checkSummaries.Any())

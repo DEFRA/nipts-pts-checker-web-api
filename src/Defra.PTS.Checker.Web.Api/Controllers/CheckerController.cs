@@ -376,42 +376,42 @@ public class CheckerController : ControllerBase
     [HttpPost]
     [Route("getCompleteCheckDetails")]
     [SwaggerResponse(StatusCodes.Status200OK, "OK: Returns the complete check details", typeof(CompleteCheckDetailsResponse))]
-    [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request: Identifier is not provided or is not valid", typeof(object))]
-    [SwaggerResponse(StatusCodes.Status404NotFound, "Not Found: There is no record matching the provided identifier")]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request: Identifier, RouteName, Date, or ScheduledTime is not valid", typeof(object))]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Not Found: There is no record matching the provided inputs")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error: An error has occurred")]
     [SwaggerOperation(
     OperationId = "getCompleteCheckDetails",
     Tags = new[] { "Checker" },
-    Summary = "Retrieves complete check details by PTD or Application Reference Number",
-    Description = "Returns complete details for the specified PTD Number or Application Reference Number"
+    Summary = "Retrieves complete check details by PTD/Application Reference Number, Route Name, Date, and Schedule Time",
+    Description = "Returns complete details for the specified inputs"
 )]
     public async Task<IActionResult> GetCompleteCheckDetails(
     [FromBody, SwaggerRequestBody("The search payload", Required = true)] CheckDetailsRequestModel model)
     {
-       
         if (!ModelState.IsValid)
         {
             return BadRequest(new { error = "Invalid input. Please provide valid data." });
         }
 
-        
         if (string.IsNullOrWhiteSpace(model.Identifier))
         {
             return BadRequest(new { error = "Identifier is required." });
         }
 
-        var response = await _checkSummaryService.GetCompleteCheckDetailsAsync(model.Identifier);
-
+        var response = await _checkSummaryService.GetCompleteCheckDetailsAsync(
+            model.Identifier,
+            model.RouteName,
+            model.Date,
+            model.ScheduledTime
+        );
 
         if (response == null)
         {
-            return NotFound(new { error = "No data found for the provided identifier." });
+            return NotFound(new { error = "No data found for the provided inputs." });
         }
-
 
         return Ok(response);
     }
-
 
 
 }

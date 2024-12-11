@@ -949,21 +949,30 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
 
 
         [Test]
-        public async Task GetCompleteCheckDetails_ValidRequest_ReturnsOkResult()
+        public async Task GetCompleteCheckDetails_ValidRequestWithAdditionalFilters_ReturnsOkResult()
         {
             var request = new CheckDetailsRequestModel
             {
-                Identifier = "valid_identifier"
+                Identifier = "valid_identifier",
+                RouteName = "Test Route",
+                Date = new DateTime(2024, 12, 25),
+                ScheduledTime = new TimeSpan(10, 30, 0)
             };
 
             var response = new CompleteCheckDetailsResponse
             {
                 MicrochipNumber = "1234567890",
                 GBCheckerName = "Test Checker",
-                Route = "Test Route"
+                Route = "Test Route",
+                ScheduledDepartureDate = "2024-12-25",
+                ScheduledDepartureTime = "10:30:00"
             };
 
-            _checkSummaryServiceMock!.Setup(service => service.GetCompleteCheckDetailsAsync(request.Identifier!))
+            _checkSummaryServiceMock!.Setup(service => service.GetCompleteCheckDetailsAsync(
+                request.Identifier!,
+                request.RouteName,
+                request.Date,
+                request.ScheduledTime))
                 .ReturnsAsync(response);
 
             var result = await _controller!.GetCompleteCheckDetails(request);
@@ -996,10 +1005,17 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
         {
             var request = new CheckDetailsRequestModel
             {
-                Identifier = "non_existing_identifier"
+                Identifier = "non_existing_identifier",
+                RouteName = "Non-existent Route",
+                Date = new DateTime(2024, 12, 25),
+                ScheduledTime = new TimeSpan(10, 30, 0)
             };
 
-            _checkSummaryServiceMock!.Setup(service => service.GetCompleteCheckDetailsAsync(request.Identifier!))
+            _checkSummaryServiceMock!.Setup(service => service.GetCompleteCheckDetailsAsync(
+                request.Identifier!,
+                request.RouteName,
+                request.Date,
+                request.ScheduledTime))
                 .ReturnsAsync((CompleteCheckDetailsResponse?)null);
 
             var result = await _controller!.GetCompleteCheckDetails(request);
@@ -1009,7 +1025,40 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
             Assert.That(notFoundResult, Is.Not.Null);
         }
 
+        [Test]
+        public async Task GetCompleteCheckDetails_ValidRequestMissingOptionalFilters_ReturnsOkResult()
+        {
+            var request = new CheckDetailsRequestModel
+            {
+                Identifier = "valid_identifier",
+                RouteName = null,
+                Date = null,
+                ScheduledTime = null
+            };
 
+            var response = new CompleteCheckDetailsResponse
+            {
+                MicrochipNumber = "1234567890",
+                GBCheckerName = "Test Checker",
+                Route = "Test Route",
+                ScheduledDepartureDate = "2024-12-25",
+                ScheduledDepartureTime = "10:30:00"
+            };
+
+            _checkSummaryServiceMock!.Setup(service => service.GetCompleteCheckDetailsAsync(
+                request.Identifier!,
+                request.RouteName,
+                request.Date,
+                request.ScheduledTime))
+                .ReturnsAsync(response);
+
+            var result = await _controller!.GetCompleteCheckDetails(request);
+
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+            var okResult = result as OkObjectResult;
+            Assert.That(okResult, Is.Not.Null);
+            Assert.That(okResult!.Value, Is.EqualTo(response));
+        }
 
     }
 
