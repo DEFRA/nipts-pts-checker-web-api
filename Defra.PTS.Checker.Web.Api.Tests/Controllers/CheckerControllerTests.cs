@@ -947,36 +947,35 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
         }
 
 
-
         [Test]
-        public async Task GetCompleteCheckDetails_ValidRequestWithAdditionalFilters_ReturnsOkResult()
+        public async Task GetCompleteCheckDetails_ValidRequest_ReturnsOkResult()
         {
+            // Arrange
             var request = new CheckDetailsRequestModel
             {
-                Identifier = "valid_identifier",
-                RouteName = "Test Route",
-                Date = new DateTime(2024, 12, 25),
-                ScheduledTime = new TimeSpan(10, 30, 0)
+                CheckSummaryId = Guid.NewGuid()
             };
 
             var response = new CompleteCheckDetailsResponse
             {
+                CheckOutcome = new List<string> { "Cannot find microchip" },
+                ReasonForReferral = new List<string> { "Passenger referred to DAERA/SPS at NI port" },
                 MicrochipNumber = "1234567890",
+                AdditionalComments = new List<string> { "Additional comment 1", "Additional comment 2" },
                 GBCheckerName = "Test Checker",
+                DateAndTimeChecked = "2024-12-11 14:30:00",
                 Route = "Test Route",
                 ScheduledDepartureDate = "2024-12-25",
                 ScheduledDepartureTime = "10:30:00"
             };
 
-            _checkSummaryServiceMock!.Setup(service => service.GetCompleteCheckDetailsAsync(
-                request.Identifier!,
-                request.RouteName,
-                request.Date,
-                request.ScheduledTime))
+            _checkSummaryServiceMock!.Setup(service => service.GetCompleteCheckDetailsAsync(request.CheckSummaryId))
                 .ReturnsAsync(response);
 
+            // Act
             var result = await _controller!.GetCompleteCheckDetails(request);
 
+            // Assert
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
             var okResult = result as OkObjectResult;
             Assert.That(okResult, Is.Not.Null);
@@ -986,79 +985,79 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
         [Test]
         public async Task GetCompleteCheckDetails_InvalidRequest_ReturnsBadRequestResult()
         {
+            // Arrange
             var request = new CheckDetailsRequestModel
             {
-                Identifier = null
+                CheckSummaryId = Guid.Empty // Invalid GUID
             };
 
-            _controller!.ModelState.AddModelError("Identifier", "Identifier is required");
+            _controller!.ModelState.AddModelError("CheckSummaryId", "CheckSummaryId is required");
 
-            var result = await _controller!.GetCompleteCheckDetails(request);
+            // Act
+            var result = await _controller.GetCompleteCheckDetails(request);
 
+            // Assert
             Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
             var badRequestResult = result as BadRequestObjectResult;
             Assert.That(badRequestResult, Is.Not.Null);
         }
 
         [Test]
-        public async Task GetCompleteCheckDetails_IdentifierNotFound_ReturnsNotFoundResult()
+        public async Task GetCompleteCheckDetails_CheckSummaryIdNotFound_ReturnsNotFoundResult()
         {
+            // Arrange
             var request = new CheckDetailsRequestModel
             {
-                Identifier = "non_existing_identifier",
-                RouteName = "Non-existent Route",
-                Date = new DateTime(2024, 12, 25),
-                ScheduledTime = new TimeSpan(10, 30, 0)
+                CheckSummaryId = Guid.NewGuid() // Non-existing ID
             };
 
-            _checkSummaryServiceMock!.Setup(service => service.GetCompleteCheckDetailsAsync(
-                request.Identifier!,
-                request.RouteName,
-                request.Date,
-                request.ScheduledTime))
+            _checkSummaryServiceMock!.Setup(service => service.GetCompleteCheckDetailsAsync(request.CheckSummaryId))
                 .ReturnsAsync((CompleteCheckDetailsResponse?)null);
 
+            // Act
             var result = await _controller!.GetCompleteCheckDetails(request);
 
+            // Assert
             Assert.That(result, Is.InstanceOf<NotFoundObjectResult>());
             var notFoundResult = result as NotFoundObjectResult;
             Assert.That(notFoundResult, Is.Not.Null);
         }
 
         [Test]
-        public async Task GetCompleteCheckDetails_ValidRequestMissingOptionalFilters_ReturnsOkResult()
+        public async Task GetCompleteCheckDetails_ValidRequestWithoutAdditionalData_ReturnsOkResult()
         {
+            // Arrange
             var request = new CheckDetailsRequestModel
             {
-                Identifier = "valid_identifier",
-                RouteName = null,
-                Date = null,
-                ScheduledTime = null
+                CheckSummaryId = Guid.NewGuid()
             };
 
             var response = new CompleteCheckDetailsResponse
             {
-                MicrochipNumber = "1234567890",
+                CheckOutcome = new List<string>(),
+                ReasonForReferral = new List<string>(),
+                MicrochipNumber = null,
+                AdditionalComments = new List<string> { "None" },
                 GBCheckerName = "Test Checker",
+                DateAndTimeChecked = "2024-12-11 14:30:00",
                 Route = "Test Route",
                 ScheduledDepartureDate = "2024-12-25",
                 ScheduledDepartureTime = "10:30:00"
             };
 
-            _checkSummaryServiceMock!.Setup(service => service.GetCompleteCheckDetailsAsync(
-                request.Identifier!,
-                request.RouteName,
-                request.Date,
-                request.ScheduledTime))
+            _checkSummaryServiceMock!.Setup(service => service.GetCompleteCheckDetailsAsync(request.CheckSummaryId))
                 .ReturnsAsync(response);
 
+            // Act
             var result = await _controller!.GetCompleteCheckDetails(request);
 
+            // Assert
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
             var okResult = result as OkObjectResult;
             Assert.That(okResult, Is.Not.Null);
             Assert.That(okResult!.Value, Is.EqualTo(response));
         }
+
 
     }
 

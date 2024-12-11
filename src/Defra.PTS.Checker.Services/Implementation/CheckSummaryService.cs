@@ -312,89 +312,71 @@ public class CheckSummaryService : ICheckSummaryService
     }
 
 
-    public async Task<CompleteCheckDetailsResponse?> GetCompleteCheckDetailsAsync(string identifier, string? routeName = null, DateTime? date = null, TimeSpan? scheduleTime = null)
+
+
+    public async Task<CompleteCheckDetailsResponse?> GetCompleteCheckDetailsAsync(Guid checkSummaryId)
     {
         try
         {
-            var formattedIdentifier = identifier.Trim().ToLower();
-
-            IQueryable<CheckSummary> query = _dbContext.CheckSummary
+            
+            var checkSummary = await _dbContext.CheckSummary
                 .Include(cs => cs.Application)
-                    .ThenInclude(app => app != null ? app.Pet:null)
+                    .ThenInclude(app => app != null?app.Pet:null)
                 .Include(cs => cs.CheckOutcomeEntity)
                 .Include(cs => cs.Checker)
-                .Include(cs => cs.RouteNavigation);
+                .Include(cs => cs.RouteNavigation)
+                .FirstOrDefaultAsync(cs => cs.Id == checkSummaryId);
 
-            query = query.Where(cs =>
-                (cs.TravelDocument != null && cs.TravelDocument.DocumentReferenceNumber != null &&
-                 cs.TravelDocument.DocumentReferenceNumber.ToLower() == formattedIdentifier) ||
-                (cs.Application != null && cs.Application.ReferenceNumber != null &&
-                 cs.Application.ReferenceNumber.ToLower() == formattedIdentifier)
-            );
-
-            if (!string.IsNullOrWhiteSpace(routeName))
-            {
-                var routeId = await _dbContext.Route
-                    .Where(r => r.RouteName != null && r.RouteName.ToLower() == routeName.ToLower())
-                    .Select(r => r.Id)
-                    .FirstOrDefaultAsync();
-
-                if (routeId > 0)
-                {
-                    query = query.Where(cs => cs.RouteId == routeId);
-                }
-            }
-
-            if (date.HasValue)
-            {
-                query = query.Where(cs => cs.Date.HasValue && cs.Date.Value.Date == date.Value.Date);
-            }
-
-            if (scheduleTime.HasValue)
-            {
-                query = query.Where(cs => cs.ScheduledSailingTime.HasValue && cs.ScheduledSailingTime.Value == scheduleTime.Value);
-            }
-
-            var checkSummaries = await query.ToListAsync();
-            if (!checkSummaries.Any())
-            {
-                return null;
-            }
-
-            var checkSummary = checkSummaries.OrderByDescending(cs => cs.UpdatedOn).FirstOrDefault();
             if (checkSummary == null)
             {
-                return null;
+                return null; 
             }
 
+            
             await _dbContext.Entry(checkSummary)
                 .Reference(cs => cs.TravelDocument)
                 .LoadAsync();
 
-            var application = checkSummary.Application;
-            var pet = application?.Pet;
-            var travelDocument = checkSummary.TravelDocument;
-            var checker = checkSummary.Checker;
+            var checkOutcomes = await _dbContext.CheckOutcome
+                .Where(co => co.Id == checkSummary.CheckOutcomeId)
+                .ToListAsync();
 
-            var checkOutcomes = checkSummaries
-                .SelectMany(cs => _dbContext.CheckOutcome
-                    .Where(co => co.Id == cs.CheckOutcomeId)
-                    .ToList())
+            
+            var checkOutcomeTexts = new List<string>();
+            foreach (var outcome in checkOutcomes)
+            {
+                if (outcome.MCNotFound == true) checkOutcomeTexts.Add("Cannot find microchip");
+                if (outcome.MCNotMatch == true) checkOutcomeTexts.Add("Microchip number does not match the PTD");
+                if (outcome.VCNotMatchPTD == true) checkOutcomeTexts.Add("Pet does not match the PTD");
+                if (outcome.OIFailPotentialCommercial == true) checkOutcomeTexts.Add("Potential commercial movement");
+                if (outcome.OIFailAuthTravellerNoConfirmation == true) checkOutcomeTexts.Add("Authorised traveller but no confirmation");
+                if (outcome.OIFailOther == true) checkOutcomeTexts.Add("Other reason");              
+            }
+
+            var referralReasons = new List<string>();
+            if (checkOutcomes.Any(o => o.GBRefersToDAERAOrSPS == true))
+                referralReasons.Add("Passenger referred to DAERA/SPS at NI port");
+            if (checkOutcomes.Any(o => o.GBAdviseNoTravel == true))
+                referralReasons.Add("Passenger advised not to travel");
+            if (checkOutcomes.Any(o => o.GBPassengerSaysNoTravel == true))
+                referralReasons.Add("Passenger says they will not travel");
+
+            var displayMicrochipNumber = checkOutcomes.Any(o =>
+                o.MCNotMatch == true || !string.IsNullOrWhiteSpace(o.MCNotMatchActual));
+
+            var additionalComments = checkOutcomes
+                .Select(o => o.RelevantComments ?? "None")
                 .ToList();
 
-            var displayMicrochipNumber = checkOutcomes.Any(co =>
-                co.MCNotMatch == true || !string.IsNullOrWhiteSpace(co.MCNotMatchActual));
-
+            
             var response = new CompleteCheckDetailsResponse
             {
-                CheckOutcome = checkOutcomes.Select(co => co.RelevantComments ?? "No outcome details").ToList(),
-                ReasonForReferral = checkOutcomes
-                    .Where(co => co.OIFailOther == true || co.OIFailAuthTravellerNoConfirmation == true)
-                    .Select(co => co.RelevantComments ?? "Reason not specified")
-                    .ToList(),
-                MicrochipNumber = displayMicrochipNumber ? pet?.MicrochipNumber ?? string.Empty : null,
-                AdditionalComments = checkOutcomes.Select(co => co.SPSOutcomeDetails ?? "No additional comments").ToList(),
-                GBCheckerName = checker?.FullName ?? string.Empty,
+                
+                CheckOutcome = checkOutcomeTexts,
+                ReasonForReferral = referralReasons,
+                MicrochipNumber = displayMicrochipNumber ? checkSummary.ChipNumber : null,
+                AdditionalComments = additionalComments,
+                GBCheckerName = checkSummary.Checker?.FullName ?? string.Empty,
                 DateAndTimeChecked = checkSummary.UpdatedOn?.ToString("yyyy-MM-dd HH:mm:ss") ?? string.Empty,
                 Route = checkSummary.RouteNavigation?.RouteName ?? string.Empty,
                 ScheduledDepartureDate = checkSummary.Date?.ToString("yyyy-MM-dd") ?? string.Empty,

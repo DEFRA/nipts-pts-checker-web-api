@@ -11,6 +11,15 @@ using Microsoft.EntityFrameworkCore;
 using Defra.PTS.Checker.Models.Enums;
 using Defra.PTS.Checker.Services.Interface;
 using Microsoft.AspNetCore.Routing;
+using Defra.PTS.Checker.Entities;
+using Defra.PTS.Checker.Repositories;
+using Defra.PTS.Checker.Services;
+using Microsoft.EntityFrameworkCore;
+using NUnit.Framework;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Defra.PTS.Checker.Services.Tests.Implementation
 {
@@ -24,18 +33,16 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
         [SetUp]
         public void Setup()
         {
-
             var options = new DbContextOptionsBuilder<CommonDbContext>()
                 .UseInMemoryDatabase(Guid.NewGuid().ToString())
                 .Options;
 
             _dbContext = new CommonDbContext(options);
-
             _loggerMock = new Mock<ILogger<CheckerService>>();
             _service = new CheckSummaryService(_dbContext, _loggerMock.Object);
 
-
             DataHelper.AddRoutes(_dbContext);
+            DataHelper.DetachTrackedEntities(_dbContext); 
         }
 
         [Test]
@@ -968,148 +975,230 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
         }
 
 
-        [Test]
-        public async Task GetCompleteCheckDetailsAsync_ValidIdentifierWithFilters_ReturnsCompleteCheckDetailsResponse()
-        {
-            var identifier = "valid_identifier";
-            var applicationId = Guid.NewGuid();
-            var testDate = DateTime.UtcNow.Date;
-            var testTime = new TimeSpan(10, 30, 0);
 
-            var pet = new Entities.Pet { MicrochipNumber = "1234567890" };
-            var application = new Entities.Application
-            {
-                Id = applicationId,
-                Pet = pet,
-                ReferenceNumber = "REF123",
-                Status = "Authorised"
-            };
-            var travelDocument = new Entities.TravelDocument
-            {
-                ApplicationId = applicationId,
-                DocumentReferenceNumber = identifier
-            };
-            var route = new Entities.Route { RouteName = "Test Route" };
+
+
+
+
+
+
+        private void AddCheckerEntity(Guid checkerId, string firstName, string lastName, string fullName)
+        {
             var checker = new Entities.Checker
             {
-                FullName = "Test Checker",
-                FirstName = "Test",
-                LastName = "Checker"
-            };
-            var checkOutcome = new Entities.CheckOutcome
-            {
-                RelevantComments = "Outcome Comment",
-                SPSOutcomeDetails = "Additional Comment",
-                OIFailOther = true
-            };
-            var checkSummary = new Entities.CheckSummary
-            {
-                Application = application,
-                TravelDocument = travelDocument,
-                Checker = checker,
-                RouteNavigation = route,
-                UpdatedOn = DateTime.UtcNow,
-                Date = testDate,
-                ScheduledSailingTime = testTime,
-                CheckOutcomeId = checkOutcome.Id,
-                CheckOutcomeEntity = checkOutcome
+                Id = checkerId,
+                FirstName = firstName,
+                LastName = lastName,
+                FullName = fullName
             };
 
-            await _dbContext!.Pet.AddAsync(pet);
-            await _dbContext.Application.AddAsync(application);
-            await _dbContext.TravelDocument.AddAsync(travelDocument);
-            await _dbContext.Route.AddAsync(route);
-            await _dbContext.Checker.AddAsync(checker);
-            await _dbContext.CheckOutcome.AddAsync(checkOutcome);
-            await _dbContext.CheckSummary.AddAsync(checkSummary);
-            await _dbContext.SaveChangesAsync();
-
-            var result = await _service!.GetCompleteCheckDetailsAsync(identifier, "Test Route", testDate, testTime);
-
-            Assert.That(result, Is.Not.Null);
-            Assert.That(result!.MicrochipNumber, Is.Null);
-            Assert.That(result.Route, Is.EqualTo("Test Route"));
-            Assert.That(result.GBCheckerName, Is.EqualTo("Test Checker"));
-            Assert.That(result.CheckOutcome, Is.Not.Empty);
-            Assert.That(result.CheckOutcome!.First(), Is.EqualTo("Outcome Comment"));
-            Assert.That(result.AdditionalComments!.First(), Is.EqualTo("Additional Comment"));
-            Assert.That(result.ReasonForReferral, Contains.Item("Outcome Comment"));
+            _dbContext?.Checker.Add(checker);
+            _dbContext?.SaveChanges();
         }
 
         [Test]
-        public async Task GetCompleteCheckDetailsAsync_EmptyCheckOutcomesWithFilters_ReturnsEmptyListsInResponse()
+        public async Task GetCompleteCheckDetailsAsync_ValidCheckSummaryId_ReturnsCompleteDetails()
         {
-            var identifier = "valid_identifier";
+            // Arrange
+            var checkSummaryId = Guid.NewGuid();
             var applicationId = Guid.NewGuid();
-            var testDate = DateTime.UtcNow.Date;
-            var testTime = new TimeSpan(10, 30, 0);
 
-            var pet = new Entities.Pet { MicrochipNumber = "1234567890" };
+            var pet = new Entities.Pet { Id = Guid.NewGuid(), MicrochipNumber = "1234567890" };
             var application = new Entities.Application
             {
                 Id = applicationId,
                 Pet = pet,
                 ReferenceNumber = "REF123",
-                Status = "Authorised"
+                Status = "Active"
             };
-            var travelDocument = new Entities.TravelDocument
+
+            var route = new Entities.Route { Id = 3, RouteName = "Test Route" };
+            var existingRoute = _dbContext.Route.SingleOrDefault(r => r.Id == route.Id);
+            if (existingRoute == null)
             {
-                ApplicationId = applicationId,
-                DocumentReferenceNumber = identifier
+                _dbContext.Route.Add(route);
+                await _dbContext.SaveChangesAsync();
+            }
+            else
+            {
+                DataHelper.DetachTrackedEntities(_dbContext);
+            }
+
+            var checkerId = Guid.NewGuid();
+            AddCheckerEntity(checkerId, "John", "Doe", "John Doe");
+
+            var checkOutcome = new Entities.CheckOutcome
+            {
+                Id = Guid.NewGuid(),
+                MCNotMatch = true,
+                MCNotMatchActual = "9876543210",
+                RelevantComments = "Relevant comment",
+                SPSOutcomeDetails = "Additional comment",
+                OIFailOther = true,
+                GBRefersToDAERAOrSPS = true
             };
-            var route = new Entities.Route { RouteName = "Test Route" };
-            var checker = new Entities.Checker
+
+            var checkSummary = new CheckSummary
             {
-                FullName = "Test Checker",
-                FirstName = "Test",
-                LastName = "Checker"
-            };
-            var checkSummary = new Entities.CheckSummary
-            {
+                Id = checkSummaryId,
                 Application = application,
-                TravelDocument = travelDocument,
-                Checker = checker,
+                CheckerId = checkerId,
                 RouteNavigation = route,
                 UpdatedOn = DateTime.UtcNow,
-                Date = testDate,
-                ScheduledSailingTime = testTime
+                Date = DateTime.UtcNow.Date,
+                ScheduledSailingTime = new TimeSpan(10, 30, 0),
+                CheckOutcomeId = checkOutcome.Id,
+                CheckOutcomeEntity = checkOutcome,
+                ChipNumber = "1234567890"
             };
 
-            await _dbContext!.Pet.AddAsync(pet);
-            await _dbContext.Application.AddAsync(application);
-            await _dbContext.TravelDocument.AddAsync(travelDocument);
-            await _dbContext.Route.AddAsync(route);
-            await _dbContext.Checker.AddAsync(checker);
-            await _dbContext.CheckSummary.AddAsync(checkSummary);
-            await _dbContext.SaveChangesAsync();
+            if (_dbContext != null)
+            {
+                await _dbContext.Pet.AddAsync(pet);
+                await _dbContext.Application.AddAsync(application);
+                await _dbContext.CheckOutcome.AddAsync(checkOutcome);
+                await _dbContext.CheckSummary.AddAsync(checkSummary);
+                await _dbContext.SaveChangesAsync();
+            }
 
-            var result = await _service!.GetCompleteCheckDetailsAsync(identifier, "Test Route", testDate, testTime);
+            // Act
+            var result = await _service.GetCompleteCheckDetailsAsync(checkSummaryId);
 
+            // Assert
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result!.MicrochipNumber, Is.EqualTo("1234567890"));
+            Assert.That(result.CheckOutcome, Contains.Item("Microchip number does not match the PTD"));
+            Assert.That(result.ReasonForReferral, Contains.Item("Passenger referred to DAERA/SPS at NI port"));
+            Assert.That(result.GBCheckerName, Is.EqualTo("John Doe"));
+            Assert.That(result.Route, Is.EqualTo("Test Route"));
+            Assert.That(result.ScheduledDepartureDate, Is.EqualTo(DateTime.UtcNow.Date.ToString("yyyy-MM-dd")));
+            Assert.That(result.ScheduledDepartureTime, Is.EqualTo("10:30:00"));
+        }
+
+
+        [Test]
+        public async Task GetCompleteCheckDetailsAsync_ValidCheckSummaryIdWithoutOutcomes_ReturnsEmptyOutcomeAndReferral()
+        {
+            // Arrange
+            var checkSummaryId = Guid.NewGuid();
+            var applicationId = Guid.NewGuid();
+
+            var pet = new Entities.Pet { Id = Guid.NewGuid(), MicrochipNumber = "1234567890" };
+            var application = new Entities.Application
+            {
+                Id = applicationId,
+                Pet = pet,
+                ReferenceNumber = "REF123",
+                Status = "Active"
+            };
+
+            var route = new Entities.Route { Id = 4, RouteName = "Test Route" };
+            var existingRoute = _dbContext.Route.SingleOrDefault(r => r.Id == route.Id);
+            if (existingRoute == null)
+            {
+                _dbContext.Route.Add(route);
+                await _dbContext.SaveChangesAsync();
+            }
+            else
+            {
+                DataHelper.DetachTrackedEntities(_dbContext);
+            }
+
+
+
+            var checkerId = Guid.NewGuid();
+            AddCheckerEntity(checkerId, "Jane", "Smith", "Jane Smith");
+
+            var checkSummary = new CheckSummary
+            {
+                Id = checkSummaryId,
+                Application = application,
+                CheckerId = checkerId,
+                RouteNavigation = route,
+                UpdatedOn = DateTime.UtcNow,
+                Date = DateTime.UtcNow.Date,
+                ScheduledSailingTime = new TimeSpan(10, 30, 0)
+            };
+
+            if (_dbContext != null)
+            {
+                await _dbContext.Pet.AddAsync(pet);
+                await _dbContext.Application.AddAsync(application);
+                await _dbContext.CheckSummary.AddAsync(checkSummary);
+                await _dbContext.SaveChangesAsync();
+            }
+
+            // Act
+            var result = await _service.GetCompleteCheckDetailsAsync(checkSummaryId);
+
+            // Assert
             Assert.That(result, Is.Not.Null);
             Assert.That(result!.CheckOutcome, Is.Empty);
             Assert.That(result.ReasonForReferral, Is.Empty);
             Assert.That(result.AdditionalComments, Is.Empty);
+            Assert.That(result.GBCheckerName, Is.EqualTo("Jane Smith"));
+            Assert.That(result.Route, Is.EqualTo("Test Route"));
+            Assert.That(result.ScheduledDepartureDate, Is.EqualTo(DateTime.UtcNow.Date.ToString("yyyy-MM-dd")));
+            Assert.That(result.ScheduledDepartureTime, Is.EqualTo("10:30:00"));
         }
 
 
-    }
+        private void DetachTrackedEntities()
+        {
+            foreach (var entry in _dbContext.ChangeTracker.Entries().ToList())
+            {
+                entry.State = EntityState.Detached;
+            }
+        }
 
+
+        [Test]
+        public async Task GetCompleteCheckDetailsAsync_InvalidCheckSummaryId_ReturnsNull()
+        {
+            // Arrange
+            var invalidCheckSummaryId = Guid.NewGuid(); // Non-existent ID
+
+            // Act
+            var result = await _service.GetCompleteCheckDetailsAsync(invalidCheckSummaryId);
+
+            // Assert
+            Assert.That(result, Is.Null);
+        }
+
+       
+    
+
+
+
+}
     public static class DataHelper
     {
         public static void AddRoutes(CommonDbContext context)
         {
-            if (!context.Route.Any(r => r.RouteName == "Route1"))
+            var existingRoute1 = context.Route.SingleOrDefault(r => r.RouteName == "Route1");
+            if (existingRoute1 == null)
             {
-                context.Route.Add(new Entities.Route { RouteName = "Route1" });
+                context.Route.Add(new Entities.Route { RouteName = "Route1", Id = 1 });
             }
-            if (!context.Route.Any(r => r.RouteName == "Route2"))
+
+            var existingRoute2 = context.Route.SingleOrDefault(r => r.RouteName == "Route2");
+            if (existingRoute2 == null)
             {
-                context.Route.Add(new Entities.Route { RouteName = "Route2" });
+                context.Route.Add(new Entities.Route { RouteName = "Route2", Id = 2 });
             }
+
             context.SaveChanges();
         }
 
-
+        public static void DetachTrackedEntities(CommonDbContext context)
+        {
+            foreach (var entry in context.ChangeTracker.Entries())
+            {
+                entry.State = EntityState.Detached;
+            }
+        }
     }
+
+
 
 }

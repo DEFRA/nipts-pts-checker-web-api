@@ -376,42 +376,31 @@ public class CheckerController : ControllerBase
     [HttpPost]
     [Route("getCompleteCheckDetails")]
     [SwaggerResponse(StatusCodes.Status200OK, "OK: Returns the complete check details", typeof(CompleteCheckDetailsResponse))]
-    [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request: Identifier, RouteName, Date, or ScheduledTime is not valid", typeof(object))]
-    [SwaggerResponse(StatusCodes.Status404NotFound, "Not Found: There is no record matching the provided inputs")]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request: CheckSummaryId is not valid", typeof(object))]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Not Found: There is no record matching the provided CheckSummaryId")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error: An error has occurred")]
     [SwaggerOperation(
-    OperationId = "getCompleteCheckDetails",
-    Tags = new[] { "Checker" },
-    Summary = "Retrieves complete check details by PTD/Application Reference Number, Route Name, Date, and Schedule Time",
-    Description = "Returns complete details for the specified inputs"
-)]
+     OperationId = "getCompleteCheckDetails",
+     Tags = new[] { "Checker" },
+     Summary = "Retrieves complete check details by CheckSummaryId",
+     Description = "Returns complete details for the specified CheckSummaryId"
+ )]
     public async Task<IActionResult> GetCompleteCheckDetails(
-    [FromBody, SwaggerRequestBody("The search payload", Required = true)] CheckDetailsRequestModel model)
+     [FromBody, SwaggerRequestBody("The search payload", Required = true)] CheckDetailsRequestModel model)
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(new { error = "Invalid input. Please provide valid data." });
+            return BadRequest(new { error = "Invalid input. Please provide a valid CheckSummaryId." });
         }
 
-        if (string.IsNullOrWhiteSpace(model.Identifier))
-        {
-            return BadRequest(new { error = "Identifier is required." });
-        }
-
-        var response = await _checkSummaryService.GetCompleteCheckDetailsAsync(
-            model.Identifier,
-            model.RouteName,
-            model.Date,
-            model.ScheduledTime
-        );
+        var response = await _checkSummaryService.GetCompleteCheckDetailsAsync(model.CheckSummaryId);
 
         if (response == null)
         {
-            return NotFound(new { error = "No data found for the provided inputs." });
+            return NotFound(new { error = "No data found for the provided CheckSummaryId." });
         }
 
         return Ok(response);
     }
-
 
 }

@@ -10,6 +10,7 @@ public interface ICheckSummaryService
     Task<IEnumerable<SpsCheckDetailResponseModel>> GetSpsCheckDetailsByRouteAsync(string route, DateTime sailingDate, int timeWindowInHours);
 
     Task<GbCheckReportResponseModel?> GetGbCheckReport(Guid gbCheckSummaryId);
-    Task<CompleteCheckDetailsResponse?> GetCompleteCheckDetailsAsync(string identifier, string? routeName = null, DateTime? date = null, TimeSpan? scheduleTime = null);
-    
+    Task<CompleteCheckDetailsResponse?> GetCompleteCheckDetailsAsync(Guid checkSummaryId);
+
+
     }
