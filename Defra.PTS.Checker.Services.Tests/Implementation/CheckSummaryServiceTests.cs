@@ -999,7 +999,6 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
         [Test]
         public async Task GetCompleteCheckDetailsAsync_ValidCheckSummaryId_ReturnsCompleteDetails()
         {
-            // Arrange
             var checkSummaryId = Guid.NewGuid();
             var applicationId = Guid.NewGuid();
 
@@ -1013,6 +1012,12 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             };
 
             var route = new Entities.Route { Id = 3, RouteName = "Test Route" };
+
+            if (_dbContext == null)
+            {
+                throw new InvalidOperationException("Database context is not initialized.");
+            }
+
             var existingRoute = _dbContext.Route.SingleOrDefault(r => r.Id == route.Id);
             if (existingRoute == null)
             {
@@ -1021,7 +1026,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             }
             else
             {
-                DataHelper.DetachTrackedEntities(_dbContext);
+                DetachTrackedEntities();
             }
 
             var checkerId = Guid.NewGuid();
@@ -1052,23 +1057,23 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
                 ChipNumber = "1234567890"
             };
 
-            if (_dbContext != null)
+            await _dbContext.Pet.AddAsync(pet);
+            await _dbContext.Application.AddAsync(application);
+            await _dbContext.CheckOutcome.AddAsync(checkOutcome);
+            await _dbContext.CheckSummary.AddAsync(checkSummary);
+            await _dbContext.SaveChangesAsync();
+
+            if (_service == null)
             {
-                await _dbContext.Pet.AddAsync(pet);
-                await _dbContext.Application.AddAsync(application);
-                await _dbContext.CheckOutcome.AddAsync(checkOutcome);
-                await _dbContext.CheckSummary.AddAsync(checkSummary);
-                await _dbContext.SaveChangesAsync();
+                throw new InvalidOperationException("Service is not initialized.");
             }
 
-            // Act
             var result = await _service.GetCompleteCheckDetailsAsync(checkSummaryId);
 
-            // Assert
             Assert.That(result, Is.Not.Null);
             Assert.That(result!.MicrochipNumber, Is.EqualTo("1234567890"));
-            Assert.That(result.CheckOutcome, Contains.Item("Microchip number does not match the PTD"));
-            Assert.That(result.ReasonForReferral, Contains.Item("Passenger referred to DAERA/SPS at NI port"));
+            Assert.That(result.CheckOutcome, Contains.Item("Passenger referred to DAERA/SPS at NI port"));
+            Assert.That(result.ReasonForReferral, Contains.Item("Microchip number does not match the PTD"));
             Assert.That(result.GBCheckerName, Is.EqualTo("John Doe"));
             Assert.That(result.Route, Is.EqualTo("Test Route"));
             Assert.That(result.ScheduledDepartureDate, Is.EqualTo(DateTime.UtcNow.Date.ToString("yyyy-MM-dd")));
@@ -1079,7 +1084,6 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
         [Test]
         public async Task GetCompleteCheckDetailsAsync_ValidCheckSummaryIdWithoutOutcomes_ReturnsEmptyOutcomeAndReferral()
         {
-            // Arrange
             var checkSummaryId = Guid.NewGuid();
             var applicationId = Guid.NewGuid();
 
@@ -1093,6 +1097,12 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             };
 
             var route = new Entities.Route { Id = 4, RouteName = "Test Route" };
+
+            if (_dbContext == null)
+            {
+                throw new InvalidOperationException("Database context is not initialized.");
+            }
+
             var existingRoute = _dbContext.Route.SingleOrDefault(r => r.Id == route.Id);
             if (existingRoute == null)
             {
@@ -1101,10 +1111,8 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             }
             else
             {
-                DataHelper.DetachTrackedEntities(_dbContext);
+                DetachTrackedEntities();
             }
-
-
 
             var checkerId = Guid.NewGuid();
             AddCheckerEntity(checkerId, "Jane", "Smith", "Jane Smith");
@@ -1120,18 +1128,18 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
                 ScheduledSailingTime = new TimeSpan(10, 30, 0)
             };
 
-            if (_dbContext != null)
+            await _dbContext.Pet.AddAsync(pet);
+            await _dbContext.Application.AddAsync(application);
+            await _dbContext.CheckSummary.AddAsync(checkSummary);
+            await _dbContext.SaveChangesAsync();
+
+            if (_service == null)
             {
-                await _dbContext.Pet.AddAsync(pet);
-                await _dbContext.Application.AddAsync(application);
-                await _dbContext.CheckSummary.AddAsync(checkSummary);
-                await _dbContext.SaveChangesAsync();
+                throw new InvalidOperationException("Service is not initialized.");
             }
 
-            // Act
             var result = await _service.GetCompleteCheckDetailsAsync(checkSummaryId);
 
-            // Assert
             Assert.That(result, Is.Not.Null);
             Assert.That(result!.CheckOutcome, Is.Empty);
             Assert.That(result.ReasonForReferral, Is.Empty);
@@ -1142,9 +1150,29 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             Assert.That(result.ScheduledDepartureTime, Is.EqualTo("10:30:00"));
         }
 
+        [Test]
+        public async Task GetCompleteCheckDetailsAsync_InvalidCheckSummaryId_ReturnsNull()
+        {
+            var invalidCheckSummaryId = Guid.NewGuid();
+
+            if (_service == null)
+            {
+                throw new InvalidOperationException("Service is not initialized.");
+            }
+
+            var result = await _service.GetCompleteCheckDetailsAsync(invalidCheckSummaryId);
+
+            Assert.That(result, Is.Null);
+        }
+
 
         private void DetachTrackedEntities()
         {
+            if (_dbContext == null)
+            {
+                throw new InvalidOperationException("Database context is not initialized.");
+            }
+
             foreach (var entry in _dbContext.ChangeTracker.Entries().ToList())
             {
                 entry.State = EntityState.Detached;
@@ -1152,25 +1180,10 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
         }
 
 
-        [Test]
-        public async Task GetCompleteCheckDetailsAsync_InvalidCheckSummaryId_ReturnsNull()
-        {
-            // Arrange
-            var invalidCheckSummaryId = Guid.NewGuid(); // Non-existent ID
-
-            // Act
-            var result = await _service.GetCompleteCheckDetailsAsync(invalidCheckSummaryId);
-
-            // Assert
-            Assert.That(result, Is.Null);
-        }
-
-       
-    
 
 
 
-}
+    }
     public static class DataHelper
     {
         public static void AddRoutes(CommonDbContext context)

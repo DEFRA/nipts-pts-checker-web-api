@@ -318,10 +318,9 @@ public class CheckSummaryService : ICheckSummaryService
     {
         try
         {
-            
             var checkSummary = await _dbContext.CheckSummary
                 .Include(cs => cs.Application)
-                    .ThenInclude(app => app != null?app.Pet:null)
+                    .ThenInclude(app => app != null ? app.Pet : null)
                 .Include(cs => cs.CheckOutcomeEntity)
                 .Include(cs => cs.Checker)
                 .Include(cs => cs.RouteNavigation)
@@ -329,10 +328,9 @@ public class CheckSummaryService : ICheckSummaryService
 
             if (checkSummary == null)
             {
-                return null; 
+                return null;
             }
 
-            
             await _dbContext.Entry(checkSummary)
                 .Reference(cs => cs.TravelDocument)
                 .LoadAsync();
@@ -341,25 +339,24 @@ public class CheckSummaryService : ICheckSummaryService
                 .Where(co => co.Id == checkSummary.CheckOutcomeId)
                 .ToListAsync();
 
-            
-            var checkOutcomeTexts = new List<string>();
-            foreach (var outcome in checkOutcomes)
+            var referralTexts = new List<string>();
+            foreach (var referral in checkOutcomes)
             {
-                if (outcome.MCNotFound == true) checkOutcomeTexts.Add("Cannot find microchip");
-                if (outcome.MCNotMatch == true) checkOutcomeTexts.Add("Microchip number does not match the PTD");
-                if (outcome.VCNotMatchPTD == true) checkOutcomeTexts.Add("Pet does not match the PTD");
-                if (outcome.OIFailPotentialCommercial == true) checkOutcomeTexts.Add("Potential commercial movement");
-                if (outcome.OIFailAuthTravellerNoConfirmation == true) checkOutcomeTexts.Add("Authorised traveller but no confirmation");
-                if (outcome.OIFailOther == true) checkOutcomeTexts.Add("Other reason");              
+                if (referral.MCNotMatch == true) referralTexts.Add("Microchip number does not match the PTD");
+                if (referral.MCNotFound == true) referralTexts.Add("Cannot find microchip");
+                if (referral.VCNotMatchPTD == true) referralTexts.Add("Pet does not match the PTD");
+                if (referral.OIFailPotentialCommercial == true) referralTexts.Add("Potential commercial movement");
+                if (referral.OIFailAuthTravellerNoConfirmation == true) referralTexts.Add("Authorised traveller but no confirmation");
+                if (referral.OIFailOther == true) referralTexts.Add("Other reason");
             }
 
-            var referralReasons = new List<string>();
+            var outcomeReasons = new List<string>();
             if (checkOutcomes.Any(o => o.GBRefersToDAERAOrSPS == true))
-                referralReasons.Add("Passenger referred to DAERA/SPS at NI port");
+                outcomeReasons.Add("Passenger referred to DAERA/SPS at NI port");
             if (checkOutcomes.Any(o => o.GBAdviseNoTravel == true))
-                referralReasons.Add("Passenger advised not to travel");
+                outcomeReasons.Add("Passenger advised not to travel");
             if (checkOutcomes.Any(o => o.GBPassengerSaysNoTravel == true))
-                referralReasons.Add("Passenger says they will not travel");
+                outcomeReasons.Add("Passenger says they will not travel");
 
             var displayMicrochipNumber = checkOutcomes.Any(o =>
                 o.MCNotMatch == true || !string.IsNullOrWhiteSpace(o.MCNotMatchActual));
@@ -368,12 +365,10 @@ public class CheckSummaryService : ICheckSummaryService
                 .Select(o => o.RelevantComments ?? "None")
                 .ToList();
 
-            
             var response = new CompleteCheckDetailsResponse
             {
-                
-                CheckOutcome = checkOutcomeTexts,
-                ReasonForReferral = referralReasons,
+                CheckOutcome = outcomeReasons,
+                ReasonForReferral = referralTexts,
                 MicrochipNumber = displayMicrochipNumber ? checkSummary.ChipNumber : null,
                 AdditionalComments = additionalComments,
                 GBCheckerName = checkSummary.Checker?.FullName ?? string.Empty,
@@ -391,6 +386,7 @@ public class CheckSummaryService : ICheckSummaryService
             return null;
         }
     }
+
 
 
 
