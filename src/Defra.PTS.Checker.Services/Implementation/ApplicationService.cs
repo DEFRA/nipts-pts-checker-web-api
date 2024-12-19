@@ -63,8 +63,8 @@ namespace Defra.PTS.Checker.Services.Implementation
                     BreedAdditionalInfo = travelDocument.Pet.AdditionalInfoMixedBreedOrUnknown,
                     Sex = Enum.GetName(typeof(PetGender), travelDocument.Pet.SexId),
                     DateOfBirth = travelDocument.Pet.DOB,
-                    ColourName = !string.IsNullOrEmpty(travelDocument.Pet.OtherColour) ? travelDocument.Pet.OtherColour : travelDocument.Pet.Colour?.Name,
-                    SignificantFeatures = travelDocument.Pet.HasUniqueFeature == (int)YesNoOptions.Yes ? travelDocument.Pet.UniqueFeatureDescription : "No",
+                    ColourName = getColourByTravelDocument(travelDocument),
+                    SignificantFeatures = getSignificantFeaturesByTravelDocument(travelDocument),
                     travelDocument.Pet.MicrochipNumber,
                     travelDocument.Pet.MicrochippedDate
                 }
@@ -117,6 +117,7 @@ namespace Defra.PTS.Checker.Services.Implementation
         }
 
 
+
         public async Task<object?> GetApplicationByReferenceNumber(string referenceNumber)
         {
             _log.LogInformation("Running inside method {0}", "GetApplicationByReferenceNumber");
@@ -150,8 +151,8 @@ namespace Defra.PTS.Checker.Services.Implementation
                     BreedAdditionalInfo = application.Pet.AdditionalInfoMixedBreedOrUnknown,
                     Sex = Enum.GetName(typeof(PetGender), application.Pet.SexId),
                     DateOfBirth = application.Pet.DOB,
-                    ColourName = !string.IsNullOrEmpty(application.Pet.OtherColour) ? application.Pet.OtherColour : application.Pet.Colour?.Name,
-                    SignificantFeatures = application.Pet.HasUniqueFeature == (int)YesNoOptions.Yes ? application.Pet.UniqueFeatureDescription : "No",
+                    ColourName = getColourByApplication(application),
+                    SignificantFeatures = getSignificantFeaturesByApplication(application),
                     application.Pet.MicrochipNumber,
                     application.Pet.MicrochippedDate
                 }
@@ -176,11 +177,11 @@ namespace Defra.PTS.Checker.Services.Implementation
                     AddressLineTwo = application.OwnerAddress.AddressLineTwo,
                     TownOrCity = application.OwnerAddress.TownOrCity,
                     County = application.OwnerAddress.County,
-                    PostCode = application.OwnerAddress.PostCode,                    
+                    PostCode = application.OwnerAddress.PostCode,
                 }
                 : null;
 
-            var petOwner = 
+            var petOwner =
                 new
                 {
                     Name = application.OwnerNewName,
@@ -199,6 +200,27 @@ namespace Defra.PTS.Checker.Services.Implementation
                 };
 
             return response;
+        }
+
+
+
+        private static string? getColourByTravelDocument(TravelDocument travelDocument)
+        {
+            return !string.IsNullOrEmpty(travelDocument?.Pet?.OtherColour) ? travelDocument.Pet.OtherColour : travelDocument?.Pet?.Colour?.Name;
+        }
+        private static string? getSignificantFeaturesByTravelDocument(TravelDocument travelDocument)
+        {
+            return travelDocument?.Pet?.HasUniqueFeature == (int)YesNoOptions.Yes ? travelDocument.Pet.UniqueFeatureDescription : "No";
+        }
+
+        private static string? getColourByApplication(Application application)
+        {
+            return !string.IsNullOrEmpty(application?.Pet?.OtherColour) ? application.Pet.OtherColour : application?.Pet?.Colour?.Name;
+        }
+
+        private static string? getSignificantFeaturesByApplication(Application application)
+        {
+            return application?.Pet?.HasUniqueFeature == (int)YesNoOptions.Yes ? application.Pet.UniqueFeatureDescription : "No";
         }
     }
 }
