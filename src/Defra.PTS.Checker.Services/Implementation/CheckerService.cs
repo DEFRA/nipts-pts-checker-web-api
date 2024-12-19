@@ -136,8 +136,8 @@ public class CheckerService : ICheckerService
                             BreedAdditionalInfo = pet.AdditionalInfoMixedBreedOrUnknown,
                             Sex = Enum.GetName(typeof(PetGender), pet.SexId),
                             DateOfBirth = pet.DOB,
-                            ColourName = pet.Colour?.Name,
-                            SignificantFeatures = pet.UniqueFeatureDescription,
+                            ColourName = !string.IsNullOrEmpty(pet.OtherColour) ? pet.OtherColour : pet.Colour?.Name,
+                            SignificantFeatures = pet.HasUniqueFeature == (int)YesNoOptions.Yes ? pet.UniqueFeatureDescription : "No",
                             pet.MicrochipNumber,
                             pet.MicrochippedDate
                         },

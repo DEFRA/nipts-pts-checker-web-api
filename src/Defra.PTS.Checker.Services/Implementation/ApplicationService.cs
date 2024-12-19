@@ -63,8 +63,8 @@ namespace Defra.PTS.Checker.Services.Implementation
                     BreedAdditionalInfo = travelDocument.Pet.AdditionalInfoMixedBreedOrUnknown,
                     Sex = Enum.GetName(typeof(PetGender), travelDocument.Pet.SexId),
                     DateOfBirth = travelDocument.Pet.DOB,
-                    ColourName = travelDocument.Pet.Colour?.Name,
-                    SignificantFeatures = travelDocument.Pet.UniqueFeatureDescription,
+                    ColourName = !string.IsNullOrEmpty(travelDocument.Pet.OtherColour) ? travelDocument.Pet.OtherColour : travelDocument.Pet.Colour?.Name,
+                    SignificantFeatures = travelDocument.Pet.HasUniqueFeature == (int)YesNoOptions.Yes ? travelDocument.Pet.UniqueFeatureDescription : "No",
                     travelDocument.Pet.MicrochipNumber,
                     travelDocument.Pet.MicrochippedDate
                 }
@@ -150,8 +150,8 @@ namespace Defra.PTS.Checker.Services.Implementation
                     BreedAdditionalInfo = application.Pet.AdditionalInfoMixedBreedOrUnknown,
                     Sex = Enum.GetName(typeof(PetGender), application.Pet.SexId),
                     DateOfBirth = application.Pet.DOB,
-                    ColourName = application.Pet.Colour?.Name,
-                    SignificantFeatures = application.Pet.UniqueFeatureDescription,
+                    ColourName = !string.IsNullOrEmpty(application.Pet.OtherColour) ? application.Pet.OtherColour : application.Pet.Colour?.Name,
+                    SignificantFeatures = application.Pet.HasUniqueFeature == (int)YesNoOptions.Yes ? application.Pet.UniqueFeatureDescription : "No",
                     application.Pet.MicrochipNumber,
                     application.Pet.MicrochippedDate
                 }
