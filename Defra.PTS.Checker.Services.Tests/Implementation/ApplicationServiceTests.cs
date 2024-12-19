@@ -155,6 +155,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
                     DOB = new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Unspecified),
                     Colour = new Colour { Name = "Black" },
                     UniqueFeatureDescription = "Scar on ear",
+                    HasUniqueFeature = 1,
                     MicrochipNumber = "1234567890",
                     MicrochippedDate = new DateTime(2020, 1, 10, 0, 0, 0, DateTimeKind.Unspecified)
                 },

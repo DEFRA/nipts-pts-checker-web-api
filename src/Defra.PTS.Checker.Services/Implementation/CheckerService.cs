@@ -136,8 +136,8 @@ public class CheckerService : ICheckerService
                             BreedAdditionalInfo = pet.AdditionalInfoMixedBreedOrUnknown,
                             Sex = Enum.GetName(typeof(PetGender), pet.SexId),
                             DateOfBirth = pet.DOB,
-                            ColourName = pet.Colour?.Name,
-                            SignificantFeatures = pet.UniqueFeatureDescription,
+                            ColourName = getColourByPet(pet),
+                            SignificantFeatures = getSignificantFeaturesByPet(pet),
                             pet.MicrochipNumber,
                             pet.MicrochippedDate
                         },
@@ -167,6 +167,17 @@ public class CheckerService : ICheckerService
             _logger.LogError(ex, "An error occurred while checking microchip number: {MicrochipNumber}", microchipNumber);
             return new { error = "An unexpected error occurred. Please try again later." };
         }
+    }
+
+
+    private static string? getColourByPet(Pet pet)
+    {
+        return !string.IsNullOrEmpty(pet.OtherColour) ? pet.OtherColour : pet.Colour?.Name;
+    }
+
+    private static string? getSignificantFeaturesByPet(Pet pet)
+    {
+        return pet.HasUniqueFeature == (int)YesNoOptions.Yes ? pet.UniqueFeatureDescription : "No";
     }
 
     private static Application? GetMostRelevantApplication(IEnumerable<Application> applications)
