@@ -1018,7 +1018,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
                 throw new InvalidOperationException("Database context is not initialized.");
             }
 
-            var existingRoute = _dbContext.Route.SingleOrDefault(r => r.Id == route.Id);
+            var existingRoute = _dbContext.Route.SingleOrDefaultAsync(r => r.Id == route.Id);
             if (existingRoute == null)
             {
                 _dbContext.Route.Add(route);
@@ -1103,7 +1103,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
                 throw new InvalidOperationException("Database context is not initialized.");
             }
 
-            var existingRoute = _dbContext.Route.SingleOrDefault(r => r.Id == route.Id);
+            var existingRoute = _dbContext.Route.SingleOrDefaultAsync(r => r.Id == route.Id);
             if (existingRoute == null)
             {
                 _dbContext.Route.Add(route);
