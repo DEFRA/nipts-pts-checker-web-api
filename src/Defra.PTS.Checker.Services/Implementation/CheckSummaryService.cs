@@ -473,19 +473,6 @@ public class CheckSummaryService : ICheckSummaryService
         return mergedList;
     }
 
-    private static int GetStringType(string str)
-    {
-        bool hasLetters = str.Any(char.IsLetter);
-        bool hasDigits = str.Any(char.IsDigit);
-
-        if (hasLetters && !hasDigits)
-            return 0; // Only letters
-        else if (hasDigits && !hasLetters)
-            return 2; // Only numbers
-        else
-            return 1; // Mixed letters and numbers
-    }
-
     private static DateTime GetCombinedDateTime(InterimCheckSummary cs)
     {
         return cs.Date?.Add(cs.ScheduledSailingTime ?? TimeSpan.Zero) ?? DateTime.MinValue;

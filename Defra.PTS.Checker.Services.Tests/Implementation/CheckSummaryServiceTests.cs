@@ -17,7 +17,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
     {
         private CheckSummaryService? _service;
         private CommonDbContext? _dbContext;
-        private Mock<ILogger<CheckerService>>? _loggerMock;
+        private Mock<ILogger<CheckSummaryService>>? _loggerMock;
 
         [SetUp]
         public void Setup()
@@ -27,7 +27,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
                 .Options;
 
             _dbContext = new CommonDbContext(options);
-            _loggerMock = new Mock<ILogger<CheckerService>>();
+            _loggerMock = new Mock<ILogger<CheckSummaryService>>();
             _service = new CheckSummaryService(_dbContext, _loggerMock.Object);
 
             DataHelper.AddRoutes(_dbContext);
