@@ -86,7 +86,7 @@ public class CheckerService : ICheckerService
                 }
             }
 
-            if (allApplications.Any())
+            if (allApplications.Count != 0)
             {
                 var mostRelevantApplication = GetMostRelevantApplication(allApplications);
                 if (mostRelevantApplication != null)
