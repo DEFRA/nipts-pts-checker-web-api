@@ -591,7 +591,7 @@ public class CheckSummaryService : ICheckSummaryService
         };
     }
 
-    private string GetEnumDescription(PetSpeciesType speciesType)
+    private static string GetEnumDescription(PetSpeciesType speciesType)
     {
         var field = speciesType.GetType().GetField(speciesType.ToString());
         var attribute = field?.GetCustomAttributes(typeof(DescriptionAttribute), false)
