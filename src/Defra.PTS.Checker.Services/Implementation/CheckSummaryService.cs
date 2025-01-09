@@ -25,9 +25,9 @@ namespace Defra.PTS.Checker.Services.Implementation;
 public class CheckSummaryService : ICheckSummaryService
 {
     private readonly CommonDbContext _dbContext;
-    private readonly ILogger<CheckerService> _logger;
+    private readonly ILogger<CheckSummaryService> _logger;
 
-    public CheckSummaryService(CommonDbContext dbContext, ILogger<CheckerService> logger)
+    public CheckSummaryService(CommonDbContext dbContext, ILogger<CheckSummaryService> logger)
     {
         _dbContext = dbContext;
         _logger = logger;
@@ -190,37 +190,29 @@ public class CheckSummaryService : ICheckSummaryService
 
     public async Task<IEnumerable<CheckSummary>> GetCheckOutcomesAsync(DateTime startDate, DateTime endDate)
     {
-        try
-        {
-            // Preliminary filtering to reduce the dataset
-            var preliminaryStartDate = startDate.Date.AddDays(-1);
-            var preliminaryEndDate = endDate.Date.AddDays(1);
+        // Preliminary filtering to reduce the dataset
+        var preliminaryStartDate = startDate.Date.AddDays(-1);
+        var preliminaryEndDate = endDate.Date.AddDays(1);
 
-            var summaries = await _dbContext.CheckSummary
-                .Include(cs => cs.RouteNavigation)
-                .Where(cs => cs.Date.HasValue && cs.ScheduledSailingTime.HasValue && cs.RouteId.HasValue)
-                .Where(cs => cs.Date!.Value >= preliminaryStartDate && cs.Date.Value <= preliminaryEndDate)
-                .Where(cs => cs.GBCheck == true)
-                .ToListAsync();
+        var summaries = await _dbContext.CheckSummary
+            .Include(cs => cs.RouteNavigation)
+            .Where(cs => cs.Date.HasValue && cs.ScheduledSailingTime.HasValue && cs.RouteId.HasValue)
+            .Where(cs => cs.Date!.Value >= preliminaryStartDate && cs.Date.Value <= preliminaryEndDate)
+            .Where(cs => cs.GBCheck == true)
+            .ToListAsync();
 
-            // Precise filtering and combining Date and Time in memory
-            var filteredSummaries = summaries
-                .Select(cs => new
-                {
-                    CheckSummary = cs,
-                    CombinedDateTime = cs?.Date!.Value.Add(cs.ScheduledSailingTime!.Value)
-                })
-                .Where(cs => cs.CombinedDateTime >= startDate && cs.CombinedDateTime <= endDate)
-                .OrderBy(cs => cs.CombinedDateTime)
-                .Select(cs => cs.CheckSummary);
+        // Precise filtering and combining Date and Time in memory
+        var filteredSummaries = summaries
+            .Select(cs => new
+            {
+                CheckSummary = cs,
+                CombinedDateTime = cs?.Date!.Value.Add(cs.ScheduledSailingTime!.Value)
+            })
+            .Where(cs => cs.CombinedDateTime >= startDate && cs.CombinedDateTime <= endDate)
+            .OrderBy(cs => cs.CombinedDateTime)
+            .Select(cs => cs.CheckSummary);
 
-            return filteredSummaries;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error in GetCheckOutcomesAsync");
-            throw;
-        }
+        return filteredSummaries;
     }
 
     public async Task<IEnumerable<SpsCheckDetailResponseModel>> GetSpsCheckDetailsByRouteAsync(string route, DateTime sailingDate, int timeWindowInHours)
