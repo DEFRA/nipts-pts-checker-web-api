@@ -9,17 +9,6 @@ using Moq;
 using NUnit.Framework;
 using Microsoft.EntityFrameworkCore;
 using Defra.PTS.Checker.Models.Enums;
-using Defra.PTS.Checker.Services.Interface;
-using Microsoft.AspNetCore.Routing;
-using Defra.PTS.Checker.Entities;
-using Defra.PTS.Checker.Repositories;
-using Defra.PTS.Checker.Services;
-using Microsoft.EntityFrameworkCore;
-using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Defra.PTS.Checker.Services.Tests.Implementation
 {
