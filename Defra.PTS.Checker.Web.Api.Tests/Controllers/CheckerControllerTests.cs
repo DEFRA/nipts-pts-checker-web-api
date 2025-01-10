@@ -247,6 +247,25 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
         }
 
         [Test]
+        public async Task CheckMicrochipNumber_ServiceReturnsResponse_ReturnsError()
+        {
+            // Arrange
+            var request = new SearchByMicrochipNumberRequest { MicrochipNumber = "1234567890" };
+            var response = new { PetDetails = "Details", error = "test" };
+            _checkerServiceMock!.Setup(service => service.CheckMicrochipNumberAsync(request.MicrochipNumber))
+                .ReturnsAsync(response);
+
+            // Act
+            var result = await _controller!.CheckMicrochipNumber(request);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<ObjectResult>());
+            var ObjectResult = result as ObjectResult;
+            Assert.That(ObjectResult, Is.Not.Null);
+            Assert.That(ObjectResult!.StatusCode, Is.EqualTo(StatusCodes.Status500InternalServerError));
+        }
+
+        [Test]
         public async Task CheckMicrochipNumber_ServiceThrowsException_ReturnsInternalServerError()
         {
             // Arrange
