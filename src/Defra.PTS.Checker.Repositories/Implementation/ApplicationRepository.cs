@@ -65,7 +65,7 @@ namespace Defra.PTS.Checker.Repositories.Implementation
                                         })
                                         .ToList();
 
-            if (!applications.Any())
+            if (applications.Count == 0)
             {
                 throw new ArgumentNullException(nameof(applications), "No applications found for the specified PetId.");
             }

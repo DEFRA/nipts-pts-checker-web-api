@@ -9,17 +9,6 @@ using Moq;
 using NUnit.Framework;
 using Microsoft.EntityFrameworkCore;
 using Defra.PTS.Checker.Models.Enums;
-using Defra.PTS.Checker.Services.Interface;
-using Microsoft.AspNetCore.Routing;
-using Defra.PTS.Checker.Entities;
-using Defra.PTS.Checker.Repositories;
-using Defra.PTS.Checker.Services;
-using Microsoft.EntityFrameworkCore;
-using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Defra.PTS.Checker.Services.Tests.Implementation
 {
@@ -28,7 +17,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
     {
         private CheckSummaryService? _service;
         private CommonDbContext? _dbContext;
-        private Mock<ILogger<CheckerService>>? _loggerMock;
+        private Mock<ILogger<CheckSummaryService>>? _loggerMock;
 
         [SetUp]
         public void Setup()
@@ -38,7 +27,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
                 .Options;
 
             _dbContext = new CommonDbContext(options);
-            _loggerMock = new Mock<ILogger<CheckerService>>();
+            _loggerMock = new Mock<ILogger<CheckSummaryService>>();
             _service = new CheckSummaryService(_dbContext, _loggerMock.Object);
 
             DataHelper.AddRoutes(_dbContext);
@@ -554,7 +543,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             Assert.That(result.Count(), Is.EqualTo(2), $"The result should contain two grouped items but contains {result.Count()}.");
         }
 
-
+        [Test]
         public async Task GetRecentCheckOutcomesAsync_ReturnsGroupedResults()
         {
             // Arrange
@@ -586,14 +575,17 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
                     Date = DateTime.UtcNow.AddDays(-5),
                     ScheduledSailingTime = TimeSpan.FromHours(2),
                     CheckOutcome = true,
-                    RouteId = route1.Id
+                    RouteId = route1.Id,
+                    GBCheck = true
+                    
                 },
                 new CheckSummary
                 {
                     Date = DateTime.UtcNow.AddDays(-3),
                     ScheduledSailingTime = TimeSpan.FromHours(3),
                     CheckOutcome = false,
-                    RouteId = route2.Id
+                    RouteId = route2.Id,
+                    GBCheck = true
                 }
             };
 
@@ -1018,7 +1010,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
                 throw new InvalidOperationException("Database context is not initialized.");
             }
 
-            var existingRoute = _dbContext.Route.SingleOrDefault(r => r.Id == route.Id);
+            var existingRoute = _dbContext.Route.SingleOrDefaultAsync(r => r.Id == route.Id);
             if (existingRoute == null)
             {
                 _dbContext.Route.Add(route);
@@ -1103,7 +1095,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
                 throw new InvalidOperationException("Database context is not initialized.");
             }
 
-            var existingRoute = _dbContext.Route.SingleOrDefault(r => r.Id == route.Id);
+            var existingRoute = _dbContext.Route.SingleOrDefaultAsync(r => r.Id == route.Id);
             if (existingRoute == null)
             {
                 _dbContext.Route.Add(route);
