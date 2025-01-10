@@ -323,16 +323,7 @@ public class CheckSummaryService : ICheckSummaryService
                 .Where(co => co.Id == checkSummary.CheckOutcomeId)
                 .ToListAsync();
 
-            var referralTexts = new List<string>();
-            foreach (var referral in checkOutcomes)
-            {
-                if (referral.MCNotMatch == true) referralTexts.Add("Microchip number does not match the PTD");
-                if (referral.MCNotFound == true) referralTexts.Add("Cannot find microchip");
-                if (referral.VCNotMatchPTD == true) referralTexts.Add("Pet does not match the PTD");
-                if (referral.OIFailPotentialCommercial == true) referralTexts.Add("Potential commercial movement");
-                if (referral.OIFailAuthTravellerNoConfirmation == true) referralTexts.Add("Authorised traveller but no confirmation");
-                if (referral.OIFailOther == true) referralTexts.Add("Other reason");
-            }
+            var referralTexts = AddReferralTexts(checkOutcomes);
 
             var outcomeReasons = new List<string>();
             if (checkOutcomes.Any(o => o.GBRefersToDAERAOrSPS == true))
@@ -371,7 +362,22 @@ public class CheckSummaryService : ICheckSummaryService
         }
     }
 
+    private static List<string> AddReferralTexts(List<CheckOutcome> checkOutcomes)
+    {
 
+        var referralTexts = new List<string>();
+        foreach (var referral in checkOutcomes)
+        {
+            if (referral.MCNotMatch == true) referralTexts.Add("Microchip number does not match the PTD");
+            if (referral.MCNotFound == true) referralTexts.Add("Cannot find microchip");
+            if (referral.VCNotMatchPTD == true) referralTexts.Add("Pet does not match the PTD");
+            if (referral.OIFailPotentialCommercial == true) referralTexts.Add("Potential commercial movement");
+            if (referral.OIFailAuthTravellerNoConfirmation == true) referralTexts.Add("Authorised traveller but no confirmation");
+            if (referral.OIFailOther == true) referralTexts.Add("Other reason");
+        }
+
+        return referralTexts;
+    }
 
 
     private async Task<List<InterimCheckSummary>> getCheckSummariesBySailing(DateTime sailingDateOnly, TimeSpan sailingTimeOnly, int routeId)
