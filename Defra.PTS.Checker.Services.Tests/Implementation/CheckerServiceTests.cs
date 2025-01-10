@@ -41,6 +41,26 @@ namespace Defra.PTS.Checker.Tests.Services
         }
 
         [Test]
+        public async Task CheckMicrochipNumberAsync_RepositoryThrowsException_ReturnsHandled()
+        {
+            // Arrange
+            string microchipNumber = "1234567890";
+
+            // Set up the mock to throw an exception
+            _petRepositoryMock!.Setup(repo => repo.GetByMicrochipNumberAsync(microchipNumber))
+                .ThrowsAsync(new Exception("Repository failure"));
+
+            // Act
+            var result = await _checkerService!.CheckMicrochipNumberAsync(microchipNumber);
+
+            // Assert
+            Assert.That(result, Is.Not.Null);
+            var error = result!.GetType().GetProperty("error")!.GetValue(result, null);
+            Assert.That(error, Is.EqualTo("An unexpected error occurred. Please try again later."));
+        }
+
+
+        [Test]
         public async Task CheckMicrochipNumberAsync_PetNotFound_ReturnsPetNotFoundError()
         {
             // Arrange
