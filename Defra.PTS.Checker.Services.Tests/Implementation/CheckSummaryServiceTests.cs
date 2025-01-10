@@ -1032,7 +1032,9 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
                 RelevantComments = "Relevant comment",
                 SPSOutcomeDetails = "Additional comment",
                 OIFailOther = true,
-                GBRefersToDAERAOrSPS = true
+                GBRefersToDAERAOrSPS = true, 
+                GBAdviseNoTravel = true,
+                GBPassengerSaysNoTravel = true
             };
 
             var checkSummary = new CheckSummary
