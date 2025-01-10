@@ -543,7 +543,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             Assert.That(result.Count(), Is.EqualTo(2), $"The result should contain two grouped items but contains {result.Count()}.");
         }
 
-
+        [Test]
         public async Task GetRecentCheckOutcomesAsync_ReturnsGroupedResults()
         {
             // Arrange
@@ -575,14 +575,17 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
                     Date = DateTime.UtcNow.AddDays(-5),
                     ScheduledSailingTime = TimeSpan.FromHours(2),
                     CheckOutcome = true,
-                    RouteId = route1.Id
+                    RouteId = route1.Id,
+                    GBCheck = true
+                    
                 },
                 new CheckSummary
                 {
                     Date = DateTime.UtcNow.AddDays(-3),
                     ScheduledSailingTime = TimeSpan.FromHours(3),
                     CheckOutcome = false,
-                    RouteId = route2.Id
+                    RouteId = route2.Id,
+                    GBCheck = true
                 }
             };
 
