@@ -4,20 +4,12 @@ using Defra.PTS.Checker.Models.Enums;
 using Defra.PTS.Checker.Repositories;
 using Defra.PTS.Checker.Services.Interface;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.SqlServer; // Include this namespace
 using Microsoft.Extensions.Logging;
-using Microsoft.Rest.ClientRuntime.Azure.Authentication.Utilities;
-using System;
 using System.ComponentModel;
 using System.Globalization;
-using System.Linq;
-using System.Threading.Tasks;
 using TravelDocument = Defra.PTS.Checker.Entities.TravelDocument;
 using CheckOutcome = Defra.PTS.Checker.Entities.CheckOutcome;
 using Defra.PTS.Checker.Models.CustomException;
-using Microsoft.Extensions.Azure;
-using System.Collections.Generic;
-using Microsoft.VisualBasic;
 using Defra.PTS.Checker.Services.Helpers;
 
 namespace Defra.PTS.Checker.Services.Implementation;
