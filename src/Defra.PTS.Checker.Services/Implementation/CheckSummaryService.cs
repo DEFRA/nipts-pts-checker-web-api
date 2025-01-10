@@ -142,50 +142,42 @@ public class CheckSummaryService : ICheckSummaryService
 
     public async Task<IEnumerable<CheckOutcomeResponse>> GetRecentCheckOutcomesAsync(DateTime startDate, DateTime endDate)
     {
-        try
-        {
-            _logger.LogInformation("GetRecentCheckOutcomesAsync startDate", startDate);
-            _logger.LogInformation("GetRecentCheckOutcomesAsync endDate", endDate);
-            var checkOutcomes = await GetCheckOutcomesAsync(startDate, endDate);
+        _logger.LogInformation("GetRecentCheckOutcomesAsync startDate", startDate);
+        _logger.LogInformation("GetRecentCheckOutcomesAsync endDate", endDate);
+        var checkOutcomes = await GetCheckOutcomesAsync(startDate, endDate);
 
-            var results = checkOutcomes.Select(co => new CheckOutcomeResponse
-            {
-                RouteId = co.RouteId,
-                RouteName = co.RouteNavigation?.RouteName ?? "Unknown",
-                DepartureDate = co.Date.HasValue
-                    ? co.Date.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture)
-                    : "N/A",
-                DepartureTime = co.ScheduledSailingTime.HasValue
-                    ? co.ScheduledSailingTime.Value.ToString(@"hh\:mm", CultureInfo.InvariantCulture)
-                    : "N/A",
-                CombinedDateTime = co.Date.HasValue && co.ScheduledSailingTime.HasValue
-                    ? co.Date.Value.Add(co.ScheduledSailingTime.Value)
-                    : DateTime.MinValue,
-                PassCount = co.CheckOutcome == true ? 1 : 0,
-                FailCount = co.CheckOutcome == false ? 1 : 0
-            })
-            .Where(x => x.CombinedDateTime != DateTime.MinValue) // Ensure CombinedDateTime is valid
-            .GroupBy(x => new { x.RouteId, x.RouteName, x.DepartureDate, x.DepartureTime, x.CombinedDateTime })
-            .Select(group => new CheckOutcomeResponse
-            {
-                RouteId = group.Key.RouteId,
-                RouteName = group.Key.RouteName,
-                DepartureDate = group.Key.DepartureDate,
-                DepartureTime = group.Key.DepartureTime,
-                PassCount = group.Sum(x => x.PassCount),
-                FailCount = group.Sum(x => x.FailCount),
-                CombinedDateTime = group.Key.CombinedDateTime
-            })
-            .OrderByDescending(x => x.CombinedDateTime)
-            .ToList();
-
-            return results;
-        }
-        catch (Exception ex)
+        var results = checkOutcomes.Select(co => new CheckOutcomeResponse
         {
-            _logger.LogError(ex, "Error in GetRecentCheckOutcomesAsync");
-            throw;
-        }
+            RouteId = co.RouteId,
+            RouteName = co.RouteNavigation?.RouteName ?? "Unknown",
+            DepartureDate = co.Date.HasValue
+                ? co.Date.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture)
+                : "N/A",
+            DepartureTime = co.ScheduledSailingTime.HasValue
+                ? co.ScheduledSailingTime.Value.ToString(@"hh\:mm", CultureInfo.InvariantCulture)
+                : "N/A",
+            CombinedDateTime = co.Date.HasValue && co.ScheduledSailingTime.HasValue
+                ? co.Date.Value.Add(co.ScheduledSailingTime.Value)
+                : DateTime.MinValue,
+            PassCount = co.CheckOutcome == true ? 1 : 0,
+            FailCount = co.CheckOutcome == false ? 1 : 0
+        })
+        .Where(x => x.CombinedDateTime != DateTime.MinValue) // Ensure CombinedDateTime is valid
+        .GroupBy(x => new { x.RouteId, x.RouteName, x.DepartureDate, x.DepartureTime, x.CombinedDateTime })
+        .Select(group => new CheckOutcomeResponse
+        {
+            RouteId = group.Key.RouteId,
+            RouteName = group.Key.RouteName,
+            DepartureDate = group.Key.DepartureDate,
+            DepartureTime = group.Key.DepartureTime,
+            PassCount = group.Sum(x => x.PassCount),
+            FailCount = group.Sum(x => x.FailCount),
+            CombinedDateTime = group.Key.CombinedDateTime
+        })
+        .OrderByDescending(x => x.CombinedDateTime)
+        .ToList();
+
+        return results;
     }
 
     public async Task<IEnumerable<CheckSummary>> GetCheckOutcomesAsync(DateTime startDate, DateTime endDate)
@@ -263,7 +255,7 @@ public class CheckSummaryService : ICheckSummaryService
 
             if (checkReport == null)
             {
-                _logger.LogInformation("No check report found with gbCheckSummaryId: {gbCheckSummaryId}", gbCheckSummaryId);
+                _logger.LogInformation("No check report found with gbCheckSummaryId: {0}", gbCheckSummaryId);
                 return null;
             }
 
@@ -555,7 +547,7 @@ public class CheckSummaryService : ICheckSummaryService
         };
     }
 
-    private string GetPetSpeciesDescription(int? petSpeciesId)
+    private static string GetPetSpeciesDescription(int? petSpeciesId)
     {
         return GetEnumDescription((PetSpeciesType)(petSpeciesId ?? 0));
     }
