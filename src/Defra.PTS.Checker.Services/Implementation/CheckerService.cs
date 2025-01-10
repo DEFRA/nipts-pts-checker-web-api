@@ -73,90 +73,11 @@ public class CheckerService : ICheckerService
                 return new { error = "Pet not found" };
             }
 
-            var allApplications = new List<Application>();
+            var allApplications = await GetApplicationsForPetsAsync(pets);
 
-            foreach (var id in pets.Select(x => x.Id))
+            if (allApplications.Any())
             {
-                _logger.LogInformation("Processing pet with ID: {PetId}", id);
-
-                var applications = await _applicationRepository.GetApplicationsByPetIdAsync(id);
-                if (applications.Any())
-                {
-                    allApplications.AddRange(applications);
-                }
-            }
-
-            if (allApplications.Count != 0)
-            {
-                var mostRelevantApplication = GetMostRelevantApplication(allApplications);
-                if (mostRelevantApplication != null)
-                {
-                    var pet = pets.First(p => p.Id == mostRelevantApplication.PetId);
-                    var travelDocument = await _travelDocumentRepository.GetTravelDocumentByApplicationIdAsync(mostRelevantApplication.Id);
-                    var travelDocumentDetail = travelDocument != null
-                        ? new
-                        {
-                            TravelDocumentId = travelDocument.Id,
-                            TravelDocumentReferenceNumber = travelDocument.DocumentReferenceNumber,
-                            TravelDocumentDateOfIssue = travelDocument.DateOfIssue,
-                            TravelDocumentValidityStartDate = travelDocument.ValidityStartDate,
-                            TravelDocumentValidityEndDate = travelDocument.ValidityEndDate,
-                            TravelDocumentStatusId = travelDocument.StatusId
-                        }
-                        : null;
-
-                    var petOwnerAddress = mostRelevantApplication?.OwnerAddress != null
-                        ? new
-                        {
-                            AddressLineOne = mostRelevantApplication.OwnerAddress.AddressLineOne,
-                            AddressLineTwo = mostRelevantApplication.OwnerAddress.AddressLineTwo,
-                            TownOrCity = mostRelevantApplication.OwnerAddress.TownOrCity,
-                            County = mostRelevantApplication.OwnerAddress.County,
-                            PostCode = mostRelevantApplication.OwnerAddress.PostCode,
-                        }
-                        : null;
-
-                    var petOwner =
-                        new
-                        {
-                            Name = mostRelevantApplication?.OwnerNewName,
-                            Telephone = mostRelevantApplication?.OwnerNewTelephone,
-                            Email = mostRelevantApplication?.Owner != null ? mostRelevantApplication.Owner.Email : null,
-                            Address = petOwnerAddress,
-                        };
-
-                    var petDetail = new
-                    {
-                        Pet = new
-                        {
-                            PetId = pet.Id,
-                            PetName = pet.Name,
-                            Species = Enum.GetName(typeof(PetSpecies), pet.SpeciesId),
-                            BreedName = pet.Breed?.Name,
-                            BreedAdditionalInfo = pet.AdditionalInfoMixedBreedOrUnknown,
-                            Sex = Enum.GetName(typeof(PetGender), pet.SexId),
-                            DateOfBirth = pet.DOB,
-                            ColourName = getColourByPet(pet),
-                            SignificantFeatures = getSignificantFeaturesByPet(pet),
-                            pet.MicrochipNumber,
-                            pet.MicrochippedDate
-                        },
-                        Application = new
-                        {
-                            ApplicationId = mostRelevantApplication?.Id,
-                            mostRelevantApplication?.ReferenceNumber,
-                            mostRelevantApplication?.DateOfApplication,
-                            mostRelevantApplication?.Status,
-                            mostRelevantApplication?.DateAuthorised,
-                            mostRelevantApplication?.DateRejected,
-                            mostRelevantApplication?.DateRevoked
-                        },
-                        TravelDocument = travelDocumentDetail,
-                        PetOwner = petOwner
-                    };
-
-                    return petDetail;
-                }
+                return await BuildPetDetailResponseAsync(pets, allApplications);
             }
 
             _logger.LogInformation("No relevant applications found for the pets with microchip number: {MicrochipNumber}", microchipNumber);
@@ -169,13 +90,103 @@ public class CheckerService : ICheckerService
         }
     }
 
+    private async Task<List<Application>> GetApplicationsForPetsAsync(IEnumerable<Pet> pets)
+    {
+        var allApplications = new List<Application>();
 
-    private static string? getColourByPet(Pet pet)
+        foreach (var id in pets.Select(x => x.Id))
+        {
+            _logger.LogInformation("Processing pet with ID: {PetId}", id);
+
+            var applications = await _applicationRepository.GetApplicationsByPetIdAsync(id);
+            if (applications.Any())
+            {
+                allApplications.AddRange(applications);
+            }
+        }
+
+        return allApplications;
+    }
+
+    private async Task<object?> BuildPetDetailResponseAsync(IEnumerable<Pet> pets, List<Application> allApplications)
+    {
+        var mostRelevantApplication = GetMostRelevantApplication(allApplications);
+        if (mostRelevantApplication == null)
+            return null;
+
+        var pet = pets.First(p => p.Id == mostRelevantApplication.PetId);
+        var travelDocument = await _travelDocumentRepository.GetTravelDocumentByApplicationIdAsync(mostRelevantApplication.Id);
+
+        var travelDocumentDetail = travelDocument != null
+            ? new
+            {
+                TravelDocumentId = travelDocument.Id,
+                TravelDocumentReferenceNumber = travelDocument.DocumentReferenceNumber,
+                TravelDocumentDateOfIssue = travelDocument.DateOfIssue,
+                TravelDocumentValidityStartDate = travelDocument.ValidityStartDate,
+                TravelDocumentValidityEndDate = travelDocument.ValidityEndDate,
+                TravelDocumentStatusId = travelDocument.StatusId
+            }
+            : null;
+
+        var petOwnerAddress = mostRelevantApplication?.OwnerAddress != null
+            ? new
+            {
+                AddressLineOne = mostRelevantApplication.OwnerAddress.AddressLineOne,
+                AddressLineTwo = mostRelevantApplication.OwnerAddress.AddressLineTwo,
+                TownOrCity = mostRelevantApplication.OwnerAddress.TownOrCity,
+                County = mostRelevantApplication.OwnerAddress.County,
+                PostCode = mostRelevantApplication.OwnerAddress.PostCode,
+            }
+            : null;
+
+        var petOwner = new
+        {
+            Name = mostRelevantApplication?.OwnerNewName,
+            Telephone = mostRelevantApplication?.OwnerNewTelephone,
+            Email = mostRelevantApplication?.Owner != null ? mostRelevantApplication.Owner.Email : null,
+            Address = petOwnerAddress,
+        };
+
+        var petDetail = new
+        {
+            Pet = new
+            {
+                PetId = pet.Id,
+                PetName = pet.Name,
+                Species = Enum.GetName(typeof(PetSpecies), pet.SpeciesId),
+                BreedName = pet.Breed?.Name,
+                BreedAdditionalInfo = pet.AdditionalInfoMixedBreedOrUnknown,
+                Sex = Enum.GetName(typeof(PetGender), pet.SexId),
+                DateOfBirth = pet.DOB,
+                ColourName = GetColourByPet(pet),
+                SignificantFeatures = GetSignificantFeaturesByPet(pet),
+                pet.MicrochipNumber,
+                pet.MicrochippedDate
+            },
+            Application = new
+            {
+                ApplicationId = mostRelevantApplication?.Id,
+                mostRelevantApplication?.ReferenceNumber,
+                mostRelevantApplication?.DateOfApplication,
+                mostRelevantApplication?.Status,
+                mostRelevantApplication?.DateAuthorised,
+                mostRelevantApplication?.DateRejected,
+                mostRelevantApplication?.DateRevoked
+            },
+            TravelDocument = travelDocumentDetail,
+            PetOwner = petOwner
+        };
+
+        return petDetail;
+    }
+
+    private static string? GetColourByPet(Pet pet)
     {
         return !string.IsNullOrEmpty(pet.OtherColour) ? pet.OtherColour : pet.Colour?.Name;
     }
 
-    private static string? getSignificantFeaturesByPet(Pet pet)
+    private static string? GetSignificantFeaturesByPet(Pet pet)
     {
         return pet.HasUniqueFeature == (int)YesNoOptions.Yes ? pet.UniqueFeatureDescription : "No";
     }
