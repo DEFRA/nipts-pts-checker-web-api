@@ -75,7 +75,7 @@ public class CheckerService : ICheckerService
 
             var allApplications = await GetApplicationsForPetsAsync(pets);
 
-            if (allApplications.Any())
+            if (allApplications.Count != 0)
             {
                 return await BuildPetDetailResponseAsync(pets, allApplications);
             }
