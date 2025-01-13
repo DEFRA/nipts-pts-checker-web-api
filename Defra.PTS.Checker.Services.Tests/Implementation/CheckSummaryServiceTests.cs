@@ -678,7 +678,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
                 // Assert
                 Assert.That(result, Is.Not.Null);
                 Assert.That(result.Count(), Is.EqualTo(1));
-                Assert.That(result.First().SPSOutcome, Is.EqualTo("Check Needed"));
+                Assert.That(result.First().SPSOutcome, Is.EqualTo("Check needed"));
             }
         }
 

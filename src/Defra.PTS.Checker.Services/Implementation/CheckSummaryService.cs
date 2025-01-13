@@ -418,7 +418,7 @@ public class CheckSummaryService : ICheckSummaryService
     private async Task<IEnumerable<SpsCheckDetailResponseModel>> getSpsCheckDetailResponse(int timeWindowInHours, List<InterimCheckSummary> checkSummaries)
     {
         var responseList = new List<SpsCheckDetailResponseModel>();
-        string checkNeededText = "Check Needed";
+        string checkNeededText = "Check needed";
 
         foreach (var cs in checkSummaries)
         {
@@ -504,7 +504,7 @@ public class CheckSummaryService : ICheckSummaryService
             return (""); // Skip "Did Not Attend" cases
         }
 
-        return ("Check Needed");
+        return ("Check needed");
     }
 
     private async Task<string> GetStatusForLinkedCheckId(InterimCheckSummary cs)
