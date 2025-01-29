@@ -55,6 +55,10 @@ namespace Defra.PTS.Checker.Models
         [StringLength(500, ErrorMessage = "SPS Outcome Details cannot exceed 500 characters.")]
         public string? SPSOutcomeDetails { get; set; }
 
+        [SwaggerSchema("GB Check Key Associated with current NI Check")]
+        public Guid? GBCheckId { get; set; }
+
+
         public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
             var validSailingOption = new List<int> { (int)sailOptions.Ferry, (int)sailOptions.Flight };

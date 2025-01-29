@@ -41,6 +41,26 @@ namespace Defra.PTS.Checker.Tests.Services
         }
 
         [Test]
+        public async Task CheckMicrochipNumberAsync_RepositoryThrowsException_ReturnsHandled()
+        {
+            // Arrange
+            string microchipNumber = "1234567890";
+
+            // Set up the mock to throw an exception
+            _petRepositoryMock!.Setup(repo => repo.GetByMicrochipNumberAsync(microchipNumber))
+                .ThrowsAsync(new Exception("Repository failure"));
+
+            // Act
+            var result = await _checkerService!.CheckMicrochipNumberAsync(microchipNumber);
+
+            // Assert
+            Assert.That(result, Is.Not.Null);
+            var error = result!.GetType().GetProperty("error")!.GetValue(result, null);
+            Assert.That(error, Is.EqualTo("An unexpected error occurred. Please try again later."));
+        }
+
+
+        [Test]
         public async Task CheckMicrochipNumberAsync_PetNotFound_ReturnsPetNotFoundError()
         {
             // Arrange
@@ -307,7 +327,8 @@ namespace Defra.PTS.Checker.Tests.Services
                 Id = Guid.NewGuid(),
                 FirstName = "Test",
                 LastName = "Test",
-                RoleId = null
+                RoleId = null,
+                OrganisationId = Guid.NewGuid(),
             };
 
             _checkerRepositoryMock!.Setup(repo => repo.Add(It.IsAny<Entities.Checker>()))
@@ -324,13 +345,15 @@ namespace Defra.PTS.Checker.Tests.Services
         [Test]
         public async Task CheckerUser_UpdateChecker()
         {
+            Guid organisationId = Guid.NewGuid();
             // Arrange
             var checkerDto = new Models.CheckerDto
             {
                 Id = Guid.NewGuid(),
                 FirstName = "Test",
                 LastName = "Test",
-                RoleId = null
+                RoleId = null,
+                OrganisationId = organisationId,
             };
 
             var checkerEntity = new Entities.Checker
@@ -339,7 +362,8 @@ namespace Defra.PTS.Checker.Tests.Services
                 FirstName = checkerDto.FirstName,
                 LastName = checkerDto.LastName,
                 FullName = $"{checkerDto.FirstName} {checkerDto.LastName}",
-                RoleId = null
+                RoleId = null,
+                OrganisationId = organisationId,
             };
 
             _checkerRepositoryMock!.Setup(repo => repo.Find(It.IsAny<Guid>()))

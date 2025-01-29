@@ -1,6 +1,7 @@
 ﻿using Defra.PTS.Checker.Entities;
 using Defra.PTS.Checker.Models;
 using Defra.PTS.Checker.Models.Constants;
+using Defra.PTS.Checker.Models.SchemaFilters;
 using Defra.PTS.Checker.Models.Search;
 using Defra.PTS.Checker.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
@@ -15,12 +16,14 @@ public class CheckerController : ControllerBase
     private readonly IApplicationService _applicationService;
     private readonly ICheckerService _checkerService;
     private readonly ICheckSummaryService _checkSummaryService;
+    private readonly IOrganisationService _organisationService;
 
-    public CheckerController(IApplicationService applicationService, ICheckerService checkerService, ICheckSummaryService checkSummaryService)
+    public CheckerController(IApplicationService applicationService, ICheckerService checkerService, ICheckSummaryService checkSummaryService, IOrganisationService organisationService)
     {
         _applicationService = applicationService;
         _checkerService = checkerService;
         _checkSummaryService = checkSummaryService;
+        _organisationService = organisationService;
     }
 
     [HttpPost("checkApplicationNumber")]
@@ -32,6 +35,7 @@ public class CheckerController : ControllerBase
             OperationId = "checkApplicationNumber",
             Tags = new[] { "Checker" },
             Summary = "Retrieves a specific application by Reference Number",
+
             Description = "Returns the application details for the specified Application Number"
         )]
     public async Task<IActionResult> CheckApplicationNumber([FromBody] SearchByApplicationNumberRequest request)
@@ -185,8 +189,6 @@ public class CheckerController : ControllerBase
         return Ok(response);
     }
 
-
-
     [HttpPost]
     [Route("checkerUser")]
     [SwaggerResponse(StatusCodes.Status200OK, "OK: Returns the Id of checker", typeof(Guid))]
@@ -310,6 +312,95 @@ public class CheckerController : ControllerBase
         {
             return StatusCode(500, new { error = "An error occurred during processing.", details = ex.Message });
         }
+    }
+
+
+    [HttpPost]
+    [Route("getOrganisation")]
+    [SwaggerResponse(StatusCodes.Status200OK, "OK: Returns the Organisation", typeof(OrganisationResponseModel))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request: OrganisationId is not provided or is not valid", typeof(object))]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Not Found: There is no Organisation matching this OrganisationId")]
+    [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error: An error has occurred")]
+    [SwaggerOperation(
+        OperationId = "organisationId",
+        Tags = new[] { "Organisation" },
+        Summary = "Retrieves a specific Organisation by OrganisationId",
+        Description = "Returns the Organisation details for the specified OrganisationId"
+    )]
+    public async Task<IActionResult> GetOrganisationById([FromBody, SwaggerRequestBody("The search payload", Required = true)] OrganisationRequestModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var organisation = await _organisationService.GetOrganisation(Guid.Parse(model.OrganisationId));
+        if (organisation == null)
+        {
+            return new NotFoundObjectResult(ApiConstants.OrganisationNotFound);
+        }
+
+       return Ok(organisation);
+    }
+
+
+    [HttpPost]
+    [Route("getGbCheck")]
+    [SwaggerResponse(StatusCodes.Status200OK, "OK: Returns the GbCheck", typeof(GbCheckReportResponseModel))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request: GbCheckSummaryId is not provided or is not valid", typeof(object))]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Not Found: There is no GbCheck matching this GbCheckSummaryId")]
+    [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error: An error has occurred")]
+    [SwaggerOperation(
+     OperationId = "gbCheckSummaryId",
+     Tags = new[] { "GbCheck" },
+     Summary = "Retrieves a specific GbCheck by GbCheckSummaryId",
+     Description = "Returns the GbCheck details for the specified GbCheckSummaryId"
+    )]
+    public async Task<IActionResult> GetGbCheckById([FromBody, SwaggerRequestBody("The search payload", Required = true)] GbCheckReportRequestModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var checkReport = await _checkSummaryService.GetGbCheckReport(Guid.Parse(model.GbCheckSummaryId));
+        if (checkReport == null)
+        {
+            return new NotFoundObjectResult(ApiConstants.GbCheckReportNotFound);
+        }
+
+        return Ok(checkReport);
+    }
+
+
+    [HttpPost]
+    [Route("getCompleteCheckDetails")]
+    [SwaggerResponse(StatusCodes.Status200OK, "OK: Returns the complete check details", typeof(CompleteCheckDetailsResponse))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request: CheckSummaryId is not valid", typeof(object))]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Not Found: There is no record matching the provided CheckSummaryId")]
+    [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error: An error has occurred")]
+    [SwaggerOperation(
+     OperationId = "getCompleteCheckDetails",
+     Tags = new[] { "Checker" },
+     Summary = "Retrieves complete check details by CheckSummaryId",
+     Description = "Returns complete details for the specified CheckSummaryId"
+ )]
+    public async Task<IActionResult> GetCompleteCheckDetails(
+     [FromBody, SwaggerRequestBody("The search payload", Required = true)] CheckDetailsRequestModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(new { error = "Invalid input. Please provide a valid CheckSummaryId." });
+        }
+
+        var response = await _checkSummaryService.GetCompleteCheckDetailsAsync(model.CheckSummaryId);
+
+        if (response == null)
+        {
+            return NotFound(new { error = "No data found for the provided CheckSummaryId." });
+        }
+
+        return Ok(response);
     }
 
 }

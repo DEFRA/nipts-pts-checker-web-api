@@ -1,7 +1,9 @@
-﻿using Defra.PTS.Checker.Models;
+﻿using Azure;
+using Defra.PTS.Checker.Models;
 using Defra.PTS.Checker.Models.Constants;
 using Defra.PTS.Checker.Models.Enums;
 using Defra.PTS.Checker.Models.Search;
+using Defra.PTS.Checker.Services.Implementation;
 using Defra.PTS.Checker.Services.Interface;
 using Defra.PTS.Checker.Web.Api.Controllers;
 using Microsoft.AspNetCore.Http;
@@ -21,6 +23,7 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
         private Mock<IApplicationService>? _applicationServiceMock;
         private Mock<ICheckerService>? _checkerServiceMock;
         private Mock<ICheckSummaryService>? _checkSummaryServiceMock;
+        private Mock<IOrganisationService>? _organisationServiceMock;
         private CheckerController? _controller;
 
         [SetUp]
@@ -29,7 +32,8 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
             _applicationServiceMock = new Mock<IApplicationService>();
             _checkerServiceMock = new Mock<ICheckerService>();
             _checkSummaryServiceMock = new Mock<ICheckSummaryService>();
-            _controller = new CheckerController(_applicationServiceMock.Object, _checkerServiceMock.Object, _checkSummaryServiceMock.Object);
+            _organisationServiceMock = new Mock<IOrganisationService>();
+            _controller = new CheckerController(_applicationServiceMock.Object, _checkerServiceMock.Object, _checkSummaryServiceMock.Object, _organisationServiceMock.Object);
         }
 
         [Test]
@@ -240,6 +244,25 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
             var OkObjectResult = result as OkObjectResult;
             Assert.That(OkObjectResult, Is.Not.Null);
             Assert.That(OkObjectResult!.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
+        }
+
+        [Test]
+        public async Task CheckMicrochipNumber_ServiceReturnsResponse_ReturnsError()
+        {
+            // Arrange
+            var request = new SearchByMicrochipNumberRequest { MicrochipNumber = "1234567890" };
+            var response = new { PetDetails = "Details", error = "test" };
+            _checkerServiceMock!.Setup(service => service.CheckMicrochipNumberAsync(request.MicrochipNumber))
+                .ReturnsAsync(response);
+
+            // Act
+            var result = await _controller!.CheckMicrochipNumber(request);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<ObjectResult>());
+            var ObjectResult = result as ObjectResult;
+            Assert.That(ObjectResult, Is.Not.Null);
+            Assert.That(ObjectResult!.StatusCode, Is.EqualTo(StatusCodes.Status500InternalServerError));
         }
 
         [Test]
@@ -699,112 +722,365 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
 
  
 
-[Test]
-    public async Task GetSpsCheckDetailsByRoute_InternalServerError_ReturnsStatus500()
-    {
-        // Arrange
-        var model = new SpsCheckRequestModel
+        [Test]
+        public async Task GetSpsCheckDetailsByRoute_InternalServerError_ReturnsStatus500()
         {
-            Route = "TestRoute",
-            SailingDate = DateTime.UtcNow,
-            TimeWindowInHours = 48
-        };
+            // Arrange
+            var model = new SpsCheckRequestModel
+            {
+                Route = "TestRoute",
+                SailingDate = DateTime.UtcNow,
+                TimeWindowInHours = 48
+            };
 
-        // Simulate an exception thrown by the service
-        _checkSummaryServiceMock!
-            .Setup(service => service.GetSpsCheckDetailsByRouteAsync(model.Route, model.SailingDate, model.TimeWindowInHours))
-            .ThrowsAsync(new Exception("Mock Exception"));
+            // Simulate an exception thrown by the service
+            _checkSummaryServiceMock!
+                .Setup(service => service.GetSpsCheckDetailsByRouteAsync(model.Route, model.SailingDate, model.TimeWindowInHours))
+                .ThrowsAsync(new Exception("Mock Exception"));
 
-        // Act
-        var result = await _controller!.GetSpsCheckDetailsByRoute(model);
+            // Act
+            var result = await _controller!.GetSpsCheckDetailsByRoute(model);
+
+                // Assert
+                Assert.That(result, Is.InstanceOf<ObjectResult>());
+                var objectResult = result as ObjectResult;
+                Assert.That(objectResult, Is.Not.Null);
+                Assert.That(objectResult!.StatusCode, Is.EqualTo(StatusCodes.Status500InternalServerError));
+
+                // Ensure objectResult.Value is not null before converting to JObject
+                Assert.That(objectResult.Value, Is.Not.Null);
+
+                // Convert result to JObject and verify error and details fields
+                var errorResponse = JObject.FromObject(objectResult.Value!);
+                Assert.That(errorResponse["error"]?.ToString(), Is.EqualTo("An error occurred during processing."));
+                Assert.That(errorResponse["details"]?.ToString(), Is.EqualTo("Mock Exception"));
+
+            }
+
+            [Test]
+        public async Task GetSpsCheckDetailsByRoute_InvalidRequest_ReturnsBadRequestResult()
+        {
+            // Arrange
+            var model = new SpsCheckRequestModel
+            {
+                Route = string.Empty, // Invalid Route
+                SailingDate = DateTime.UtcNow,
+                TimeWindowInHours = 48
+            };
+
+            // Simulate model validation error
+            _controller!.ModelState.AddModelError("Route", "Route is required");
+
+            // Act
+            var result = await _controller!.GetSpsCheckDetailsByRoute(model);
+
+                // Assert
+                Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+                var badRequestResult = result as BadRequestObjectResult;
+                Assert.That(badRequestResult, Is.Not.Null);
+                Assert.That(badRequestResult!.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
+
+                // Ensure badRequestResult.Value is not null before converting to JObject
+                Assert.That(badRequestResult.Value, Is.Not.Null);
+
+                // Convert result to JObject and verify error field
+                var errorResponse = JObject.FromObject(badRequestResult.Value!);
+                Assert.That(errorResponse["error"]?.ToString(), Is.EqualTo("Invalid request."));
+
+            }
+
+            [Test]
+        public async Task GetSpsCheckDetailsByRoute_NoCheckDetailsFound_ReturnsNotFoundResult()
+        {
+            // Arrange
+            var model = new SpsCheckRequestModel
+            {
+                Route = "TestRoute",
+                SailingDate = DateTime.UtcNow,
+                TimeWindowInHours = 48
+            };
+
+            _checkSummaryServiceMock!
+                .Setup(service => service.GetSpsCheckDetailsByRouteAsync(model.Route, model.SailingDate, model.TimeWindowInHours))
+                .ReturnsAsync(new List<SpsCheckDetailResponseModel>());
+
+            // Act
+            var result = await _controller!.GetSpsCheckDetailsByRoute(model);
+
+                // Assert
+                Assert.That(result, Is.InstanceOf<NotFoundObjectResult>());
+                var notFoundResult = result as NotFoundObjectResult;
+                Assert.That(notFoundResult, Is.Not.Null);
+                Assert.That(notFoundResult!.StatusCode, Is.EqualTo(StatusCodes.Status404NotFound));
+
+                // Ensure notFoundResult.Value is not null before converting to JObject
+                Assert.That(notFoundResult.Value, Is.Not.Null);
+
+                // Convert result to JObject and verify message field
+                var messageResponse = JObject.FromObject(notFoundResult.Value!);
+                Assert.That(messageResponse["message"]?.ToString(), Is.EqualTo("No SPS check details found."));
+
+            }
+
+
+        [Test]
+        public async Task GetOrganisationById_ReturnsOkResult()
+        {
+            // Arrange
+            var request = new OrganisationRequestModel
+            {
+                OrganisationId = "FF0DF803-8033-4CF8-B877-AB69BEFE63D2",
+            };
+
+            var response = new OrganisationResponseModel { Id = Guid.NewGuid() };
+
+           _organisationServiceMock!.Setup(service => service.GetOrganisation(It.IsAny<Guid>()))!.ReturnsAsync(response);
+
+            // Act
+            var result = await _controller!.GetOrganisationById(request);
 
             // Assert
-            Assert.That(result, Is.InstanceOf<ObjectResult>());
-            var objectResult = result as ObjectResult;
-            Assert.That(objectResult, Is.Not.Null);
-            Assert.That(objectResult!.StatusCode, Is.EqualTo(StatusCodes.Status500InternalServerError));
-
-            // Ensure objectResult.Value is not null before converting to JObject
-            Assert.That(objectResult.Value, Is.Not.Null);
-
-            // Convert result to JObject and verify error and details fields
-            var errorResponse = JObject.FromObject(objectResult.Value!);
-            Assert.That(errorResponse["error"]?.ToString(), Is.EqualTo("An error occurred during processing."));
-            Assert.That(errorResponse["details"]?.ToString(), Is.EqualTo("Mock Exception"));
-
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+            var okResult = result as OkObjectResult;
+            Assert.That(okResult, Is.Not.Null);
+            Assert.That(okResult!.StatusCode, Is.EqualTo(200));
         }
 
         [Test]
-    public async Task GetSpsCheckDetailsByRoute_InvalidRequest_ReturnsBadRequestResult()
-    {
-        // Arrange
-        var model = new SpsCheckRequestModel
+        public async Task GetOrganisationById_ValidRequestButNoOrganisation_ReturnsNotFoundResult()
         {
-            Route = string.Empty, // Invalid Route
-            SailingDate = DateTime.UtcNow,
-            TimeWindowInHours = 48
-        };
+            // Arrange
+            var request = new OrganisationRequestModel
+            {
+                OrganisationId = "FF0DF803-8033-4CF8-B877-AB69BEFE63D2",
+            };
 
-        // Simulate model validation error
-        _controller!.ModelState.AddModelError("Route", "Route is required");
+            OrganisationResponseModel? response = null;
+            _organisationServiceMock!.Setup(service => service.GetOrganisation(It.IsAny<Guid>()))!.ReturnsAsync(response);
 
-        // Act
-        var result = await _controller!.GetSpsCheckDetailsByRoute(model);
+            // Act
+            var result = await _controller!.GetOrganisationById(request);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<NotFoundObjectResult>());
+
+            var objectResult = result as NotFoundObjectResult;
+            Assert.That(objectResult, Is.Not.Null);
+            Assert.That(objectResult!.StatusCode, Is.EqualTo(StatusCodes.Status404NotFound));
+        }
+
+        [Test]
+        public async Task GetOrganisationById_InvalidRequest_ReturnsBadRequestResult()
+        {
+            // Arrange
+            // Arrange
+            var request = new OrganisationRequestModel
+            {
+                OrganisationId = "FF0DF803-8033-4CF8-B877-AB69BEFE63D2",
+            };
+
+            _organisationServiceMock!.Setup(service => service.GetOrganisation(It.IsAny<Guid>()))!.ReturnsAsync(new OrganisationResponseModel());
+
+
+            // Act
+            _controller!.ModelState.AddModelError("OrganisationId", "Organisation is required");
+            var result = await _controller!.GetOrganisationById(request);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+
+            var objectResult = result as BadRequestObjectResult;
+            Assert.That(objectResult, Is.Not.Null);
+            Assert.That(objectResult!.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
+        }
+
+
+        [Test]
+        public async Task GetGbCheckById_ReturnsOkResult()
+        {
+            Guid gbCheckSummaryId = Guid.NewGuid();
+            // Arrange
+            var request = new GbCheckReportRequestModel
+            {
+                GbCheckSummaryId = gbCheckSummaryId.ToString(),
+            };
+
+            var response = new GbCheckReportResponseModel { GbCheckSummaryId = gbCheckSummaryId };
+            _checkSummaryServiceMock!.Setup(service => service.GetGbCheckReport(It.IsAny<Guid>()))!.ReturnsAsync(response);
+
+            // Act
+            var result = await _controller!.GetGbCheckById(request);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+            var okResult = result as OkObjectResult;
+            Assert.That(okResult, Is.Not.Null);
+            Assert.That(okResult!.StatusCode, Is.EqualTo(200));
+        }
+
+        [Test]
+        public async Task GetGbCheckById_ValidRequestButNoCheck_ReturnsNotFoundResult()
+        {
+            // Arrange
+            var request = new GbCheckReportRequestModel
+            {
+                GbCheckSummaryId = "FF0DF803-8033-4CF8-B877-AB69BEFE63D2",
+            };
+
+            GbCheckReportResponseModel? response = null;
+            _checkSummaryServiceMock!.Setup(service => service.GetGbCheckReport(It.IsAny<Guid>()))!.ReturnsAsync(response);
+
+            // Act
+            var result = await _controller!.GetGbCheckById(request);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<NotFoundObjectResult>());
+
+            var objectResult = result as NotFoundObjectResult;
+            Assert.That(objectResult, Is.Not.Null);
+            Assert.That(objectResult!.StatusCode, Is.EqualTo(StatusCodes.Status404NotFound));
+        }
+
+        [Test]
+        public async Task GetGbCheckById_InvalidRequest_ReturnsBadRequestResult()
+        {
+            // Arrange
+            var request = new GbCheckReportRequestModel
+            {
+                GbCheckSummaryId = "FF0DF803-8033-4CF8-B877-AB69BEFE63D2",
+            };
+
+            _checkSummaryServiceMock!.Setup(service => service.GetGbCheckReport(It.IsAny<Guid>()))!.ReturnsAsync(new GbCheckReportResponseModel());
+
+
+            // Act
+            _controller!.ModelState.AddModelError("GbCheckSummaryId", "GbCheckSummaryId is required");
+            var result = await _controller!.GetGbCheckById(request);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+
+            var objectResult = result as BadRequestObjectResult;
+            Assert.That(objectResult, Is.Not.Null);
+            Assert.That(objectResult!.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
+        }
+
+
+        [Test]
+        public async Task GetCompleteCheckDetails_ValidRequest_ReturnsOkResult()
+        {
+            // Arrange
+            var request = new CheckDetailsRequestModel
+            {
+                CheckSummaryId = Guid.NewGuid()
+            };
+
+            var response = new CompleteCheckDetailsResponse
+            {
+                CheckOutcome = new List<string> { "Cannot find microchip" },
+                ReasonForReferral = new List<string> { "Passenger referred to DAERA/SPS at NI port" },
+                MicrochipNumber = "1234567890",
+                AdditionalComments = new List<string> { "Additional comment 1", "Additional comment 2" },
+                GBCheckerName = "Test Checker",
+                DateAndTimeChecked = "2024-12-11 14:30:00",
+                Route = "Test Route",
+                ScheduledDepartureDate = "2024-12-25",
+                ScheduledDepartureTime = "10:30:00"
+            };
+
+            _checkSummaryServiceMock!.Setup(service => service.GetCompleteCheckDetailsAsync(request.CheckSummaryId))
+                .ReturnsAsync(response);
+
+            // Act
+            var result = await _controller!.GetCompleteCheckDetails(request);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+            var okResult = result as OkObjectResult;
+            Assert.That(okResult, Is.Not.Null);
+            Assert.That(okResult!.Value, Is.EqualTo(response));
+        }
+
+        [Test]
+        public async Task GetCompleteCheckDetails_InvalidRequest_ReturnsBadRequestResult()
+        {
+            // Arrange
+            var request = new CheckDetailsRequestModel
+            {
+                CheckSummaryId = Guid.Empty // Invalid GUID
+            };
+
+            _controller!.ModelState.AddModelError("CheckSummaryId", "CheckSummaryId is required");
+
+            // Act
+            var result = await _controller.GetCompleteCheckDetails(request);
 
             // Assert
             Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
             var badRequestResult = result as BadRequestObjectResult;
             Assert.That(badRequestResult, Is.Not.Null);
-            Assert.That(badRequestResult!.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
-
-            // Ensure badRequestResult.Value is not null before converting to JObject
-            Assert.That(badRequestResult.Value, Is.Not.Null);
-
-            // Convert result to JObject and verify error field
-            var errorResponse = JObject.FromObject(badRequestResult.Value!);
-            Assert.That(errorResponse["error"]?.ToString(), Is.EqualTo("Invalid request."));
-
         }
 
         [Test]
-    public async Task GetSpsCheckDetailsByRoute_NoCheckDetailsFound_ReturnsNotFoundResult()
-    {
-        // Arrange
-        var model = new SpsCheckRequestModel
+        public async Task GetCompleteCheckDetails_CheckSummaryIdNotFound_ReturnsNotFoundResult()
         {
-            Route = "TestRoute",
-            SailingDate = DateTime.UtcNow,
-            TimeWindowInHours = 48
-        };
+            // Arrange
+            var request = new CheckDetailsRequestModel
+            {
+                CheckSummaryId = Guid.NewGuid() // Non-existing ID
+            };
 
-        _checkSummaryServiceMock!
-            .Setup(service => service.GetSpsCheckDetailsByRouteAsync(model.Route, model.SailingDate, model.TimeWindowInHours))
-            .ReturnsAsync(new List<SpsCheckDetailResponseModel>());
+            _checkSummaryServiceMock!.Setup(service => service.GetCompleteCheckDetailsAsync(request.CheckSummaryId))
+                .ReturnsAsync((CompleteCheckDetailsResponse?)null);
 
-        // Act
-        var result = await _controller!.GetSpsCheckDetailsByRoute(model);
+            // Act
+            var result = await _controller!.GetCompleteCheckDetails(request);
 
             // Assert
             Assert.That(result, Is.InstanceOf<NotFoundObjectResult>());
             var notFoundResult = result as NotFoundObjectResult;
             Assert.That(notFoundResult, Is.Not.Null);
-            Assert.That(notFoundResult!.StatusCode, Is.EqualTo(StatusCodes.Status404NotFound));
-
-            // Ensure notFoundResult.Value is not null before converting to JObject
-            Assert.That(notFoundResult.Value, Is.Not.Null);
-
-            // Convert result to JObject and verify message field
-            var messageResponse = JObject.FromObject(notFoundResult.Value!);
-            Assert.That(messageResponse["message"]?.ToString(), Is.EqualTo("No SPS check details found."));
-
         }
 
+        [Test]
+        public async Task GetCompleteCheckDetails_ValidRequestWithoutAdditionalData_ReturnsOkResult()
+        {
+            // Arrange
+            var request = new CheckDetailsRequestModel
+            {
+                CheckSummaryId = Guid.NewGuid()
+            };
 
+            var response = new CompleteCheckDetailsResponse
+            {
+                CheckOutcome = new List<string>(),
+                ReasonForReferral = new List<string>(),
+                MicrochipNumber = null,
+                AdditionalComments = new List<string> { "None" },
+                GBCheckerName = "Test Checker",
+                DateAndTimeChecked = "2024-12-11 14:30:00",
+                Route = "Test Route",
+                ScheduledDepartureDate = "2024-12-25",
+                ScheduledDepartureTime = "10:30:00"
+            };
+
+            _checkSummaryServiceMock!.Setup(service => service.GetCompleteCheckDetailsAsync(request.CheckSummaryId))
+                .ReturnsAsync(response);
+
+            // Act
+            var result = await _controller!.GetCompleteCheckDetails(request);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+            var okResult = result as OkObjectResult;
+            Assert.That(okResult, Is.Not.Null);
+            Assert.That(okResult!.Value, Is.EqualTo(response));
+        }
 
 
     }
 
-public class ErrorResponse
+    public class ErrorResponse
     {
         public string? Message { get; set; }
         public List<FieldError>? Errors { get; set; }

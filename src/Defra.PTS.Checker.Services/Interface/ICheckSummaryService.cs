@@ -8,4 +8,9 @@ public interface ICheckSummaryService
     Task<IEnumerable<CheckOutcomeResponse>> GetRecentCheckOutcomesAsync(DateTime startDate, DateTime endDate);
 
     Task<IEnumerable<SpsCheckDetailResponseModel>> GetSpsCheckDetailsByRouteAsync(string route, DateTime sailingDate, int timeWindowInHours);
-}
+
+    Task<GbCheckReportResponseModel?> GetGbCheckReport(Guid gbCheckSummaryId);
+    Task<CompleteCheckDetailsResponse?> GetCompleteCheckDetailsAsync(Guid checkSummaryId);
+
+
+    }
