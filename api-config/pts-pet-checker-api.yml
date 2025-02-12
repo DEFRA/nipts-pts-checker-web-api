@@ -44,7 +44,10 @@ templateParameters:
     - name: idm2Issuer
       value: "#{{ idm2Issuer }}"
     - name: idm2Audience
-      value: "#{{ cpIdm2Audience }}"
+      reference:
+        keyVault:
+          id: "/subscriptions/#{{ subscriptionId }}/resourceGroups/#{{ Environment.Name }}TRD#{{ nc-function-infrastructure }}#{{ nc-resource-resourcegroup }}1001/providers/Microsoft.KeyVault/vaults/#{{ Environment.Name }}TRD#{{ nc-function-infrastructure }}#{{ nc-resource-keyvault }}1001"
+        secretName: "PTS-CP-B2C-CLIENT-ID"      
     - name: roles
       values: 
         roleTradeTracesAdapterRead: "#{{ roleTradeTracesAdapterRead }}"
