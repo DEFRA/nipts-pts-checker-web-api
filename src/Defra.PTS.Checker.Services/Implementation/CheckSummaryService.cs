@@ -332,12 +332,17 @@ public class CheckSummaryService : ICheckSummaryService
                 .Select(o => o.RelevantComments ?? "None")
                 .ToList();
 
+            var detailsComments = checkOutcomes
+                .Select(o => o.SPSOutcomeDetails ?? "None")
+                .ToList();
+
             var response = new CompleteCheckDetailsResponse
             {
                 CheckOutcome = outcomeReasons,
                 ReasonForReferral = referralTexts,
                 MicrochipNumber = displayMicrochipNumber ? checkSummary.ChipNumber : null,
                 AdditionalComments = additionalComments,
+                DetailsComments = detailsComments,
                 GBCheckerName = checkSummary.Checker?.FullName ?? string.Empty,
                 DateAndTimeChecked = checkSummary.UpdatedOn?.ToString("yyyy-MM-dd HH:mm:ss") ?? string.Empty,
                 Route = checkSummary.RouteNavigation?.RouteName ?? string.Empty,
@@ -364,7 +369,7 @@ public class CheckSummaryService : ICheckSummaryService
             if (referral.MCNotFound == true) referralTexts.Add("Cannot find microchip");
             if (referral.VCNotMatchPTD == true) referralTexts.Add("Pet does not match the PTD");
             if (referral.OIFailPotentialCommercial == true) referralTexts.Add("Potential commercial movement");
-            if (referral.OIFailAuthTravellerNoConfirmation == true) referralTexts.Add("Authorised traveller but no confirmation");
+            if (referral.OIFailAuthTravellerNoConfirmation == true) referralTexts.Add("Authorised person but no confirmation");
             if (referral.OIFailOther == true) referralTexts.Add("Other reason");
         }
 
@@ -498,10 +503,10 @@ public class CheckSummaryService : ICheckSummaryService
 
     private static string GetStatusForMissingLinkedCheckId(DateTime combinedDateTime, int timeWindowInHours)
     {
-        var timeSinceSailing = DateTime.Now - combinedDateTime;
+        TimeSpan timeSinceSailing = DateTime.UtcNow - combinedDateTime;
         if (timeSinceSailing.TotalHours > timeWindowInHours)
         {
-            return (""); // Skip "Did Not Attend" cases
+            return (""); 
         }
 
         return ("Check needed");

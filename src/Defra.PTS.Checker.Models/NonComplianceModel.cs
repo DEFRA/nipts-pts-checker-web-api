@@ -26,7 +26,7 @@ namespace Defra.PTS.Checker.Models
         [SwaggerSchema("Other Issues Potential commercial movement")]
         public bool? OIFailPotentialCommercial { get; set; }
 
-        [SwaggerSchema("Other Issues Authorised traveller but no confirmation")]
+        [SwaggerSchema("Other Issues Authorised person but no confirmation")]
         public bool? OIFailAuthTravellerNoConfirmation { get; set; }
 
         [SwaggerSchema("Other Issues Other reason")]
