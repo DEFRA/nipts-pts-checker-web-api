@@ -1736,7 +1736,414 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             Assert.That(result!.DateAndTimeChecked, Is.EqualTo(string.Empty));
         }
 
+        [Test]
+        public async Task GetCompleteCheckDetailsAsync_WithExceptionDuringDbOperation_ReturnsNull()
+        {
+            if (_dbContext == null || _loggerMock == null)
+            {
+                throw new InvalidOperationException("Dependencies are not initialized.");
+            }
 
+            var options = new DbContextOptionsBuilder<CommonDbContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            var dbContext = new CommonDbContext(options);
+            var loggerMock = new Mock<ILogger<CheckSummaryService>>();
+
+            var service = new CheckSummaryService(dbContext, loggerMock.Object);
+
+            dbContext.Dispose();
+
+            var result = await service.GetCompleteCheckDetailsAsync(Guid.NewGuid());
+
+            Assert.That(result, Is.Null);
+            loggerMock.Verify(
+                x => x.Log(
+                    It.IsAny<LogLevel>(),
+                    It.IsAny<EventId>(),
+                    It.Is<It.IsAnyType>((v, t) => true),
+                    It.IsAny<Exception>(),
+                    It.IsAny<Func<It.IsAnyType, Exception, string>>()),
+                Times.Once);
+        }
+
+        [Test]
+        public async Task GetCompleteCheckDetailsAsync_WithMultipleOutcomeReasons_MergesAll()
+        {
+            var checkSummaryId = Guid.NewGuid();
+            var applicationId = Guid.NewGuid();
+
+            var pet = new Entities.Pet { Id = Guid.NewGuid(), MicrochipNumber = "1234567890" };
+            var application = new Entities.Application
+            {
+                Id = applicationId,
+                Pet = pet,
+                ReferenceNumber = "REF123",
+                Status = "Active"
+            };
+
+            var route = new Entities.Route { Id = 16, RouteName = "Test Route" };
+
+            if (_dbContext == null)
+            {
+                throw new InvalidOperationException("Database context is not initialized.");
+            }
+
+            var existingRoute = await _dbContext.Route.SingleOrDefaultAsync(r => r.Id == route.Id);
+            if (existingRoute == null)
+            {
+                _dbContext.Route.Add(route);
+                await _dbContext.SaveChangesAsync();
+            }
+            else
+            {
+                DetachTrackedEntities();
+            }
+
+            var checkerId = Guid.NewGuid();
+            AddCheckerEntity(checkerId, "Test", "Checker", "Test Checker");
+
+            var checkOutcome = new Entities.CheckOutcome
+            {
+                Id = Guid.NewGuid(),
+                GBRefersToDAERAOrSPS = true,
+                GBAdviseNoTravel = true,
+                GBPassengerSaysNoTravel = true,
+                MCNotMatch = true,
+                MCNotFound = true,
+                VCNotMatchPTD = true,
+                OIFailPotentialCommercial = true,
+                OIFailAuthTravellerNoConfirmation = true,
+                OIFailOther = true,
+                RelevantComments = "Test comment",
+                SPSOutcomeDetails = "SPS details"
+            };
+
+            var checkSummary = new CheckSummary
+            {
+                Id = checkSummaryId,
+                Application = application,
+                CheckerId = checkerId,
+                RouteNavigation = route,
+                UpdatedOn = DateTime.UtcNow,
+                Date = DateTime.UtcNow.Date,
+                ScheduledSailingTime = new TimeSpan(10, 30, 0),
+                CheckOutcomeId = checkOutcome.Id,
+                CheckOutcomeEntity = checkOutcome,
+                ChipNumber = "1234567890"
+            };
+
+            await _dbContext.Pet.AddAsync(pet);
+            await _dbContext.Application.AddAsync(application);
+            await _dbContext.CheckOutcome.AddAsync(checkOutcome);
+            await _dbContext.CheckSummary.AddAsync(checkSummary);
+            await _dbContext.SaveChangesAsync();
+
+            if (_service == null)
+            {
+                throw new InvalidOperationException("Service is not initialized.");
+            }
+
+            var result = await _service.GetCompleteCheckDetailsAsync(checkSummaryId);
+
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result!.CheckOutcome, Has.Count.EqualTo(3));
+            Assert.That(result.ReasonForReferral, Has.Count.EqualTo(6));
+            Assert.That(result.AdditionalComments, Has.Count.EqualTo(1));
+            Assert.That(result.DetailsComments, Has.Count.EqualTo(1));
+        }
+
+        [Test]
+        public async Task GetCompleteCheckDetailsAsync_WithMultipleCheckOutcomes_CombinesAllReasons()
+        {
+            var checkSummaryId = Guid.NewGuid();
+            var applicationId = Guid.NewGuid();
+            var pet = new Entities.Pet { Id = Guid.NewGuid(), MicrochipNumber = "1234567890" };
+            var application = new Entities.Application
+            {
+                Id = applicationId,
+                Pet = pet,
+                ReferenceNumber = "REF123",
+                Status = "Active"
+            };
+            var route = new Entities.Route { Id = 17, RouteName = "Test Route" };
+            if (_dbContext == null)
+            {
+                throw new InvalidOperationException("Database context is not initialized.");
+            }
+            var existingRoute = await _dbContext.Route.SingleOrDefaultAsync(r => r.Id == route.Id);
+            if (existingRoute == null)
+            {
+                _dbContext.Route.Add(route);
+                await _dbContext.SaveChangesAsync();
+            }
+            else
+            {
+                DetachTrackedEntities();
+            }
+            var checkerId = Guid.NewGuid();
+            AddCheckerEntity(checkerId, "Test", "Checker", "Test Checker");
+
+            // Create a single CheckOutcome with multiple flags set
+            var checkOutcome = new Entities.CheckOutcome
+            {
+                Id = Guid.NewGuid(),
+                GBRefersToDAERAOrSPS = true,
+                GBAdviseNoTravel = true,
+                MCNotMatch = true,
+                VCNotMatchPTD = true,
+                RelevantComments = "Combined comments",
+                SPSOutcomeDetails = "Combined SPS details"
+            };
+
+            var checkSummary = new CheckSummary
+            {
+                Id = checkSummaryId,
+                Application = application,
+                CheckerId = checkerId,
+                RouteNavigation = route,
+                UpdatedOn = DateTime.UtcNow,
+                Date = DateTime.UtcNow.Date,
+                ScheduledSailingTime = new TimeSpan(10, 30, 0),
+                CheckOutcomeId = checkOutcome.Id,
+                CheckOutcomeEntity = checkOutcome,
+                ChipNumber = "1234567890"
+            };
+
+            await _dbContext.Pet.AddAsync(pet);
+            await _dbContext.Application.AddAsync(application);
+            await _dbContext.CheckOutcome.AddAsync(checkOutcome);
+            await _dbContext.CheckSummary.AddAsync(checkSummary);
+            await _dbContext.SaveChangesAsync();
+
+            if (_service == null)
+            {
+                throw new InvalidOperationException("Service is not initialized.");
+            }
+
+            var result = await _service.GetCompleteCheckDetailsAsync(checkSummaryId);
+
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result!.CheckOutcome, Has.Count.EqualTo(2));
+            Assert.That(result.ReasonForReferral, Has.Count.EqualTo(2));
+            Assert.That(result.AdditionalComments, Has.Count.EqualTo(1));
+            Assert.That(result.DetailsComments, Has.Count.EqualTo(1));
+
+            // Verify specific items in the collections
+            Assert.That(result.CheckOutcome, Contains.Item("Passenger referred to DAERA/SPS at NI port"));
+            Assert.That(result.CheckOutcome, Contains.Item("Passenger advised not to travel"));
+            Assert.That(result.ReasonForReferral, Contains.Item("Microchip number does not match the PTD"));
+            Assert.That(result.ReasonForReferral, Contains.Item("Pet does not match the PTD"));
+            Assert.That(result.AdditionalComments[0], Is.EqualTo("Combined comments"));
+            Assert.That(result.DetailsComments[0], Is.EqualTo("Combined SPS details"));
+        }
+
+        [Test]
+        public async Task GetCompleteCheckDetailsAsync_NoApplicationAndNoTravelDocument_HandlesNullReferences()
+        {
+            var checkSummaryId = Guid.NewGuid();
+            if (_dbContext == null)
+            {
+                throw new InvalidOperationException("Database context is not initialized.");
+            }
+
+            var checkerId = Guid.NewGuid();
+            AddCheckerEntity(checkerId, "Test", "Checker", "Test Checker");
+
+            var checkOutcome = new Entities.CheckOutcome
+            {
+                Id = Guid.NewGuid(),
+                MCNotMatch = true,
+                RelevantComments = "Test comment"
+            };
+
+            var checkSummary = new CheckSummary
+            {
+                Id = checkSummaryId,
+                Application = null,
+                ApplicationId = Guid.Empty,
+                CheckerId = checkerId,
+                RouteNavigation = null,
+                UpdatedOn = DateTime.UtcNow,
+                Date = DateTime.UtcNow.Date,
+                ScheduledSailingTime = new TimeSpan(10, 30, 0),
+                CheckOutcomeId = checkOutcome.Id,
+                CheckOutcomeEntity = checkOutcome,
+                ChipNumber = "1234567890",
+                TravelDocument = null,
+                TravelDocumentId = Guid.Empty
+            };
+
+            await _dbContext.CheckOutcome.AddAsync(checkOutcome);
+            await _dbContext.CheckSummary.AddAsync(checkSummary);
+            await _dbContext.SaveChangesAsync();
+
+            if (_service == null)
+            {
+                throw new InvalidOperationException("Service is not initialized.");
+            }
+
+            var result = await _service.GetCompleteCheckDetailsAsync(checkSummaryId);
+
+            Assert.That(result, Is.Null);
+        }
+
+        [Test]
+        public async Task GetCompleteCheckDetailsAsync_WithMultipleMatchingFlags_DisplaysActualMicrochipNumber()
+        {
+            var checkSummaryId = Guid.NewGuid();
+            var applicationId = Guid.NewGuid();
+
+            var pet = new Entities.Pet { Id = Guid.NewGuid(), MicrochipNumber = "1234567890" };
+            var application = new Entities.Application
+            {
+                Id = applicationId,
+                Pet = pet,
+                ReferenceNumber = "REF123",
+                Status = "Active"
+            };
+
+            var route = new Entities.Route { Id = 18, RouteName = "Test Route" };
+
+            if (_dbContext == null)
+            {
+                throw new InvalidOperationException("Database context is not initialized.");
+            }
+
+            var existingRoute = await _dbContext.Route.SingleOrDefaultAsync(r => r.Id == route.Id);
+            if (existingRoute == null)
+            {
+                _dbContext.Route.Add(route);
+                await _dbContext.SaveChangesAsync();
+            }
+            else
+            {
+                DetachTrackedEntities();
+            }
+
+            var checkerId = Guid.NewGuid();
+            AddCheckerEntity(checkerId, "Test", "Checker", "Test Checker");
+
+            var checkOutcome = new Entities.CheckOutcome
+            {
+                Id = Guid.NewGuid(),
+                MCNotMatch = true,
+                MCNotMatchActual = "9876543210",
+                MCNotFound = true,
+                VCNotMatchPTD = true,
+                RelevantComments = "Test comment"
+            };
+
+            var checkSummary = new CheckSummary
+            {
+                Id = checkSummaryId,
+                Application = application,
+                CheckerId = checkerId,
+                RouteNavigation = route,
+                UpdatedOn = DateTime.UtcNow,
+                Date = DateTime.UtcNow.Date,
+                ScheduledSailingTime = new TimeSpan(10, 30, 0),
+                CheckOutcomeId = checkOutcome.Id,
+                CheckOutcomeEntity = checkOutcome,
+                ChipNumber = "1234567890"
+            };
+
+            await _dbContext.Pet.AddAsync(pet);
+            await _dbContext.Application.AddAsync(application);
+            await _dbContext.CheckOutcome.AddAsync(checkOutcome);
+            await _dbContext.CheckSummary.AddAsync(checkSummary);
+            await _dbContext.SaveChangesAsync();
+
+            if (_service == null)
+            {
+                throw new InvalidOperationException("Service is not initialized.");
+            }
+
+            var result = await _service.GetCompleteCheckDetailsAsync(checkSummaryId);
+
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result!.MicrochipNumber, Is.EqualTo("1234567890"));
+            Assert.That(result.ReasonForReferral, Has.Count.EqualTo(3));
+            Assert.That(result.ReasonForReferral, Contains.Item("Microchip number does not match the PTD"));
+            Assert.That(result.ReasonForReferral, Contains.Item("Cannot find microchip"));
+            Assert.That(result.ReasonForReferral, Contains.Item("Pet does not match the PTD"));
+        }
+
+        [Test]
+        public async Task GetCompleteCheckDetailsAsync_WithNullTravelDocumentReference_HandlesGracefully()
+        {
+            var checkSummaryId = Guid.NewGuid();
+            var applicationId = Guid.NewGuid();
+
+            var pet = new Entities.Pet { Id = Guid.NewGuid(), MicrochipNumber = "1234567890" };
+            var application = new Entities.Application
+            {
+                Id = applicationId,
+                Pet = pet,
+                ReferenceNumber = "REF123",
+                Status = "Active"
+            };
+
+            var route = new Entities.Route { Id = 19, RouteName = "Test Route" };
+
+            if (_dbContext == null)
+            {
+                throw new InvalidOperationException("Database context is not initialized.");
+            }
+
+            var existingRoute = await _dbContext.Route.SingleOrDefaultAsync(r => r.Id == route.Id);
+            if (existingRoute == null)
+            {
+                _dbContext.Route.Add(route);
+                await _dbContext.SaveChangesAsync();
+            }
+            else
+            {
+                DetachTrackedEntities();
+            }
+
+            var checkerId = Guid.NewGuid();
+            AddCheckerEntity(checkerId, "Test", "Checker", "Test Checker");
+
+            var checkOutcome = new Entities.CheckOutcome
+            {
+                Id = Guid.NewGuid(),
+                MCNotMatch = true,
+                RelevantComments = "Test comment"
+            };
+
+            var checkSummary = new CheckSummary
+            {
+                Id = checkSummaryId,
+                Application = application,
+                CheckerId = checkerId,
+                RouteNavigation = route,
+                UpdatedOn = DateTime.UtcNow,
+                Date = DateTime.UtcNow.Date,
+                ScheduledSailingTime = new TimeSpan(10, 30, 0),
+                CheckOutcomeId = checkOutcome.Id,
+                CheckOutcomeEntity = checkOutcome,
+                ChipNumber = "1234567890",
+                TravelDocumentId = Guid.Empty
+            };
+
+            await _dbContext.Pet.AddAsync(pet);
+            await _dbContext.Application.AddAsync(application);
+            await _dbContext.CheckOutcome.AddAsync(checkOutcome);
+            await _dbContext.CheckSummary.AddAsync(checkSummary);
+            await _dbContext.SaveChangesAsync();
+
+            if (_service == null)
+            {
+                throw new InvalidOperationException("Service is not initialized.");
+            }
+
+            var result = await _service.GetCompleteCheckDetailsAsync(checkSummaryId);
+
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result!.ReasonForReferral, Contains.Item("Microchip number does not match the PTD"));
+        }
         private void DetachTrackedEntities()
         {
             if (_dbContext == null)
