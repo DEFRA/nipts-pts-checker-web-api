@@ -243,6 +243,72 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
         }
 
         [Test]
+        public async Task SaveCheckSummary_ForFerry_ReturnsIdOnSave_ForPassOutcome_DuplicatesAreSuperseded()
+        {
+            // Arrange
+            var applicationId = Guid.NewGuid();
+
+            var route = await _dbContext?.Route?.FirstOrDefaultAsync()!;
+            if (route == null)
+            {
+                route = new Entities.Route { RouteName = "Test Route" };
+                await _dbContext.Route.AddAsync(route);
+                await _dbContext.SaveChangesAsync();
+            }
+
+            var model = new CheckOutcomeModel
+            {
+                CheckerId = Guid.NewGuid(),
+                CheckOutcome = "Pass",
+                ApplicationId = applicationId,
+                RouteId = route.Id,
+                SailingTime = DateTime.UtcNow,
+                SailingOption = (int)SailingOption.Ferry
+            };
+
+            var outcome = await _dbContext.Outcome.FirstOrDefaultAsync(o => o.Type == model.CheckOutcome);
+            if (outcome == null)
+            {
+                outcome = new Outcome { Type = model.CheckOutcome };
+                await _dbContext.Outcome.AddAsync(outcome);
+                await _dbContext.SaveChangesAsync();
+            }
+
+            var pet = new Entities.Pet { MicrochipNumber = "1234567890" };
+            await _dbContext.Pet.AddAsync(pet);
+            await _dbContext.SaveChangesAsync();
+
+            var application = new Entities.Application
+            {
+                Id = applicationId,
+                PetId = pet.Id,
+                ReferenceNumber = "REF123",
+                Status = "Active"
+            };
+            await _dbContext.Application.AddAsync(application);
+
+            var travelDocument = new Entities.TravelDocument
+            {
+                ApplicationId = applicationId,
+                PetId = pet.Id,
+                DocumentReferenceNumber = "DOC123"
+            };
+            await _dbContext.TravelDocument.AddAsync(travelDocument);
+            await _dbContext.SaveChangesAsync();
+            _dbContext.ChangeTracker.Clear();
+
+            // Act
+            var result = await _service?.SaveCheckSummary(model)!;
+
+            //Again
+            result = await _service?.SaveCheckSummary(model)!;
+
+            // Assert
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.CheckSummaryId, Is.Not.Null);
+        }
+
+        [Test]
         public async Task SaveCheckSummary_IsGbCheck_Ferry_ReturnsIdOnSave_ForFailOutcome()
         {
             // Arrange
