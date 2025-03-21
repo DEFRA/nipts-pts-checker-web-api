@@ -141,7 +141,7 @@ public class CheckSummaryService : ICheckSummaryService
                         && c.ApplicationId == checkSummary.ApplicationId
                         && c.RouteId == checkSummary.RouteId
                         && c.Date == checkSummary.Date
-                        && c.Date == checkSummary.ScheduledSailingTime
+                        && c.ScheduledSailingTime == checkSummary.ScheduledSailingTime
                         && c.FlightNo == checkSummary.FlightNo).ToListAsync();
 
         foreach (var check in duplicateChecks)
