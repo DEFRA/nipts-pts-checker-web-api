@@ -140,6 +140,8 @@ public class CheckSummaryService : ICheckSummaryService
              .Where(c => c.GBCheck == checkSummary.GBCheck 
                         && c.ApplicationId == checkSummary.ApplicationId
                         && c.RouteId == checkSummary.RouteId
+                        && c.Date == checkSummary.Date
+                        && c.Date == checkSummary.ScheduledSailingTime
                         && c.FlightNo == checkSummary.FlightNo).ToListAsync();
 
         foreach (var check in duplicateChecks)
