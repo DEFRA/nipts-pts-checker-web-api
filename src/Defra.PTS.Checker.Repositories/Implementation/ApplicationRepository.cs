@@ -67,7 +67,7 @@ namespace Defra.PTS.Checker.Repositories.Implementation
 
             if (applications.Count == 0)
             {
-                throw new ArgumentException("No applications found for the specified PetId.", nameof(applications));
+                throw new ArgumentException("No applications found for the specified PetId.", nameof(petId));
             }
 
             var mostRecentApplication = applications
