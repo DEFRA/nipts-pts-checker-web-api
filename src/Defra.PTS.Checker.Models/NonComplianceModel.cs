@@ -62,7 +62,7 @@ namespace Defra.PTS.Checker.Models
         public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
             var validSailingOption = new List<int> { (int)sailOptions.Ferry, (int)sailOptions.Flight };
-            if ((SailingOption == null) || (SailingOption != null && !validSailingOption.Contains(SailingOption.GetValueOrDefault())))
+            if ((SailingOption == null) || (!validSailingOption.Contains(SailingOption.GetValueOrDefault())))
             {
                 yield return new ValidationResult($"Valid RouteOption is required", new[] { nameof(SailingOption) });
             }
