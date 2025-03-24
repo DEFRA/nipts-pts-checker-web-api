@@ -15,9 +15,9 @@ public class CheckOutcomeResponseSchemaFilter : ISchemaFilter
             schema.Description = "Description for CheckOutcomeResponse";
 
             // For example, add custom properties or modify existing ones
-            if (schema.Properties.ContainsKey("CheckSummaryId"))
+            if (schema.Properties.TryGetValue("CheckSummaryId", out var property))
             {
-                schema.Properties["CheckSummaryId"].Description = "The check summary id.";
+                property.Description = "The check summary id.";
             }
         }
     }

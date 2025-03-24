@@ -18,17 +18,19 @@ public class SearchByPtdNumberResponseSchemaFilter : ISchemaFilter
             schema.Description = "Description for SearchByPtdNumberResponse";
 
             // For example, add custom properties or modify existing ones
-            if (schema.Properties.ContainsKey("TravelDocument"))
+            var descriptions = new Dictionary<string, string>
             {
-                schema.Properties["TravelDocument"].Description = "The travel document details.";
-            }
-            if (schema.Properties.ContainsKey("Pet"))
+                { "TravelDocument", "The travel document details." },
+                { "Pet", "The pet details." },
+                { "Application", "The application details." }
+            };
+
+            foreach (var key in descriptions.Keys)
             {
-                schema.Properties["Pet"].Description = "The pet details.";
-            }
-            if (schema.Properties.ContainsKey("Application"))
-            {
-                schema.Properties["Application"].Description = "The application details.";
+                if (schema.Properties.TryGetValue(key, out var property))
+                {
+                    property.Description = descriptions[key];
+                }
             }
         }
     }
