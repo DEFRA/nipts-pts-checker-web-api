@@ -17,7 +17,7 @@ public class SearchByPtdNumberRequest : IValidatableObject
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
-        if (!string.IsNullOrWhiteSpace(PTDNumber) && !PTDNumber.ToLower().StartsWith(ApiConstants.PTDNumberPrefix.ToLower()))
+        if (!string.IsNullOrWhiteSpace(PTDNumber) && !PTDNumber.StartsWith(ApiConstants.PTDNumberPrefix, StringComparison.OrdinalIgnoreCase))
         {
             yield return new ValidationResult($"PTD number must start with {ApiConstants.PTDNumberPrefix}", new[] { nameof(PTDNumber) });
         }

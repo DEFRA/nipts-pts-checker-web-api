@@ -38,7 +38,7 @@ namespace Defra.PTS.Checker.Repositories.Implementation
                 .Include(a => a.Pet)
                 .Include(a => a.Pet!.Breed)
                 .Include(a => a.Pet!.Colour)
-                .FirstOrDefaultAsync(a => a.ReferenceNumber!.ToLower() == referenceNumber.ToLower());
+                .FirstOrDefaultAsync(a => string.Equals(a.ReferenceNumber, referenceNumber, StringComparison.OrdinalIgnoreCase));
         }
 
         public async Task<bool> PerformHealthCheckLogic()
@@ -67,7 +67,7 @@ namespace Defra.PTS.Checker.Repositories.Implementation
 
             if (applications.Count == 0)
             {
-                throw new ArgumentNullException(nameof(applications), "No applications found for the specified PetId.");
+                throw new ArgumentException("No applications found for the specified PetId.", nameof(applications));
             }
 
             var mostRecentApplication = applications
