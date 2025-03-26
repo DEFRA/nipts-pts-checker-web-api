@@ -254,12 +254,12 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
         public async Task GetApplicationByReferenceNumber_ReturnsCorrectData_WhenTravelDocumentFound()
         {
             // Arrange
-            string reference = "PTD123";
+            string reference = "GB826abc";
 
             var application = new Application
             {
                 Id = Guid.NewGuid(),
-                ReferenceNumber = "APP123",
+                ReferenceNumber = "GB826ABC",
                 DateOfApplication = new DateTime(2022, 1, 1, 0, 0, 0, DateTimeKind.Unspecified),
                 Status = "Approved",
                 DateAuthorised = new DateTime(2022, 2, 1, 0, 0, 0, DateTimeKind.Unspecified),
@@ -278,7 +278,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
                 }
             };
 
-            _applicationRepositoryMock!.Setup(repo => repo.GetApplicationByReferenceNumber(reference))
+            _applicationRepositoryMock!.Setup(repo => repo.GetApplicationByReferenceNumber(reference.ToUpper()))
                  .Returns(Task.FromResult(application)!);
                       
             // Act
