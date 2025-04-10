@@ -44,6 +44,8 @@ namespace Defra.PTS.Checker.Entities
 
         public DateTime? UpdatedOn { get; set; } = DateTime.UtcNow;
 
+        public bool? Superseded { get; set; }
+
         // Navigation properties
         [ForeignKey("CheckOutcomeId")]
         public virtual CheckOutcome? CheckOutcomeEntity { get; set; }      

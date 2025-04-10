@@ -26,7 +26,7 @@ namespace Defra.PTS.Checker.Models
         [SwaggerSchema("Other Issues Potential commercial movement")]
         public bool? OIFailPotentialCommercial { get; set; }
 
-        [SwaggerSchema("Other Issues Authorised traveller but no confirmation")]
+        [SwaggerSchema("Other Issues Authorised person but no confirmation")]
         public bool? OIFailAuthTravellerNoConfirmation { get; set; }
 
         [SwaggerSchema("Other Issues Other reason")]
@@ -62,7 +62,7 @@ namespace Defra.PTS.Checker.Models
         public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
             var validSailingOption = new List<int> { (int)sailOptions.Ferry, (int)sailOptions.Flight };
-            if ((SailingOption == null) || (SailingOption != null && !validSailingOption.Contains(SailingOption.GetValueOrDefault())))
+            if ((SailingOption == null) || (!validSailingOption.Contains(SailingOption.GetValueOrDefault())))
             {
                 yield return new ValidationResult($"Valid RouteOption is required", new[] { nameof(SailingOption) });
             }

@@ -19,7 +19,7 @@ namespace Defra.PTS.Checker.Repositories.Implementation
         {
             if (applicationId == null || ownerId == null || petId == null)
             {
-                throw new ArgumentNullException("Application ID, Owner ID, and Pet ID are required.");
+                throw new ArgumentNullException(nameof(applicationId), "Application ID, Owner ID, and Pet ID are required.");
             }
 
             return await _context.TravelDocument

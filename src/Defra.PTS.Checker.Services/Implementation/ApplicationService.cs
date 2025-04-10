@@ -121,6 +121,7 @@ namespace Defra.PTS.Checker.Services.Implementation
         public async Task<object?> GetApplicationByReferenceNumber(string referenceNumber)
         {
             _log.LogInformation("Running inside method {0}", "GetApplicationByReferenceNumber");
+            referenceNumber = referenceNumber.ToUpper();
             var application = await _applicationRepository.GetApplicationByReferenceNumber(referenceNumber);
             if (application == null)
             {

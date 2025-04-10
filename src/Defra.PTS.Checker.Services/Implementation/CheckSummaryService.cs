@@ -70,6 +70,8 @@ public class CheckSummaryService : ICheckSummaryService
             checkSummaryEntity.RouteId = checkOutcomeModel?.RouteId;
         }
 
+        await SetDuplicateChecksAsSuperceded(checkSummaryEntity);
+
         var nonComplianceModel = checkOutcomeModel as NonComplianceModel;
         Guid gbCheckId = nonComplianceModel?.GBCheckId ?? Guid.Empty;
         if ((bool)checkSummaryEntity.CheckOutcome)
@@ -132,6 +134,23 @@ public class CheckSummaryService : ICheckSummaryService
         return response;
     }
 
+    public async Task SetDuplicateChecksAsSuperceded(CheckSummary checkSummary)
+    {
+        var duplicateChecks = await _dbContext.CheckSummary
+             .Where(c => c.GBCheck == checkSummary.GBCheck 
+                        && c.ApplicationId == checkSummary.ApplicationId
+                        && c.RouteId == checkSummary.RouteId
+                        && c.Date == checkSummary.Date
+                        && c.ScheduledSailingTime == checkSummary.ScheduledSailingTime
+                        && c.FlightNo == checkSummary.FlightNo).ToListAsync();
+
+        foreach (var check in duplicateChecks)
+        {
+            check.Superseded = true;
+            _dbContext.CheckSummary.Update(check);
+        }
+    }
+
     public async Task<IEnumerable<CheckOutcomeResponse>> GetRecentCheckOutcomesAsync(DateTime startDate, DateTime endDate)
     {
         _logger.LogInformation("GetRecentCheckOutcomesAsync startDate", startDate);
@@ -183,6 +202,7 @@ public class CheckSummaryService : ICheckSummaryService
             .Where(cs => cs.Date.HasValue && cs.ScheduledSailingTime.HasValue && cs.RouteId.HasValue)
             .Where(cs => cs.Date!.Value >= preliminaryStartDate && cs.Date.Value <= preliminaryEndDate)
             .Where(cs => cs.GBCheck == true)
+            .Where(cs => cs.Superseded == null || cs.Superseded == false)
             .ToListAsync();
 
         // Precise filtering and combining Date and Time in memory
@@ -332,12 +352,17 @@ public class CheckSummaryService : ICheckSummaryService
                 .Select(o => o.RelevantComments ?? "None")
                 .ToList();
 
+            var detailsComments = checkOutcomes
+                .Select(o => o.SPSOutcomeDetails ?? "None")
+                .ToList();
+
             var response = new CompleteCheckDetailsResponse
             {
                 CheckOutcome = outcomeReasons,
                 ReasonForReferral = referralTexts,
                 MicrochipNumber = displayMicrochipNumber ? checkSummary.ChipNumber : null,
                 AdditionalComments = additionalComments,
+                DetailsComments = detailsComments,
                 GBCheckerName = checkSummary.Checker?.FullName ?? string.Empty,
                 DateAndTimeChecked = checkSummary.UpdatedOn?.ToString("yyyy-MM-dd HH:mm:ss") ?? string.Empty,
                 Route = checkSummary.RouteNavigation?.RouteName ?? string.Empty,
@@ -364,7 +389,7 @@ public class CheckSummaryService : ICheckSummaryService
             if (referral.MCNotFound == true) referralTexts.Add("Cannot find microchip");
             if (referral.VCNotMatchPTD == true) referralTexts.Add("Pet does not match the PTD");
             if (referral.OIFailPotentialCommercial == true) referralTexts.Add("Potential commercial movement");
-            if (referral.OIFailAuthTravellerNoConfirmation == true) referralTexts.Add("Authorised traveller but no confirmation");
+            if (referral.OIFailAuthTravellerNoConfirmation == true) referralTexts.Add("Authorised person but no confirmation");
             if (referral.OIFailOther == true) referralTexts.Add("Other reason");
         }
 
@@ -387,7 +412,8 @@ public class CheckSummaryService : ICheckSummaryService
                          && i.CheckSummary.Date == sailingDateOnly
                          && i.CheckSummary.ScheduledSailingTime == sailingTimeOnly
                          && i.CheckSummary.GBCheck == true
-                         && i.CheckSummary.CheckOutcome == false)
+                         && i.CheckSummary.CheckOutcome == false
+                         && i.CheckSummary.Superseded == null || i.CheckSummary.Superseded == false)
             .Select(i => new InterimCheckSummary
             {
                 Id = i.CheckSummary.Id,
@@ -498,10 +524,10 @@ public class CheckSummaryService : ICheckSummaryService
 
     private static string GetStatusForMissingLinkedCheckId(DateTime combinedDateTime, int timeWindowInHours)
     {
-        var timeSinceSailing = DateTime.Now - combinedDateTime;
+        TimeSpan timeSinceSailing = DateTime.UtcNow - combinedDateTime;
         if (timeSinceSailing.TotalHours > timeWindowInHours)
         {
-            return (""); // Skip "Did Not Attend" cases
+            return (""); 
         }
 
         return ("Check needed");
