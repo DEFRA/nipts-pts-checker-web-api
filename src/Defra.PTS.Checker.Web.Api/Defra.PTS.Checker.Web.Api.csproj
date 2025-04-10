@@ -7,9 +7,10 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Defra.Trade.Address.V1.ApiClient" Version="1.0.8" />
-    <PackageReference Include="Defra.Trade.Common" Version="3.0.0" />
+    <PackageReference Include="Defra.Trade.Common" Version="4.0.2" />
+    <PackageReference Include="Defra.Trade.Common.Api" Version="3.0.6" />
     <PackageReference Include="Defra.Trade.Common.Security" Version="2.0.5" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Defra.PTS.Checker.Models\Defra.PTS.Checker.Models.csproj" />

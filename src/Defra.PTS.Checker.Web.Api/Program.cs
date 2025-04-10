@@ -2,6 +2,7 @@
 using Defra.PTS.Checker.Web.Api.Configuration;
 using Defra.PTS.Checker.Web.Api.Middleware;
 using Defra.PTS.Configuration;
+using Defra.Trade.Common.Api.Health;
 using Defra.Trade.Common.AppConfig;
 using Defra.Trade.Common.Security.Authentication.Infrastructure;
 using Defra.Trade.Common.Security.AzureKeyVault;
@@ -41,6 +42,7 @@ if (string.IsNullOrEmpty(connection))
 
 builder.Services.AddDefraRepositoriesServices(connection);
 builder.Services.AddDefraApiServices(builder.Configuration);
+builder.Services.AddHealthChecks();
 builder.Services.AddSwaggerGen(c =>
 {
     c.EnableAnnotations();
@@ -58,7 +60,7 @@ app.UseSwaggerUI(c =>
 
 // Configure the HTTP request pipeline.
 app.UseHttpsRedirection();
-
+app.UseTradeHealthChecks();
 app.UseAuthorization();
 
 app.MapControllers();
