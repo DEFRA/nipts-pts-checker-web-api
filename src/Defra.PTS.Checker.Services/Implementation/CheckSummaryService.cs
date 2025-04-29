@@ -399,46 +399,43 @@ public class CheckSummaryService : ICheckSummaryService
 
     private async Task<List<InterimCheckSummary>> getCheckSummariesBySailing(DateTime sailingDateOnly, TimeSpan sailingTimeOnly, int routeId)
     {
-        return await _dbContext.CheckSummary
-            .Join(_dbContext.Application,
-                  cs => cs.ApplicationId,
-                  a => a.Id,
-                  (cs, a) => new
-                  {
-                      CheckSummary = cs,
-                      Application = a
-                  })
-            .Where(i => i.CheckSummary.RouteId == routeId
-                         && i.CheckSummary.Date == sailingDateOnly
-                         && i.CheckSummary.ScheduledSailingTime == sailingTimeOnly
-                         && i.CheckSummary.GBCheck == true
-                         && i.CheckSummary.CheckOutcome == false
-                         && i.CheckSummary.Superseded == null || i.CheckSummary.Superseded == false)
+
+        var checkSummaries = _dbContext.CheckSummary
+            .Include(c => c.Application)
+            .Include(c => c.TravelDocument)
+            .Include(c => c.TravelDocument!.Pet)
+            .Where(c => c.RouteId == routeId 
+            && c.Date == sailingDateOnly 
+            && c.ScheduledSailingTime == sailingTimeOnly
+            && c.GBCheck == true
+            && c.CheckOutcome == false
+            && (c.Superseded == null || c.Superseded == false))
             .Select(i => new InterimCheckSummary
             {
-                Id = i.CheckSummary.Id,
-                Date = i.CheckSummary.Date,
-                ScheduledSailingTime = i.CheckSummary.ScheduledSailingTime,
-                LinkedCheckId = i.CheckSummary.LinkedCheckId,
-                CheckOutcomeId = i.CheckSummary.CheckOutcomeId,
-                DocumentReferenceNumber = i.Application.Status != "Authorised" && i.Application.Status != "Revoked"
-                            ? i.Application.ReferenceNumber : (GetTravelDocumentReferenceNumber(i.CheckSummary.TravelDocument!)),
-                PetSpeciesId = i.CheckSummary.TravelDocument != null && i.CheckSummary.TravelDocument.Pet != null
-                                ? i.CheckSummary.TravelDocument.Pet.SpeciesId
-                                : (int?)null,
-                PetColourName = i.CheckSummary.TravelDocument != null && i.CheckSummary.TravelDocument.Pet != null
-                                 && i.CheckSummary.TravelDocument.Pet.Colour != null
-                                    ? i.CheckSummary.TravelDocument.Pet.Colour.Name
-                                    : null,
-                PetOtherColour = i.CheckSummary.TravelDocument != null && i.CheckSummary.TravelDocument.Pet != null
-                                   ? i.CheckSummary.TravelDocument.Pet.OtherColour
-                                   : null,
-                MicrochipNumber = i.CheckSummary.TravelDocument != null && i.CheckSummary.TravelDocument.Pet != null
-                                    ? i.CheckSummary.TravelDocument.Pet.MicrochipNumber
-                                    : null
+                Id = i.Id,
+                Date = i.Date,
+                ScheduledSailingTime = i.ScheduledSailingTime,
+                LinkedCheckId = i.LinkedCheckId,
+                CheckOutcomeId = i.CheckOutcomeId,
+                DocumentReferenceNumber = i.Application!.Status != "Authorised" && i.Application.Status != "Revoked"
+                ? i.Application.ReferenceNumber : (GetTravelDocumentReferenceNumber(i.TravelDocument!)),
+                PetSpeciesId = i.TravelDocument != null && i.TravelDocument.Pet != null
+                    ? i.TravelDocument.Pet.SpeciesId
+                    : (int?)null,
+                PetColourName = i.TravelDocument != null && i.TravelDocument.Pet != null
+                     && i.TravelDocument.Pet.Colour != null
+                        ? i.TravelDocument.Pet.Colour.Name
+                        : null,
+                PetOtherColour = i.TravelDocument != null && i.TravelDocument.Pet != null
+                       ? i.TravelDocument.Pet.OtherColour
+                       : null,
+                MicrochipNumber = i.TravelDocument != null && i.TravelDocument.Pet != null
+                        ? i.TravelDocument.Pet.MicrochipNumber
+                        : null
             })
             .ToListAsync();
 
+        return await checkSummaries;
     }
 
     private async Task<IEnumerable<SpsCheckDetailResponseModel>> getSpsCheckDetailResponse(int timeWindowInHours, List<InterimCheckSummary> checkSummaries)
