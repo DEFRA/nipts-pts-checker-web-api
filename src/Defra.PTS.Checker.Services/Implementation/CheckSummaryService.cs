@@ -403,7 +403,7 @@ public class CheckSummaryService : ICheckSummaryService
         var checkSummaries = _dbContext.CheckSummary
             .Include(c => c.Application)
             .Include(c => c.TravelDocument)
-            .Include(c => c.TravelDocument.Pet)
+            .Include(c => c.TravelDocument!.Pet)
             .Where(c => c.RouteId == routeId 
             && c.Date == sailingDateOnly 
             && c.ScheduledSailingTime == sailingTimeOnly
@@ -417,7 +417,7 @@ public class CheckSummaryService : ICheckSummaryService
                 ScheduledSailingTime = i.ScheduledSailingTime,
                 LinkedCheckId = i.LinkedCheckId,
                 CheckOutcomeId = i.CheckOutcomeId,
-                DocumentReferenceNumber = i.Application.Status != "Authorised" && i.Application.Status != "Revoked"
+                DocumentReferenceNumber = i.Application!.Status != "Authorised" && i.Application.Status != "Revoked"
                 ? i.Application.ReferenceNumber : (GetTravelDocumentReferenceNumber(i.TravelDocument!)),
                 PetSpeciesId = i.TravelDocument != null && i.TravelDocument.Pet != null
                     ? i.TravelDocument.Pet.SpeciesId
