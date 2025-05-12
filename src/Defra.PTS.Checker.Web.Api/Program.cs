@@ -21,6 +21,7 @@ builder.Configuration.AddUserSecrets(Assembly.GetExecutingAssembly(), true);
 #endif
 
 builder.Configuration.AddEnvironmentVariables();
+builder.Configuration.ConfigureTradeAppConfiguration(true, "RemosSignUpService:Sentinel");
 
 
 // Add services to the container.
@@ -49,6 +50,8 @@ builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "PTS Checker API", Version = "v1" });
     c.UseInlineDefinitionsForEnums();
 });
+
+builder.Services.AddApplicationInsightsTelemetry();
 
 var app = builder.Build();
 
