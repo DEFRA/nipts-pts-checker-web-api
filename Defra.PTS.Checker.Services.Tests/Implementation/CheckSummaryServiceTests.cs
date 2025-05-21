@@ -296,12 +296,9 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             await _dbContext.TravelDocument.AddAsync(travelDocument);
             await _dbContext.SaveChangesAsync();
             _dbContext.ChangeTracker.Clear();
-
-            // Act
-            var result = await _service?.SaveCheckSummary(model)!;
-
+            
             //Again
-            result = await _service?.SaveCheckSummary(model)!;
+            var result = await _service?.SaveCheckSummary(model)!;
 
             // Assert
             Assert.That(result, Is.Not.Null);
@@ -831,7 +828,6 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
         {
             // Arrange
             var specificDate = DateTime.Today.AddDays(-1); // Yesterday's date at midnight
-            var scheduledSailingTime = TimeSpan.Zero; // 00:00:00
 
             if (_dbContext != null)
             {
@@ -2210,6 +2206,78 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             Assert.That(result, Is.Not.Null);
             Assert.That(result!.ReasonForReferral, Contains.Item("Microchip number does not match the PTD"));
         }
+
+
+        [Test]
+        public void DisplayCorrectMicrochipInSpsCheckDetailResponse()
+        {
+            var checkSummaries = new List<InterimCheckSummary>
+    {
+        new() {
+            Id = Guid.NewGuid(),
+            MicrochipNumber = "1234567890",
+            MCNotMatch = true,
+            MCNotMatchActual = "9876543210", 
+            DocumentReferenceNumber = "PTD001",
+            PetSpeciesId = 1,
+            PetColourName = "Brown"
+        },
+        new() {
+            Id = Guid.NewGuid(),
+            MicrochipNumber = "2345678901",
+            MCNotMatch = false,
+            MCNotMatchActual = null,
+            DocumentReferenceNumber = "PTD002",
+            PetSpeciesId = 1,
+            PetColourName = "Black"
+        },
+        new()
+        {
+            Id = Guid.NewGuid(),
+            MicrochipNumber = "3456789012",
+            MCNotMatch = true,
+            MCNotMatchActual = "",
+            DocumentReferenceNumber = "PTD003",
+            PetSpeciesId = 1,
+            PetColourName = "White"
+        }
+    };
+
+           
+            var timeWindowInHours = 48;
+            var methodInfo = typeof(CheckSummaryService).GetMethod("GetSpsCheckDetailResponse",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+            if (methodInfo == null)
+            {
+                Assert.Fail("Cannot find getSpsCheckDetailResponse method via reflection");
+                return;
+            }
+
+           
+            var task = methodInfo.Invoke(
+                _service, [timeWindowInHours, checkSummaries]) as Task<IEnumerable<SpsCheckDetailResponseModel>>;
+            var result =  task!.GetAwaiter().GetResult().ToList();
+
+         
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.Count, Is.EqualTo(3), "Expected three SpsCheckDetailResponseModel items");
+
+            // Find each item by document reference number
+            var item1 = result.FirstOrDefault(r => r.PTDNumber == "PTD001");
+            var item2 = result.FirstOrDefault(r => r.PTDNumber == "PTD002");
+            var item3 = result.FirstOrDefault(r => r.PTDNumber == "PTD003");
+
+            Assert.That(item1, Is.Not.Null, "Missing response for PTD001");
+            Assert.That(item2, Is.Not.Null, "Missing response for PTD002");
+            Assert.That(item3, Is.Not.Null, "Missing response for PTD003");
+
+            // Check that microchip numbers are correctly displayed
+            Assert.That(item1!.Microchip, Is.EqualTo("9876543210"), "Should use MCNotMatchActual when MCNotMatch is true and MCNotMatchActual is not empty");
+            Assert.That(item2!.Microchip, Is.EqualTo("2345678901"), "Should use original MicrochipNumber when MCNotMatch is false");
+            Assert.That(item3!.Microchip, Is.EqualTo("3456789012"), "Should use original MicrochipNumber when MCNotMatchActual is empty");
+        }
+
         private void DetachTrackedEntities()
         {
             if (_dbContext == null)
