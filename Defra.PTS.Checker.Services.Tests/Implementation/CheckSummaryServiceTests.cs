@@ -1236,7 +1236,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
                 RelevantComments = "Relevant comment",
                 SPSOutcomeDetails = "Additional comment",
                 OIFailOther = true,
-                GBRefersToDAERAOrSPS = true, 
+                GBRefersToDAERAOrSPS = true,
                 GBAdviseNoTravel = true,
                 GBPassengerSaysNoTravel = true
             };
@@ -1269,7 +1269,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             var result = await _service.GetCompleteCheckDetailsAsync(checkSummaryId);
 
             Assert.That(result, Is.Not.Null);
-            Assert.That(result!.MicrochipNumber, Is.EqualTo("1234567890"));
+            Assert.That(result!.MicrochipNumber, Is.EqualTo("9876543210")); // Changed from "1234567890" to "9876543210"
             Assert.That(result.CheckOutcome, Contains.Item("Passenger referred to DAERA/SPS at NI port"));
             Assert.That(result.ReasonForReferral, Contains.Item("Microchip number does not match the PTD"));
             Assert.That(result.GBCheckerName, Is.EqualTo("John Doe"));
@@ -2125,7 +2125,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             var result = await _service.GetCompleteCheckDetailsAsync(checkSummaryId);
 
             Assert.That(result, Is.Not.Null);
-            Assert.That(result!.MicrochipNumber, Is.EqualTo("1234567890"));
+            Assert.That(result!.MicrochipNumber, Is.EqualTo("9876543210")); 
             Assert.That(result.ReasonForReferral, Has.Count.EqualTo(3));
             Assert.That(result.ReasonForReferral, Contains.Item("Microchip number does not match the PTD"));
             Assert.That(result.ReasonForReferral, Contains.Item("Cannot find microchip"));
