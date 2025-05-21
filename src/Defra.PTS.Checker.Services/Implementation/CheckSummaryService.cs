@@ -235,9 +235,7 @@ public class CheckSummaryService(CommonDbContext dbContext, ILogger<CheckSummary
         if (!scheduledFerryExists)
         {
             // No ferry is scheduled at this date and time for this route
-
             return new List<SpsCheckDetailResponseModel>();
-
         }
 
         // Fetch records matching the specific sailing
@@ -389,46 +387,58 @@ public class CheckSummaryService(CommonDbContext dbContext, ILogger<CheckSummary
 
     private async Task<List<InterimCheckSummary>> GetCheckSummariesBySailing(DateTime sailingDateOnly, TimeSpan sailingTimeOnly, int routeId)
     {
-        var checkSummaries = _dbContext.CheckSummary
+        var query = BuildCheckSummariesQuery(routeId, sailingDateOnly, sailingTimeOnly);
+        return await query.ToListAsync();
+    }
+
+    private IQueryable<InterimCheckSummary> BuildCheckSummariesQuery(int routeId, DateTime sailingDateOnly, TimeSpan sailingTimeOnly)
+    {
+        return _dbContext.CheckSummary
             .Include(c => c.Application)
             .Include(c => c.TravelDocument)
             .Include(c => c.TravelDocument!.Pet)
-            .Include(c => c.CheckOutcomeEntity) 
+            .Include(c => c.CheckOutcomeEntity)
             .Where(c => c.RouteId == routeId
-            && c.Date == sailingDateOnly
-            && c.ScheduledSailingTime == sailingTimeOnly
-            && c.GBCheck == true
-            && c.CheckOutcome == false
-            && (c.Superseded == null || c.Superseded == false))
-            .Select(i => new InterimCheckSummary
-            {
-                Id = i.Id,
-                Date = i.Date,
-                ScheduledSailingTime = i.ScheduledSailingTime,
-                LinkedCheckId = i.LinkedCheckId,
-                CheckOutcomeId = i.CheckOutcomeId,
-                DocumentReferenceNumber = i.Application!.Status != "Authorised" && i.Application.Status != "Revoked"
-                ? i.Application.ReferenceNumber : (GetTravelDocumentReferenceNumber(i.TravelDocument!)),
-                PetSpeciesId = i.TravelDocument != null && i.TravelDocument.Pet != null
-                    ? i.TravelDocument.Pet.SpeciesId
-                    : (int?)null,
-                PetColourName = i.TravelDocument != null && i.TravelDocument.Pet != null
-                     && i.TravelDocument.Pet.Colour != null
-                        ? i.TravelDocument.Pet.Colour.Name
-                        : null,
-                PetOtherColour = i.TravelDocument != null && i.TravelDocument.Pet != null
-                       ? i.TravelDocument.Pet.OtherColour
-                       : null,
-                MicrochipNumber = i.TravelDocument != null && i.TravelDocument.Pet != null
-                        ? i.TravelDocument.Pet.MicrochipNumber
-                        : null,
-                
-                MCNotMatch = i.CheckOutcomeEntity != null ? i.CheckOutcomeEntity.MCNotMatch : null,
-                MCNotMatchActual = i.CheckOutcomeEntity != null ? i.CheckOutcomeEntity.MCNotMatchActual : null
-            })
-            .ToListAsync();
+                       && c.Date == sailingDateOnly
+                       && c.ScheduledSailingTime == sailingTimeOnly
+                       && c.GBCheck == true
+                       && c.CheckOutcome == false
+                       && (c.Superseded == null || c.Superseded == false))
+            .Select(i => MapToInterimCheckSummary(i));
+    }
 
-        return await checkSummaries;
+    private static InterimCheckSummary MapToInterimCheckSummary(CheckSummary i)
+    {
+        var travelDoc = i.TravelDocument;
+        var pet = travelDoc?.Pet;
+        var application = i.Application;
+
+        return new InterimCheckSummary
+        {
+            Id = i.Id,
+            Date = i.Date,
+            ScheduledSailingTime = i.ScheduledSailingTime,
+            LinkedCheckId = i.LinkedCheckId,
+            CheckOutcomeId = i.CheckOutcomeId,
+            DocumentReferenceNumber = GetDocumentReferenceNumber(application, travelDoc),
+            PetSpeciesId = pet?.SpeciesId,
+            PetColourName = pet?.Colour?.Name,
+            PetOtherColour = pet?.OtherColour,
+            MicrochipNumber = pet?.MicrochipNumber,
+            MCNotMatch = i.CheckOutcomeEntity?.MCNotMatch,
+            MCNotMatchActual = i.CheckOutcomeEntity?.MCNotMatchActual
+        };
+    }
+
+    private static string? GetDocumentReferenceNumber(Entities.Application? application, TravelDocument? travelDocument)
+    {
+        if (application == null)
+            return null;
+
+        if (application.Status != "Authorised" && application.Status != "Revoked")
+            return application.ReferenceNumber;
+
+        return GetTravelDocumentReferenceNumber(travelDocument!);
     }
 
     private async Task<IEnumerable<SpsCheckDetailResponseModel>> GetSpsCheckDetailResponse(int timeWindowInHours, List<InterimCheckSummary> checkSummaries)

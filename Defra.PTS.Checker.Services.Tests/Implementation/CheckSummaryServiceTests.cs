@@ -296,12 +296,9 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             await _dbContext.TravelDocument.AddAsync(travelDocument);
             await _dbContext.SaveChangesAsync();
             _dbContext.ChangeTracker.Clear();
-
-            // Act
-            var result = await _service?.SaveCheckSummary(model)!;
-
+            
             //Again
-            result = await _service?.SaveCheckSummary(model)!;
+            var result = await _service?.SaveCheckSummary(model)!;
 
             // Assert
             Assert.That(result, Is.Not.Null);
