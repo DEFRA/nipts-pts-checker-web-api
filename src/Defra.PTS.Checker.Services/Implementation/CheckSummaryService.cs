@@ -235,9 +235,9 @@ public class CheckSummaryService(CommonDbContext dbContext, ILogger<CheckSummary
         if (!scheduledFerryExists)
         {
             // No ferry is scheduled at this date and time for this route
-#pragma warning disable IDE0028 // Simplify collection initialization
+
             return new List<SpsCheckDetailResponseModel>();
-#pragma warning restore IDE0028 // Simplify collection initialization
+
         }
 
         // Fetch records matching the specific sailing
