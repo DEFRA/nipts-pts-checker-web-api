@@ -296,8 +296,6 @@ public class CheckSummaryService(CommonDbContext dbContext, ILogger<CheckSummary
     }
 
 
-
-
     public async Task<CompleteCheckDetailsResponse?> GetCompleteCheckDetailsAsync(Guid checkSummaryId)
     {
         try
@@ -333,8 +331,14 @@ public class CheckSummaryService(CommonDbContext dbContext, ILogger<CheckSummary
             if (checkOutcomes.Any(o => o.GBPassengerSaysNoTravel == true))
                 outcomeReasons.Add("Passenger says they will not travel");
 
-            var displayMicrochipNumber = checkOutcomes.Any(o =>
-                o.MCNotMatch == true || !string.IsNullOrWhiteSpace(o.MCNotMatchActual));
+
+            string? microchipToDisplay = checkSummary.ChipNumber;
+            var mismatchOutcome = checkOutcomes.FirstOrDefault(o =>
+                o.MCNotMatch == true && !string.IsNullOrWhiteSpace(o.MCNotMatchActual));
+            if (mismatchOutcome != null)
+            {
+                microchipToDisplay = mismatchOutcome.MCNotMatchActual;
+            }
 
             var additionalComments = checkOutcomes
                 .Select(o => o.RelevantComments ?? "None")
@@ -348,7 +352,7 @@ public class CheckSummaryService(CommonDbContext dbContext, ILogger<CheckSummary
             {
                 CheckOutcome = outcomeReasons,
                 ReasonForReferral = referralTexts,
-                MicrochipNumber = displayMicrochipNumber ? checkSummary.ChipNumber : null,
+                MicrochipNumber = microchipToDisplay,
                 AdditionalComments = additionalComments,
                 DetailsComments = detailsComments,
                 GBCheckerName = checkSummary.Checker?.FullName ?? string.Empty,
@@ -366,6 +370,8 @@ public class CheckSummaryService(CommonDbContext dbContext, ILogger<CheckSummary
             return null;
         }
     }
+
+
 
     private static List<string> AddReferralTexts(List<CheckOutcome> checkOutcomes)
     {
