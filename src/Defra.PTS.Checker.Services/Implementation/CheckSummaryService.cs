@@ -234,6 +234,7 @@ public class CheckSummaryService(CommonDbContext dbContext, ILogger<CheckSummary
 
         if (!scheduledFerryExists)
         {
+            //Need replacement
             // No ferry is scheduled at this date and time for this route
             return new List<SpsCheckDetailResponseModel>();
         }
