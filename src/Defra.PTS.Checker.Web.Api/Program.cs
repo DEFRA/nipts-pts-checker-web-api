@@ -53,6 +53,25 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddApplicationInsightsTelemetry();
 
+var origins = new string[] { "https://pre-check-a-pet-from-gb-to-ni.azure.defra.cloud/",
+                "https://tst-check-a-pet-from-gb-to-ni.azure.defra.cloud/",
+                "https://dev-check-a-pet-from-gb-to-ni.azure.defra.cloud/",
+                 "https://check-a-pet-from-gb-to-ni.service.gov.uk/" };
+
+#if DEBUG
+origins = origins.Append("http://localhost:5000").ToArray();
+#endif
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("RestrictedPolicy", policy =>
+    {
+        policy.WithOrigins(origins)
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
 app.UseSwagger();
