@@ -21,7 +21,8 @@ builder.Configuration.AddUserSecrets(Assembly.GetExecutingAssembly(), true);
 #endif
 
 builder.Configuration.AddEnvironmentVariables();
-builder.Configuration.ConfigureTradeAppConfiguration(true, "RemosSignUpService:Sentinel");
+
+builder.Configuration.ConfigureTradeAppConfiguration();
 
 
 // Add services to the container.
