@@ -22,6 +22,8 @@ builder.Configuration.AddUserSecrets(Assembly.GetExecutingAssembly(), true);
 
 builder.Configuration.AddEnvironmentVariables();
 
+builder.Configuration.ConfigureTradeAppConfiguration();
+
 
 // Add services to the container.
 builder.Services
@@ -48,6 +50,27 @@ builder.Services.AddSwaggerGen(c =>
     c.EnableAnnotations();
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "PTS Checker API", Version = "v1" });
     c.UseInlineDefinitionsForEnums();
+});
+
+builder.Services.AddApplicationInsightsTelemetry();
+
+var origins = new string[] { "https://pre-check-a-pet-from-gb-to-ni.azure.defra.cloud/",
+                "https://tst-check-a-pet-from-gb-to-ni.azure.defra.cloud/",
+                "https://dev-check-a-pet-from-gb-to-ni.azure.defra.cloud/",
+                 "https://check-a-pet-from-gb-to-ni.service.gov.uk/" };
+
+#if DEBUG
+origins = origins.Append("http://localhost:5000").ToArray();
+#endif
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("RestrictedPolicy", policy =>
+    {
+        policy.WithOrigins(origins)
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
 });
 
 var app = builder.Build();
