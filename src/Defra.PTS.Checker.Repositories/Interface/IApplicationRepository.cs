@@ -14,5 +14,6 @@ namespace Defra.PTS.Checker.Repositories.Interface
         Application? GetMostRecentApplication(Guid petId);
 
         Task<IEnumerable<Application>> GetApplicationsByPetIdAsync(Guid petId);
+        Task<List<Application>> GetApplicationsByUserEmail(string email);
     }
 }
