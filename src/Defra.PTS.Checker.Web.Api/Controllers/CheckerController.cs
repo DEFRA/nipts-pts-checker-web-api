@@ -379,7 +379,7 @@ public class CheckerController : ControllerBase
     [SwaggerResponse(StatusCodes.Status404NotFound, "Not Found: There are no checks associated with this email")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error: An error has occurred")]
     [SwaggerOperation(
-    OperationId = "gbCheckSummaryId",
+    OperationId = "getIsUserSuspendedStatus",
     Tags = new[] { "Checker" },
     Summary = "Retrieves a bool for if the user has a suspended application using their email for reference",
     Description = "Returns the suspended status for the specified Email"
