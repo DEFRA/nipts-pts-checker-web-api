@@ -372,6 +372,30 @@ public class CheckerController : ControllerBase
         return Ok(checkReport);
     }
 
+    [HttpPost]
+    [Route("GetIsUserSuspendedStatusByEmail")]
+    [SwaggerResponse(StatusCodes.Status200OK, "OK: Returns a bool", typeof(bool))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request: Email is not provided or is not valid", typeof(object))]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Not Found: There are no checks associated with this email")]
+    [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error: An error has occurred")]
+    [SwaggerOperation(
+    OperationId = "gbCheckSummaryId",
+    Tags = new[] { "Checker" },
+    Summary = "Retrieves a bool for if the user has a suspended application using their email for reference",
+    Description = "Returns the suspended status for the specified Email"
+    )]
+    public async Task<IActionResult> GetIsUserSuspendedStatusByEmail([FromBody, SwaggerRequestBody("The search payload", Required = true)] string email)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var result = await _applicationService.GetIsUserSuspendedByEmail(email);
+
+        return Ok(result);
+    }
+
 
     [HttpPost]
     [Route("getCompleteCheckDetails")]

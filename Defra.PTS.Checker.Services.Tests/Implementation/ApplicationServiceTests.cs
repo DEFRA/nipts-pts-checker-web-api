@@ -310,7 +310,51 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             Assert.That(application.OwnerAddress.PostCode, Is.EqualTo(root.GetProperty("PetOwner").GetProperty("Address").GetProperty("PostCode").GetString()!));
         }
 
+        [Test]
+        public async Task GetIsUserSuspendedByEmail_ReturnsTrue_WhenSuspendedApplicationExists()
+        {
+            // Arrange
+            string email = "test.user@example.com";
 
+            var applications = new List<Application>
+            {
+                new Application { Status = "Authorised" },
+                new Application { Status = "Suspended" },
+                new Application { Status = "Cancelled" }
+            };
 
+            _applicationRepositoryMock!
+                .Setup(repo => repo.GetApplicationsByUserEmail(email))
+                .ReturnsAsync(applications);
+
+            // Act
+            var result = await _applicationService!.GetIsUserSuspendedByEmail(email);
+
+            // Assert
+            Assert.That(result, Is.True);
+        }
+
+        [Test]
+        public async Task GetIsUserSuspendedByEmail_ReturnsFalse_WhenNoSuspendedApplicationsExist()
+        {
+            // Arrange
+            string email = "test.user@example.com";
+
+            var applications = new List<Application>
+            {
+                new Application { Status = "Approved" },
+                new Application { Status = "Cancelled" }
+            };
+
+            _applicationRepositoryMock!
+                .Setup(repo => repo.GetApplicationsByUserEmail(email))
+                .ReturnsAsync(applications);
+
+            // Act
+            var result = await _applicationService!.GetIsUserSuspendedByEmail(email);
+
+            // Assert
+            Assert.That(result, Is.False);
+        }
     }
 }

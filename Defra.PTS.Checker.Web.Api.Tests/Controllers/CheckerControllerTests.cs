@@ -1077,6 +1077,48 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
             Assert.That(okResult!.Value, Is.EqualTo(response));
         }
 
+        [Test]
+        public async Task GetIsUserSuspendedStatusByEmail_ValidEmail_ReturnsTrue_OkResult()
+        {
+            // Arrange
+            var email = "test.user@example.com";
+            var expectedResult = true;
+
+            _applicationServiceMock!
+                .Setup(service => service.GetIsUserSuspendedByEmail(email))
+                .ReturnsAsync(expectedResult);
+
+            // Act
+            var result = await _controller!.GetIsUserSuspendedStatusByEmail(email);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+            var okResult = result as OkObjectResult;
+            Assert.That(okResult, Is.Not.Null);
+            Assert.That(okResult!.Value, Is.EqualTo(expectedResult));
+        }
+
+        [Test]
+        public async Task GetIsUserSuspendedStatusByEmail_ValidEmail_ReturnsFalse_OkResult()
+        {
+            // Arrange
+            var email = "test.user@example.com";
+            var expectedResult = false;
+
+            _applicationServiceMock!
+                .Setup(service => service.GetIsUserSuspendedByEmail(email))
+                .ReturnsAsync(expectedResult);
+
+            // Act
+            var result = await _controller!.GetIsUserSuspendedStatusByEmail(email);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+            var okResult = result as OkObjectResult;
+            Assert.That(okResult, Is.Not.Null);
+            Assert.That(okResult!.Value, Is.EqualTo(expectedResult));
+        }
+
 
     }
 

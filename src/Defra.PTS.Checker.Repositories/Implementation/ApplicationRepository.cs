@@ -91,5 +91,12 @@ namespace Defra.PTS.Checker.Repositories.Implementation
                 .Where(a => a.PetId == petId)
                 .ToListAsync();
         }
+
+        public async Task<List<Application>> GetApplicationsByUserEmail(string email)
+        {
+            return await _context!.Application
+                .Include(t => t.User)
+                .Where(a => a.User!.Email == email).ToListAsync() ?? null!;
+        }
     }
 }
