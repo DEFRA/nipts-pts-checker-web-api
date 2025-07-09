@@ -98,7 +98,7 @@ namespace Defra.PTS.Checker.Repositories.Implementation
             var userIds = _context!.User
                 .Where(a => a.Email == email);
 
-            List<string> emails = new List<string>();
+            List<string> emails = [];
 
             foreach (var user in userIds) {
                 emails.Add(user.Email!);
