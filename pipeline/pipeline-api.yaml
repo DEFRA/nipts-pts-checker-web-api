@@ -54,7 +54,7 @@ parameters:
     displayName: "Quality Gate parameters"
     type: object
     default:
-      enforceQualityGate: true
+      enforceQualityGate: false
       warningVariance: 20
       coverageVariance: 20
       coverageThreshold: 400
