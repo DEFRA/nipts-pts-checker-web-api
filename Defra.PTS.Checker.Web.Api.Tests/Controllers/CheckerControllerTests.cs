@@ -1120,6 +1120,22 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
         }
 
 
+        [Test]
+        public async Task GetIsUserSuspendedStatusByEmail_InvalidModelState_ReturnsBadRequest()
+        {
+            // Arrange
+            var email = "invalid-email";
+            _controller!.ModelState.AddModelError("email", "Invalid email format");
+
+            // Act
+            var result = await _controller.GetIsUserSuspendedStatusByEmail(email);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+            var badRequestResult = result as BadRequestObjectResult;
+            Assert.That(badRequestResult, Is.Not.Null);
+            Assert.That(badRequestResult!.Value, Is.TypeOf<SerializableError>());
+        }
     }
 
     public class ErrorResponse
