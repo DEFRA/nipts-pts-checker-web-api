@@ -94,9 +94,19 @@ namespace Defra.PTS.Checker.Repositories.Implementation
 
         public async Task<List<Application>> GetApplicationsByUserEmail(string email)
         {
+            //we will also get the associated UserIds, in case they have had a change 
+            var userIds = _context!.User
+                .Where(a => a.Email == email);
+
+            List<string> emails = new List<string>();
+
+            foreach (var user in userIds) {
+                emails.Add(user.Email!);
+            }
+
             return await _context!.Application
                 .Include(t => t.User)
-                .Where(a => a.User!.Email == email).ToListAsync() ?? null!;
+                .Where(a => emails.Contains(a.User!.Email!)).ToListAsync() ?? null!;
         }
     }
 }
