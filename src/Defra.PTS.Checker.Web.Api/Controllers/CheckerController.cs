@@ -373,7 +373,7 @@ public class CheckerController : ControllerBase
     }
 
     [HttpPost]
-    [Route("GetIsUserSuspendedStatusByEmail")]
+    [Route("getIsUserSuspendedStatusByEmail")]
     [SwaggerResponse(StatusCodes.Status200OK, "OK: Returns a bool", typeof(bool))]
     [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request: Email is not provided or is not valid", typeof(object))]
     [SwaggerResponse(StatusCodes.Status404NotFound, "Not Found: There are no checks associated with this email")]
