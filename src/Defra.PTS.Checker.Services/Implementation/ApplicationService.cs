@@ -203,6 +203,21 @@ namespace Defra.PTS.Checker.Services.Implementation
             return response;
         }
 
+        public async Task<bool> GetIsUserSuspendedByEmail(string email)
+        {
+            var applications = await _applicationRepository.GetApplicationsByUserEmail(email);
+
+            if (applications.Any(x => x.Status!.Equals("Suspended", StringComparison.OrdinalIgnoreCase)))
+            {
+                return true;
+            }
+                
+            else
+            {
+                return false;
+            }
+        }
+
 
 
         private static string? getColourByTravelDocument(TravelDocument travelDocument)
@@ -223,5 +238,7 @@ namespace Defra.PTS.Checker.Services.Implementation
         {
             return application?.Pet?.HasUniqueFeature == (int)YesNoOptions.Yes ? application.Pet.UniqueFeatureDescription : "No";
         }
+
+
     }
 }

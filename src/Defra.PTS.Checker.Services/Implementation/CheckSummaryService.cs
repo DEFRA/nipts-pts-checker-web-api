@@ -403,7 +403,7 @@ public class CheckSummaryService(CommonDbContext dbContext, ILogger<CheckSummary
         return _dbContext.CheckSummary
             .Include(c => c.Application)
             .Include(c => c.TravelDocument)
-            .Include(c => c.TravelDocument!.Pet)
+            .Include(c => c.TravelDocument!.Pet!.Colour)
             .Include(c => c.CheckOutcomeEntity)
             .Where(c => c.RouteId == routeId
                        && c.Date == sailingDateOnly
@@ -596,6 +596,9 @@ public class CheckSummaryService(CommonDbContext dbContext, ILogger<CheckSummary
 
     private static string GetColourDescription(string? petColourName, string? petOtherColour)
     {
+        if (petColourName == "Other")
+            return petColourName;
+
         return petColourName ?? petOtherColour ?? "";
     }
 
