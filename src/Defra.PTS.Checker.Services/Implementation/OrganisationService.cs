@@ -28,7 +28,7 @@ namespace Defra.PTS.Checker.Services.Implementation
             var organisation = await _organisationRepository.Find(organisationId);
             if (organisation == null)
             {
-                _log.LogInformation("No organisation found with organisationId: {organisationId}", organisationId);
+                _log.LogInformation("No organisation found with organisationId: {OrganisationId}", organisationId);
                 return null;
             }
 
