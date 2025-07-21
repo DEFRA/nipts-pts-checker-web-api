@@ -78,7 +78,7 @@ namespace Defra.PTS.Checker.Repositories.Implementation
                         a.DateRejected,
                         a.DateRevoked
                 }.Where(d => d.HasValue).Max() ?? DateTime.MinValue)
-                .FirstOrDefault();
+                .First();
 
             return mostRecentApplication;
         }
