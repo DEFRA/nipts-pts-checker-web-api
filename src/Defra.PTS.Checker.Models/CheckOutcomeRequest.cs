@@ -8,9 +8,9 @@ namespace Defra.PTS.Checker.Models
 {
     public class CheckOutcomeRequest
     {
-        public string CheckSummaryId { get; set; }
-        public string CheckOutcome { get; set; }
-        public string CheckOutcomeDetails { get; set; }
+        public string? CheckSummaryId { get; set; }
+        public string? CheckOutcome { get; set; }
+        public string? CheckOutcomeDetails { get; set; }
     }
 
 }
