@@ -11,6 +11,7 @@ using TravelDocument = Defra.PTS.Checker.Entities.TravelDocument;
 using CheckOutcome = Defra.PTS.Checker.Entities.CheckOutcome;
 using Defra.PTS.Checker.Models.CustomException;
 using Defra.PTS.Checker.Services.Helpers;
+using System.Linq;
 
 namespace Defra.PTS.Checker.Services.Implementation;
 
@@ -217,7 +218,8 @@ public class CheckSummaryService(CommonDbContext dbContext, ILogger<CheckSummary
     {
         // Extract date and time from sailingDate
         DateTime sailingDateOnly = sailingDate.Date;
-        TimeSpan sailingTimeOnly = sailingDate.TimeOfDay;
+        TimeSpan sailingTimeOnly = sailingDate.AddHours(1).TimeOfDay;
+
 
         // Find RouteId based on the route name
         var routeEntity = await _dbContext.Route
@@ -370,6 +372,24 @@ public class CheckSummaryService(CommonDbContext dbContext, ILogger<CheckSummary
             _logger.LogError(ex, "Error occurred while retrieving complete check details.");
             return null;
         }
+    }
+
+    public async Task UpdateCheckOutcomeSps(CheckOutcomeRequest checkOutcomeRequest)
+    {
+
+        var checkSummary = await _dbContext.CheckSummary
+            .FirstOrDefaultAsync(x => x.Id == Guid.Parse(checkOutcomeRequest.CheckSummaryId));
+
+        var checkOutcome = await _dbContext.CheckOutcome
+            .FirstOrDefaultAsync(x => x.Id == checkSummary!.CheckOutcomeId);
+
+        bool outcome = checkOutcomeRequest.CheckOutcome == "Yes";
+
+        checkOutcome!.SPSOutcome = outcome;
+        checkOutcome.SPSOutcomeDetails = checkOutcomeRequest.CheckOutcomeDetails;
+
+        _dbContext.Update(checkOutcome);
+        await _dbContext.SaveChangesAsync();
     }
 
 
