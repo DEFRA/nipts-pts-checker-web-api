@@ -2072,7 +2072,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
                 CheckOutcomeEntity = checkOutcome
             };
 
-            await _dbContext.CheckOutcome.AddAsync(checkOutcome);
+            await _dbContext!.CheckOutcome.AddAsync(checkOutcome);
             await _dbContext.CheckSummary.AddAsync(checkSummary);
             await _dbContext.SaveChangesAsync();
 
@@ -2084,7 +2084,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             };
 
             // Act
-            await _service.UpdateCheckOutcomeSps(request);
+            await _service!.UpdateCheckOutcomeSps(request);
 
             // Assert
             var updatedOutcome = await _dbContext.CheckOutcome.FindAsync(checkOutcomeId);

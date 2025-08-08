@@ -378,7 +378,7 @@ public class CheckSummaryService(CommonDbContext dbContext, ILogger<CheckSummary
     {
 
         var checkSummary = await _dbContext.CheckSummary
-            .FirstOrDefaultAsync(x => x.Id == Guid.Parse(checkOutcomeRequest.CheckSummaryId));
+            .FirstOrDefaultAsync(x => x.Id == Guid.Parse(checkOutcomeRequest.CheckSummaryId!));
 
         var checkOutcome = await _dbContext.CheckOutcome
             .FirstOrDefaultAsync(x => x.Id == checkSummary!.CheckOutcomeId);
