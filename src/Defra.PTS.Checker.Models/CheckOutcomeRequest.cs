@@ -12,5 +12,4 @@ namespace Defra.PTS.Checker.Models
         public string? CheckOutcome { get; set; }
         public string? CheckOutcomeDetails { get; set; }
     }
-
 }

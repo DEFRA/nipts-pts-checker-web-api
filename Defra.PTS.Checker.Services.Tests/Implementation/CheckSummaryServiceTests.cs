@@ -2052,6 +2052,49 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
         }
 
         [Test]
+        public async Task UpdateCheckOutcomeSps_WithValidRequest_UpdatesSpsOutcomeAndDetails()
+        {
+            // Arrange
+            var checkSummaryId = Guid.NewGuid();
+            var checkOutcomeId = Guid.NewGuid();
+
+            var checkOutcome = new Entities.CheckOutcome
+            {
+                Id = checkOutcomeId,
+                SPSOutcome = false,
+                SPSOutcomeDetails = "Old details"
+            };
+
+            var checkSummary = new Entities.CheckSummary
+            {
+                Id = checkSummaryId,
+                CheckOutcomeId = checkOutcomeId,
+                CheckOutcomeEntity = checkOutcome
+            };
+
+            await _dbContext.CheckOutcome.AddAsync(checkOutcome);
+            await _dbContext.CheckSummary.AddAsync(checkSummary);
+            await _dbContext.SaveChangesAsync();
+
+            var request = new CheckOutcomeRequest
+            {
+                CheckSummaryId = checkSummaryId.ToString(),
+                CheckOutcome = "Yes",
+                CheckOutcomeDetails = "Updated SPS details"
+            };
+
+            // Act
+            await _service.UpdateCheckOutcomeSps(request);
+
+            // Assert
+            var updatedOutcome = await _dbContext.CheckOutcome.FindAsync(checkOutcomeId);
+            Assert.That(updatedOutcome, Is.Not.Null);
+            Assert.That(updatedOutcome!.SPSOutcome, Is.True);
+            Assert.That(updatedOutcome.SPSOutcomeDetails, Is.EqualTo("Updated SPS details"));
+        }
+
+
+        [Test]
         public async Task GetCompleteCheckDetailsAsync_WithMultipleMatchingFlags_DisplaysActualMicrochipNumber()
         {
             var checkSummaryId = Guid.NewGuid();
