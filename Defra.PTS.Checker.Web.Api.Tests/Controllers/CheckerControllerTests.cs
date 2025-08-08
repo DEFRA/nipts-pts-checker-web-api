@@ -1136,6 +1136,32 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
             Assert.That(badRequestResult, Is.Not.Null);
             Assert.That(badRequestResult!.Value, Is.TypeOf<SerializableError>());
         }
+
+        [Test]
+        public async Task GetCompleteCheckDetails_ValidRequest_ReturnsTrue_OkResult()
+        {
+            // Arrange
+            var request = new CheckOutcomeRequest
+            {
+                CheckSummaryId = Guid.NewGuid().ToString(),
+                CheckOutcome = "Yes",
+                CheckOutcomeDetails = "SPS outcome details"
+            };
+
+            _checkSummaryServiceMock!
+                .Setup(service => service.UpdateCheckOutcomeSps(request))
+                .Returns(Task.CompletedTask);
+
+            // Act
+            var result = await _controller!.GetCompleteCheckDetails(request);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+            var okResult = result as OkObjectResult;
+            Assert.That(okResult, Is.Not.Null);
+            Assert.That(okResult!.Value, Is.EqualTo(true));
+        }
+
     }
 
     public class ErrorResponse

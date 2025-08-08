@@ -408,9 +408,9 @@ public class CheckerController : ControllerBase
      Tags = new[] { "Checker" },
      Summary = "Retrieves complete check details by CheckSummaryId",
      Description = "Returns complete details for the specified CheckSummaryId"
- )]
+    )]
     public async Task<IActionResult> GetCompleteCheckDetails(
-     [FromBody, SwaggerRequestBody("The search payload", Required = true)] CheckDetailsRequestModel model)
+    [FromBody, SwaggerRequestBody("The search payload", Required = true)] CheckDetailsRequestModel model)
     {
         if (!ModelState.IsValid)
         {
@@ -425,6 +425,31 @@ public class CheckerController : ControllerBase
         }
 
         return Ok(response);
+    }
+
+    [HttpPost]
+    [Route("updateCheckOutcomeSps")]
+    [SwaggerResponse(StatusCodes.Status200OK, "OK: Returns a bool", typeof(bool))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request: CheckSummaryId is not valid", typeof(object))]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Not Found: There is no record matching the provided CheckSummaryId")]
+    [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error: An error has occurred")]
+    [SwaggerOperation(
+     OperationId = "updateCheckOutcomeSps",
+     Tags = new[] { "Checker" },
+    Summary = "Updates CheckOutcome with SPS Details",
+    Description = "Updates the CheckOutcome from the CheckSummaryId, with the SPSOutcome and SPSOutcomeDetails saved"
+    )]
+    public async Task<IActionResult> GetCompleteCheckDetails(
+    [FromBody, SwaggerRequestBody("The search payload", Required = true)] CheckOutcomeRequest request)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(new { error = "Invalid input. Please provide a valid CheckSummaryId." });
+        }
+
+        await _checkSummaryService.UpdateCheckOutcomeSps(request);
+
+        return Ok(true);
     }
 
 }
