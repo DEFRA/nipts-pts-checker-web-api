@@ -11,6 +11,7 @@ namespace Defra.PTS.Checker.Models
         public string? TravelBy { get; set; }
         public string? SPSOutcome { get; set; }
         public Guid CheckSummaryId { get; set; }
+        public int? PassengerTypeId { get; set; }
 
     }
 }
