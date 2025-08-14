@@ -110,6 +110,7 @@ public class CheckSummaryService(CommonDbContext dbContext, ILogger<CheckSummary
 
         await _dbContext.SaveChangesAsync();
 
+
         // On Fail Reverse Mapping LinkedCheckId to GB Entry 
         if (!isGbCheck && gbCheckId != Guid.Empty && !(bool)checkSummaryEntity.CheckOutcome)
         {
@@ -374,26 +375,6 @@ public class CheckSummaryService(CommonDbContext dbContext, ILogger<CheckSummary
         }
     }
 
-    public async Task UpdateCheckOutcomeSps(CheckOutcomeRequest checkOutcomeRequest)
-    {
-
-        var checkSummary = await _dbContext.CheckSummary
-            .FirstOrDefaultAsync(x => x.Id == Guid.Parse(checkOutcomeRequest.CheckSummaryId!));
-
-        var checkOutcome = await _dbContext.CheckOutcome
-            .FirstOrDefaultAsync(x => x.Id == checkSummary!.CheckOutcomeId);
-
-        bool outcome = checkOutcomeRequest.CheckOutcome == "Yes";
-
-        checkOutcome!.SPSOutcome = outcome;
-        checkOutcome.SPSOutcomeDetails = checkOutcomeRequest.CheckOutcomeDetails;
-
-        _dbContext.Update(checkOutcome);
-        await _dbContext.SaveChangesAsync();
-    }
-
-
-
     private static List<string> AddReferralTexts(List<CheckOutcome> checkOutcomes)
     {
 
@@ -453,7 +434,8 @@ public class CheckSummaryService(CommonDbContext dbContext, ILogger<CheckSummary
             PetOtherColour = pet?.OtherColour,
             MicrochipNumber = pet?.MicrochipNumber,
             MCNotMatch = i.CheckOutcomeEntity?.MCNotMatch,
-            MCNotMatchActual = i.CheckOutcomeEntity?.MCNotMatchActual
+            MCNotMatchActual = i.CheckOutcomeEntity?.MCNotMatchActual,
+            PassengerTypeId = i.CheckOutcomeEntity?.PassengerTypeId
         };
     }
 
@@ -491,15 +473,16 @@ public class CheckSummaryService(CommonDbContext dbContext, ILogger<CheckSummary
                 microchipNumberToDisplay = cs.MCNotMatchActual;
             }
 
-           
+
             var responseItem = new SpsCheckDetailResponseModel
             {
                 PTDNumber = cs.DocumentReferenceNumber ?? "",
                 PetDescription = $"{petSpeciesDescription}, {colourDescription}",
-                Microchip = microchipNumberToDisplay, 
+                Microchip = microchipNumberToDisplay,
                 TravelBy = travelBy,
                 SPSOutcome = status,
-                CheckSummaryId = cs.Id
+                CheckSummaryId = cs.Id,
+                PassengerTypeId = cs.PassengerTypeId
             };
 
             // Add to response list if not already present
@@ -651,6 +634,7 @@ public class InterimCheckSummary
     public string? MicrochipNumber { get; set; }
     public bool? MCNotMatch { get; set; }
     public string? MCNotMatchActual { get; set; }
+    public int? PassengerTypeId { get; set; }
 }
 
 
