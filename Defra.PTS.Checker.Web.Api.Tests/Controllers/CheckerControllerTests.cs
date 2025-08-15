@@ -193,6 +193,89 @@ namespace Defra.PTS.Checker.Web.Api.Tests.Controllers
             Assert.ThrowsAsync<Exception>(async () => await _controller!.GetApplicationByPTDNumber(request));
         }
 
+        [Test]
+        public async Task Get_ApplicationByPTDNumber_ValidRequest_ReturnsOkResult()
+        {
+            // Arrange
+            var response = new { ApplicationDetails = "Details" };
+
+            _applicationServiceMock!.Setup(service => service.GetApplicationByPTDNumber(It.IsAny<string>())).ReturnsAsync(response);
+
+            var request = new SearchByPtdNumberRequest
+            {
+                PTDNumber = $"{ApiConstants.PTDNumberPrefix}ABCXYZ123",
+            };
+
+            // Act
+            var result = await _controller!.GetApplicationByPTDNumber(request.PTDNumber);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+
+            var objectResult = result as OkObjectResult;
+            Assert.That(objectResult, Is.Not.Null);
+            Assert.That(objectResult!.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
+        }
+
+        [Test]
+        public async Task Get_ApplicationByPTDNumber_ValidRequestButNoApplication_ReturnsNotFoundResult()
+        {
+            // Arrange
+            var request = new SearchByPtdNumberRequest
+            {
+                PTDNumber = $"{ApiConstants.PTDNumberPrefix}ABCXYZ123",
+            };
+
+            _applicationServiceMock!.Setup(service => service.GetApplicationByPTDNumber(It.IsAny<string>()))!.ReturnsAsync(null!);
+
+            // Act
+            var result = await _controller!.GetApplicationByPTDNumber(request.PTDNumber);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<NotFoundObjectResult>());
+
+            var objectResult = result as NotFoundObjectResult;
+            Assert.That(objectResult, Is.Not.Null);
+            Assert.That(objectResult!.StatusCode, Is.EqualTo(StatusCodes.Status404NotFound));
+        }
+
+        [Test]
+        public async Task Get_ApplicationByPTDNumber_InvalidRequest_ReturnsBadRequestResult()
+        {
+            // Arrange
+            var request = new SearchByPtdNumberRequest
+            {
+                PTDNumber = string.Empty,
+            };
+
+            // Act
+            _controller!.ModelState.AddModelError("PTDNumber", "PTDNumber is required");
+            var result = await _controller!.GetApplicationByPTDNumber(request.PTDNumber);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+
+            var objectResult = result as BadRequestObjectResult;
+            Assert.That(objectResult, Is.Not.Null);
+            Assert.That(objectResult!.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
+        }
+
+        [Test]
+        public void Get_ApplicationByPTDNumber_Exception_ReturnsInternalServerError()
+        {
+            // Arrange
+            var request = new SearchByPtdNumberRequest
+            {
+                PTDNumber = $"{ApiConstants.PTDNumberPrefix}ABCXYZ123",
+            };
+
+            _applicationServiceMock!.Setup(service => service.GetApplicationByPTDNumber(request.PTDNumber))
+                .ThrowsAsync(new Exception("Mock Exception"));
+
+            // Assert
+            Assert.ThrowsAsync<Exception>(async () => await _controller!.GetApplicationByPTDNumber(request.PTDNumber));
+        }
+
 
         [Test]
         public async Task CheckMicrochipNumber_MicrochipNumberIsNullOrEmpty_ReturnsBadRequest()
