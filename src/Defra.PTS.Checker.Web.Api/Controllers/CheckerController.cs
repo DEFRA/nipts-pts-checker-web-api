@@ -101,6 +101,34 @@ public class CheckerController : ControllerBase
     }
 
 
+    [HttpGet]
+    [Route("checkPTDNumber")]
+    [SwaggerResponse(StatusCodes.Status200OK, "OK: Returns the approved application", typeof(SearchResponse))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request: PTD Number is not provided or is not valid", typeof(IDictionary<string, string>))]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Not Found: There is no application matching this PTD number")]
+    [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error: An error has occurred")]
+    [SwaggerOperation(
+        OperationId = "checkPTDNumber_Get",
+        Tags = new[] { "Checker" },
+        Summary = "Retrieves a specific application by PTD Number",
+        Description = "Returns the application details for the specified Pet Travel Document Number"
+    )]
+    public async Task<IActionResult> GetApplicationByPTDNumber([FromQuery, SwaggerRequestBody("The search payload", Required = true)] string ptdNumber)
+    {
+        if (string.IsNullOrWhiteSpace(ptdNumber))
+        {
+            return BadRequest(new { error = "PTD number is required" });
+        }
+
+        var application = await _applicationService.GetApplicationByPTDNumber(ptdNumber);
+        if (application == null)
+        {
+            return new NotFoundObjectResult(ApiConstants.ApplicationNotFound);
+        }
+
+        return Ok(application);
+    }
+
     [HttpPost]
     [Route("checkPTDNumber")]
     [SwaggerResponse(StatusCodes.Status200OK, "OK: Returns the approved application", typeof(SearchResponse))]
@@ -108,7 +136,7 @@ public class CheckerController : ControllerBase
     [SwaggerResponse(StatusCodes.Status404NotFound, "Not Found: There is no application matching this PTD number")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error: An error has occurred")]
     [SwaggerOperation(
-            OperationId = "checkPTDNumber",
+            OperationId = "checkPTDNumber_Post",
             Tags = new[] { "Checker" },
             Summary = "Retrieves a specific application by PTD Number",
             Description = "Returns the application details for the specified Pet Travel Document Number"
@@ -408,9 +436,9 @@ public class CheckerController : ControllerBase
      Tags = new[] { "Checker" },
      Summary = "Retrieves complete check details by CheckSummaryId",
      Description = "Returns complete details for the specified CheckSummaryId"
- )]
+    )]
     public async Task<IActionResult> GetCompleteCheckDetails(
-     [FromBody, SwaggerRequestBody("The search payload", Required = true)] CheckDetailsRequestModel model)
+    [FromBody, SwaggerRequestBody("The search payload", Required = true)] CheckDetailsRequestModel model)
     {
         if (!ModelState.IsValid)
         {
@@ -427,4 +455,5 @@ public class CheckerController : ControllerBase
         return Ok(response);
     }
 
+   
 }

@@ -11,6 +11,7 @@ using TravelDocument = Defra.PTS.Checker.Entities.TravelDocument;
 using CheckOutcome = Defra.PTS.Checker.Entities.CheckOutcome;
 using Defra.PTS.Checker.Models.CustomException;
 using Defra.PTS.Checker.Services.Helpers;
+using System.Linq;
 
 namespace Defra.PTS.Checker.Services.Implementation;
 
@@ -108,6 +109,7 @@ public class CheckSummaryService(CommonDbContext dbContext, ILogger<CheckSummary
         }
 
         await _dbContext.SaveChangesAsync();
+
 
         // On Fail Reverse Mapping LinkedCheckId to GB Entry 
         if (!isGbCheck && gbCheckId != Guid.Empty && !(bool)checkSummaryEntity.CheckOutcome)
@@ -218,6 +220,7 @@ public class CheckSummaryService(CommonDbContext dbContext, ILogger<CheckSummary
         // Extract date and time from sailingDate
         DateTime sailingDateOnly = sailingDate.Date;
         TimeSpan sailingTimeOnly = sailingDate.TimeOfDay;
+
 
         // Find RouteId based on the route name
         var routeEntity = await _dbContext.Route
@@ -372,8 +375,6 @@ public class CheckSummaryService(CommonDbContext dbContext, ILogger<CheckSummary
         }
     }
 
-
-
     private static List<string> AddReferralTexts(List<CheckOutcome> checkOutcomes)
     {
 
@@ -433,7 +434,8 @@ public class CheckSummaryService(CommonDbContext dbContext, ILogger<CheckSummary
             PetOtherColour = pet?.OtherColour,
             MicrochipNumber = pet?.MicrochipNumber,
             MCNotMatch = i.CheckOutcomeEntity?.MCNotMatch,
-            MCNotMatchActual = i.CheckOutcomeEntity?.MCNotMatchActual
+            MCNotMatchActual = i.CheckOutcomeEntity?.MCNotMatchActual,
+            PassengerTypeId = i.CheckOutcomeEntity?.PassengerTypeId
         };
     }
 
@@ -471,15 +473,16 @@ public class CheckSummaryService(CommonDbContext dbContext, ILogger<CheckSummary
                 microchipNumberToDisplay = cs.MCNotMatchActual;
             }
 
-           
+
             var responseItem = new SpsCheckDetailResponseModel
             {
                 PTDNumber = cs.DocumentReferenceNumber ?? "",
                 PetDescription = $"{petSpeciesDescription}, {colourDescription}",
-                Microchip = microchipNumberToDisplay, 
+                Microchip = microchipNumberToDisplay,
                 TravelBy = travelBy,
                 SPSOutcome = status,
-                CheckSummaryId = cs.Id
+                CheckSummaryId = cs.Id,
+                PassengerTypeId = cs.PassengerTypeId
             };
 
             // Add to response list if not already present
@@ -631,6 +634,7 @@ public class InterimCheckSummary
     public string? MicrochipNumber { get; set; }
     public bool? MCNotMatch { get; set; }
     public string? MCNotMatchActual { get; set; }
+    public int? PassengerTypeId { get; set; }
 }
 
 
