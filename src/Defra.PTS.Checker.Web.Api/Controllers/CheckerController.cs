@@ -108,7 +108,7 @@ public class CheckerController : ControllerBase
     [SwaggerResponse(StatusCodes.Status404NotFound, "Not Found: There is no application matching this PTD number")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error: An error has occurred")]
     [SwaggerOperation(
-        OperationId = "checkPTDNumber",
+        OperationId = "checkPTDNumber_Get",
         Tags = new[] { "Checker" },
         Summary = "Retrieves a specific application by PTD Number",
         Description = "Returns the application details for the specified Pet Travel Document Number"
@@ -136,7 +136,7 @@ public class CheckerController : ControllerBase
     [SwaggerResponse(StatusCodes.Status404NotFound, "Not Found: There is no application matching this PTD number")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error: An error has occurred")]
     [SwaggerOperation(
-            OperationId = "checkPTDNumber",
+            OperationId = "checkPTDNumber_Post",
             Tags = new[] { "Checker" },
             Summary = "Retrieves a specific application by PTD Number",
             Description = "Returns the application details for the specified Pet Travel Document Number"
