@@ -824,6 +824,87 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
         }
 
         [Test]
+        public async Task GetSpsCheckDetailsByRouteAsync_ReturnsCheckNeeded_WhenNoLinkedCheck_Authorised()
+        {
+            // Arrange
+            var specificDate = DateTime.Today.AddDays(-1); // Yesterday's date at midnight
+            var scheduledSailingTime = TimeSpan.Zero; // 00:00:00
+
+            var route = new Entities.Route { RouteName = "Route1" };
+
+            if (_dbContext != null)
+            {
+                await _dbContext.Route.AddAsync(route);
+                await _dbContext.SaveChangesAsync();
+
+                var guid = new Guid("FF0DF803-8033-4CF8-B877-AB69BEFE63D2");
+                var application = new Entities.Application { Id = guid, ReferenceNumber = "test", Status = "Authorised" };
+                var existingApplication = await _dbContext.Application.FirstOrDefaultAsync(a => a.Id == guid);
+                if (existingApplication == null)
+                {
+                    await _dbContext.Application.AddAsync(application);
+                    await _dbContext.SaveChangesAsync();
+                }
+
+                var colour = new Entities.Colour { Name = "Brown", SpeciesId = 1 };
+                await _dbContext.Colour.AddAsync(colour);
+                await _dbContext.SaveChangesAsync();
+
+                var pet = new Entities.Pet
+                {
+                    MicrochipNumber = "1234567890",
+                    SpeciesId = 1,
+                    ColourId = colour.Id
+                };
+                await _dbContext.Pet.AddAsync(pet);
+                await _dbContext.SaveChangesAsync();
+
+                var travelDocument = new Entities.TravelDocument
+                {
+                    DocumentReferenceNumber = "PTD001",
+                    PetId = pet.Id,
+                    Application = application,
+                    ApplicationId = guid
+                };
+                await _dbContext.TravelDocument.AddAsync(travelDocument);
+                await _dbContext.SaveChangesAsync();
+
+                // No CheckOutcome needed since LinkedCheckId is null
+
+                var checkSummary = new Entities.CheckSummary
+                {
+                    RouteId = 1,
+                    TravelDocumentId = travelDocument.Id,
+                    Date = specificDate.Date,
+                    ScheduledSailingTime = scheduledSailingTime,
+                    Application = application,
+                    ApplicationId = guid,
+                    GBCheck = true,
+                    CheckOutcome = false,
+                    LinkedCheckId = null, // No linked check
+                    CheckOutcomeId = null // No outcome,
+
+                };
+                await _dbContext.CheckSummary.AddAsync(checkSummary);
+                await _dbContext.SaveChangesAsync();
+
+                _dbContext.ChangeTracker.Clear();
+            }
+
+            // Act
+            var timeWindowInHours = 48;
+            if (_service != null)
+            {
+                var result = await _service.GetSpsCheckDetailsByRouteAsync("Route1", specificDate, timeWindowInHours);
+
+                // Assert
+                Assert.That(result, Is.Not.Null);
+                Assert.That(result.Count(), Is.EqualTo(1));
+                Assert.That(result.First().SPSOutcome, Is.EqualTo("Check needed"));
+            }
+        }
+
+        [Test]
         public async Task GetSpsCheckDetailsByRouteAsync_ReturnsException_WhenNoLinkedCheck()
         {
             // Arrange
