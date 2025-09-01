@@ -22,6 +22,8 @@ namespace Defra.PTS.Checker.Entities
 
         public bool? OIFailAuthTravellerNoConfirmation { get; set; }
 
+        public bool? OIRefusedToSignDeclaration { get; set; }
+
         public bool? OIFailOther { get; set; }
 
         public int? PassengerTypeId { get; set; }

@@ -28,6 +28,7 @@ public class NonComplianceSchemaFilter : ISchemaFilter
             ["vcNotMatchPTD"] = new OpenApiBoolean(true),
             ["oiFailPotentialCommercial"] = new OpenApiBoolean(true),
             ["oiFailAuthTravellerNoConfirmation"] = new OpenApiBoolean(true),
+            ["oiRefusedToSignDeclaration"] = new OpenApiBoolean(true),
             ["oiFailOther"] = new OpenApiBoolean(true),
             ["passengerTypeId"] = new OpenApiInteger(1),
             ["relevantComments"] = new OpenApiString("Relevant Comments"),

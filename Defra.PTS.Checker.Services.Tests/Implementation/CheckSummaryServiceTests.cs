@@ -1958,6 +1958,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
                 VCNotMatchPTD = true,
                 OIFailPotentialCommercial = true,
                 OIFailAuthTravellerNoConfirmation = true,
+                OIRefusedToSignDeclaration = true,
                 OIFailOther = true,
                 RelevantComments = "Test comment",
                 SPSOutcomeDetails = "SPS details"
