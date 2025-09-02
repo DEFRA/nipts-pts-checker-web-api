@@ -40,6 +40,7 @@ namespace Defra.PTS.Checker.Models.SchemaFilters
                         ["vcNotMatchPTD"] = new OpenApiBoolean(true),
                         ["oiFailPotentialCommercial"] = new OpenApiBoolean(true),
                         ["oiFailAuthTravellerNoConfirmation"] = new OpenApiBoolean(true),
+                        ["oiRefusedToSignDeclaration"] = new OpenApiBoolean(true),
                         ["oiFailOther"] = new OpenApiBoolean(true),
                         ["relevantComments"] = new OpenApiString("John Doe"),
                     }

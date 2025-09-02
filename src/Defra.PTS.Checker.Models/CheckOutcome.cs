@@ -22,6 +22,7 @@ namespace Defra.PTS.Checker.Models
         public bool? VCNotMatchPTD { get; set; }
         public bool? OIFailPotentialCommercial { get; set; }
         public bool? OIFailAuthTravellerNoConfirmation { get; set; }
+        public bool? OIRefusedToSignDeclaration { get; set; }
         public bool? OIFailOther { get; set; }
 
         //Additional Comments

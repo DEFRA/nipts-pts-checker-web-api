@@ -1958,6 +1958,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
                 VCNotMatchPTD = true,
                 OIFailPotentialCommercial = true,
                 OIFailAuthTravellerNoConfirmation = true,
+                OIRefusedToSignDeclaration = true,
                 OIFailOther = true,
                 RelevantComments = "Test comment",
                 SPSOutcomeDetails = "SPS details"
@@ -1992,7 +1993,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
 
             Assert.That(result, Is.Not.Null);
             Assert.That(result!.CheckOutcome, Has.Count.EqualTo(3));
-            Assert.That(result.ReasonForReferral, Has.Count.EqualTo(6));
+            Assert.That(result.ReasonForReferral, Has.Count.EqualTo(7));
             Assert.That(result.AdditionalComments, Has.Count.EqualTo(1));
             Assert.That(result.DetailsComments, Has.Count.EqualTo(1));
         }
