@@ -388,7 +388,7 @@ public class CheckSummaryService(CommonDbContext dbContext, ILogger<CheckSummary
             if (referral.VCNotMatchPTD == true) referralTexts.Add("Pet does not match the PTD");
             if (referral.OIFailPotentialCommercial == true) referralTexts.Add("Potential commercial movement");
             if (referral.OIFailAuthTravellerNoConfirmation == true) referralTexts.Add("Authorised person but no confirmation");
-            if (referral.OIRefusedToSignDeclaration == true) referralTexts.Add("Other Issues Refused to sign declaration");
+            if (referral.OIRefusedToSignDeclaration == true) referralTexts.Add("Refused to sign declaration");
             if (referral.OIFailOther == true) referralTexts.Add("Other reason");
         }
 
