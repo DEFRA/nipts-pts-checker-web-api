@@ -85,6 +85,7 @@ public class CheckSummaryService(CommonDbContext dbContext, ILogger<CheckSummary
                 VCNotMatchPTD = nonComplianceModel?.VCNotMatchPTD,
                 OIFailPotentialCommercial = nonComplianceModel?.OIFailPotentialCommercial,
                 OIFailAuthTravellerNoConfirmation = nonComplianceModel?.OIFailAuthTravellerNoConfirmation,
+                OIRefusedToSignDeclaration = nonComplianceModel?.OIRefusedToSignDeclaration,
                 OIFailOther = nonComplianceModel?.OIFailOther,
                 PassengerTypeId = nonComplianceModel?.PassengerTypeId,
                 RelevantComments = nonComplianceModel?.RelevantComments,
@@ -286,6 +287,7 @@ public class CheckSummaryService(CommonDbContext dbContext, ILogger<CheckSummary
                     VCNotMatchPTD = checkReport.CheckOutcomeEntity?.VCNotMatchPTD,
                     OIFailPotentialCommercial = checkReport.CheckOutcomeEntity?.OIFailPotentialCommercial,
                     OIFailAuthTravellerNoConfirmation = checkReport.CheckOutcomeEntity?.OIFailAuthTravellerNoConfirmation,
+                    OIRefusedToSignDeclaration = checkReport.CheckOutcomeEntity?.OIRefusedToSignDeclaration,
                     OIFailOther = checkReport.CheckOutcomeEntity?.OIFailOther,
 
                     RelevantComments = checkReport.CheckOutcomeEntity?.RelevantComments,
@@ -386,6 +388,7 @@ public class CheckSummaryService(CommonDbContext dbContext, ILogger<CheckSummary
             if (referral.VCNotMatchPTD == true) referralTexts.Add("Pet does not match the PTD");
             if (referral.OIFailPotentialCommercial == true) referralTexts.Add("Potential commercial movement");
             if (referral.OIFailAuthTravellerNoConfirmation == true) referralTexts.Add("Authorised person but no confirmation");
+            if (referral.OIRefusedToSignDeclaration == true) referralTexts.Add("Refused to sign declaration");
             if (referral.OIFailOther == true) referralTexts.Add("Other reason");
         }
 
