@@ -22,7 +22,9 @@ builder.Configuration.AddUserSecrets(Assembly.GetExecutingAssembly(), true);
 
 builder.Configuration.AddEnvironmentVariables();
 
+#if !DEBUG
 builder.Configuration.ConfigureTradeAppConfiguration();
+#endif
 
 
 // Add services to the container.
@@ -32,7 +34,6 @@ builder.Services
 
 builder.Services.AddControllers();
 
-builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var connection = builder.Configuration.GetConnectionString("sql_db");
