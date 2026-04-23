@@ -220,7 +220,7 @@ public class CheckSummaryService(CommonDbContext dbContext, ILogger<CheckSummary
     {
         // Extract date and time from sailingDate
         DateTime sailingDateOnly = sailingDate.Date;
-        TimeSpan sailingTimeOnly = sailingDate.TimeOfDay.Add(TimeSpan.FromHours(1)); ;
+        TimeSpan sailingTimeOnly = sailingDate.TimeOfDay;
 
 
         // Find RouteId based on the route name
