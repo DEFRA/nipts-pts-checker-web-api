@@ -91,7 +91,7 @@ app.MapControllers();
 
 app.UseMiddleware<ExceptionHandler>();
 
-app.Run();
+await app.RunAsync();
 
 
 [ExcludeFromCodeCoverage]
