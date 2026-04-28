@@ -1901,14 +1901,7 @@ namespace Defra.PTS.Checker.Services.Tests.Implementation
             var result = await service.GetCompleteCheckDetailsAsync(Guid.NewGuid());
 
             Assert.That(result, Is.Null);
-            loggerMock.Verify(
-                x => x.Log(
-                    It.IsAny<LogLevel>(),
-                    It.IsAny<EventId>(),
-                    It.Is<It.IsAnyType>((v, t) => true),
-                    It.IsAny<Exception>(),
-                    (Func<It.IsAnyType, Exception?, string>)It.IsAny<object>()),
-                Times.Once);
+            Assert.That(loggerMock.Invocations, Has.Count.EqualTo(1));
         }
 
         [Test]
