@@ -347,3 +347,5 @@ ASALocalRun/
 /src/Defra.Trade.EUCerts.UI.Vue/.sonarqube
 /src/Defra.Trade.EUCerts.UI.Vue/.config/dotnet-tools.json
 /src/Defra.PTS.Checker.Web.Api/appsettings.Development.json
+/src/Defra.PTS.Checker.Web.Api/appsettings.json
+local.settings.json
