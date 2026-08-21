@@ -9,6 +9,9 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace Defra.PTS.Checker.Web.Api.Controllers;
 
+/// <summary>
+/// Provides endpoints for checking pet travel documents, applications and related checker operations.
+/// </summary>
 [Route("api/[controller]")]
 [ApiController]
 public class CheckerController : ControllerBase
@@ -18,6 +21,13 @@ public class CheckerController : ControllerBase
     private readonly ICheckSummaryService _checkSummaryService;
     private readonly IOrganisationService _organisationService;
 
+    /// <summary>
+    /// Initialises a new instance of the <see cref="CheckerController"/> class.
+    /// </summary>
+    /// <param name="applicationService">The application service.</param>
+    /// <param name="checkerService">The checker service.</param>
+    /// <param name="checkSummaryService">The check summary service.</param>
+    /// <param name="organisationService">The organisation service.</param>
     public CheckerController(IApplicationService applicationService, ICheckerService checkerService, ICheckSummaryService checkSummaryService, IOrganisationService organisationService)
     {
         _applicationService = applicationService;
@@ -26,6 +36,11 @@ public class CheckerController : ControllerBase
         _organisationService = organisationService;
     }
 
+    /// <summary>
+    /// Retrieves a specific application by its reference number.
+    /// </summary>
+    /// <param name="request">The request containing the application reference number.</param>
+    /// <returns>The matching application, or a not found/bad request result.</returns>
     [HttpPost("checkApplicationNumber")]
     [SwaggerResponse(StatusCodes.Status200OK, "OK: Returns the requested application", typeof(SearchResponse))]
     [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request: Application reference number is not provided or is not valid", typeof(IDictionary<string, string>))]
@@ -58,6 +73,11 @@ public class CheckerController : ControllerBase
         return Ok(response);
     }
 
+    /// <summary>
+    /// Retrieves a specific application by microchip number.
+    /// </summary>
+    /// <param name="request">The request containing the microchip number.</param>
+    /// <returns>The matching application, or a not found/error result.</returns>
     [HttpPost("checkMicrochipNumber")]
     [ProducesResponseType(typeof(SearchResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(object), StatusCodes.Status400BadRequest)]
@@ -101,6 +121,11 @@ public class CheckerController : ControllerBase
     }
 
 
+    /// <summary>
+    /// Retrieves a specific application by Pet Travel Document (PTD) number.
+    /// </summary>
+    /// <param name="ptdNumber">The Pet Travel Document number to search for.</param>
+    /// <returns>The matching application, or a not found/bad request result.</returns>
     [HttpGet]
     [Route("checkPTDNumber")]
     [SwaggerResponse(StatusCodes.Status200OK, "OK: Returns the approved application", typeof(SearchResponse))]
@@ -129,6 +154,11 @@ public class CheckerController : ControllerBase
         return Ok(application);
     }
 
+    /// <summary>
+    /// Retrieves a specific application by Pet Travel Document (PTD) number.
+    /// </summary>
+    /// <param name="model">The request containing the Pet Travel Document number.</param>
+    /// <returns>The matching application, or a not found/bad request result.</returns>
     [HttpPost]
     [Route("checkPTDNumber")]
     [SwaggerResponse(StatusCodes.Status200OK, "OK: Returns the approved application", typeof(SearchResponse))]
@@ -157,6 +187,11 @@ public class CheckerController : ControllerBase
         return Ok(application);
     }
 
+    /// <summary>
+    /// Saves the check outcome for a pet travel document.
+    /// </summary>
+    /// <param name="model">The check outcome payload.</param>
+    /// <returns>The saved check summary response.</returns>
     [HttpPost]
     [Route("CheckOutcome")]
     [SwaggerResponse(StatusCodes.Status200OK, "OK: Returns check summary response", typeof(CheckOutcomeResponseModel))]
@@ -188,6 +223,11 @@ public class CheckerController : ControllerBase
 
 
 
+    /// <summary>
+    /// Saves a non-compliance report for a pet travel document.
+    /// </summary>
+    /// <param name="model">The non-compliance payload.</param>
+    /// <returns>The saved check summary response.</returns>
     [HttpPost]
     [Route("ReportNonCompliance")]
     [SwaggerResponse(StatusCodes.Status200OK, "OK: Returns NonCompliance summary response", typeof(NonComplianceResponseModel))]
@@ -217,6 +257,11 @@ public class CheckerController : ControllerBase
         return Ok(response);
     }
 
+    /// <summary>
+    /// Adds or updates a checker user.
+    /// </summary>
+    /// <param name="model">The checker user payload.</param>
+    /// <returns>The identifier of the saved checker user.</returns>
     [HttpPost]
     [Route("checkerUser")]
     [SwaggerResponse(StatusCodes.Status200OK, "OK: Returns the Id of checker", typeof(Guid))]
@@ -240,6 +285,11 @@ public class CheckerController : ControllerBase
         return Ok(checkerId);
     }
 
+    /// <summary>
+    /// Determines whether a microchip number already exists against a Pet Travel Document.
+    /// </summary>
+    /// <param name="model">The checker microchip number payload.</param>
+    /// <returns><c>true</c> if the microchip number exists with a PTD; otherwise <c>false</c>.</returns>
     [HttpPost]
     [Route("checkMicrochipNumberExistWithPtd")]
     [SwaggerResponse(StatusCodes.Status200OK, "OK: Returns the bool", typeof(bool))]
@@ -263,6 +313,11 @@ public class CheckerController : ControllerBase
         return Ok(exist);
     }
 
+    /// <summary>
+    /// Retrieves recent check outcomes within the specified time range.
+    /// </summary>
+    /// <param name="model">The dashboard payload containing the start and end hour offsets.</param>
+    /// <returns>The matching check outcomes, or a not found/error result.</returns>
     [HttpPost("getCheckOutcomes")]
     [SwaggerResponse(StatusCodes.Status200OK, "OK: Returns the check outcomes", typeof(IEnumerable<CheckOutcomeResponse>))]
     [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request: Invalid request", typeof(object))]
@@ -314,6 +369,11 @@ public class CheckerController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Retrieves SPS check details for a given route and sailing date window.
+    /// </summary>
+    /// <param name="model">The request containing the route, sailing date and time window.</param>
+    /// <returns>The matching SPS check details, or a not found/error result.</returns>
     [HttpPost("getSpsCheckDetailsByRoute")]
     [SwaggerResponse(StatusCodes.Status200OK, "OK: Returns SPS check details", typeof(IEnumerable<SpsCheckDetailResponseModel>))]
     [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request: Invalid request", typeof(object))]
@@ -343,6 +403,11 @@ public class CheckerController : ControllerBase
     }
 
 
+    /// <summary>
+    /// Retrieves a specific organisation by its identifier.
+    /// </summary>
+    /// <param name="model">The request containing the organisation identifier.</param>
+    /// <returns>The matching organisation, or a not found/bad request result.</returns>
     [HttpPost]
     [Route("getOrganisation")]
     [SwaggerResponse(StatusCodes.Status200OK, "OK: Returns the Organisation", typeof(OrganisationResponseModel))]
@@ -372,6 +437,11 @@ public class CheckerController : ControllerBase
     }
 
 
+    /// <summary>
+    /// Retrieves a specific GB check report by its check summary identifier.
+    /// </summary>
+    /// <param name="model">The request containing the GB check summary identifier.</param>
+    /// <returns>The matching GB check report, or a not found/bad request result.</returns>
     [HttpPost]
     [Route("getGbCheck")]
     [SwaggerResponse(StatusCodes.Status200OK, "OK: Returns the GbCheck", typeof(GbCheckReportResponseModel))]
@@ -400,6 +470,11 @@ public class CheckerController : ControllerBase
         return Ok(checkReport);
     }
 
+    /// <summary>
+    /// Determines whether the user associated with the given email has a suspended application.
+    /// </summary>
+    /// <param name="email">The email address to check.</param>
+    /// <returns><c>true</c> if the user is suspended; otherwise <c>false</c>.</returns>
     [HttpPost]
     [Route("getIsUserSuspendedStatusByEmail")]
     [SwaggerResponse(StatusCodes.Status200OK, "OK: Returns a bool", typeof(bool))]
@@ -425,6 +500,11 @@ public class CheckerController : ControllerBase
     }
 
 
+    /// <summary>
+    /// Retrieves the complete check details for a given check summary identifier.
+    /// </summary>
+    /// <param name="model">The request containing the check summary identifier.</param>
+    /// <returns>The complete check details, or a not found/bad request result.</returns>
     [HttpPost]
     [Route("getCompleteCheckDetails")]
     [SwaggerResponse(StatusCodes.Status200OK, "OK: Returns the complete check details", typeof(CompleteCheckDetailsResponse))]
