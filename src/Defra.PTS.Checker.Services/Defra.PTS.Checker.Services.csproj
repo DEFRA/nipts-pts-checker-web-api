@@ -9,6 +9,9 @@
     <PackageReference Include="Defra.Trade.Common" Version="4.0.2" />
     <PackageReference Include="Defra.Trade.Common.Security" Version="2.0.5" />
     <PackageReference Include="Microsoft.Identity.Client" Version="4.61.3" />
+    <!-- Pinned to patched versions to override vulnerable transitive dependencies (Snyk). -->
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+    <PackageReference Include="RestSharp" Version="112.0.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Defra.PTS.Checker.Models\Defra.PTS.Checker.Models.csproj" />

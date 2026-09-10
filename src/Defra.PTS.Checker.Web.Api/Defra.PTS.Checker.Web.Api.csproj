@@ -13,6 +13,8 @@
     <PackageReference Include="Defra.Trade.Common.Security" Version="2.0.5" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.0" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.22.0" />
+    <!-- Pinned to patched version to override vulnerable transitive dependency (Snyk). -->
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Defra.PTS.Checker.Models\Defra.PTS.Checker.Models.csproj" />

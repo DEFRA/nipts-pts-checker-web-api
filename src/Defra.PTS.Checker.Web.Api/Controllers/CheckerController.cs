@@ -92,7 +92,7 @@ public class CheckerController : ControllerBase
 
         try
         {
-            var response = await _checkerService.CheckMicrochipNumberAsync(request.MicrochipNumber);
+            var response = await _checkerService.CheckMicrochipNumberAsync(Sanitize(request.MicrochipNumber));
 
             if (response == null)
             {
@@ -308,7 +308,7 @@ public class CheckerController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        var exist = await _checkerService.CheckerMicrochipNumberExistWithPtd(model.MicrochipNumber!);
+        var exist = await _checkerService.CheckerMicrochipNumberExistWithPtd(Sanitize(model.MicrochipNumber!));
 
         return Ok(exist);
     }
@@ -461,7 +461,7 @@ public class CheckerController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        var checkReport = await _checkSummaryService.GetGbCheckReport(Guid.Parse(model.GbCheckSummaryId));
+        var checkReport = await _checkSummaryService.GetGbCheckReport(Guid.Parse(Sanitize(model.GbCheckSummaryId)));
         if (checkReport == null)
         {
             return new NotFoundObjectResult(ApiConstants.GbCheckReportNotFound);
@@ -535,5 +535,7 @@ public class CheckerController : ControllerBase
         return Ok(response);
     }
 
-   
+    // Removes CR/LF from user input to prevent log forging before values reach logging sinks.
+    private static string Sanitize(string value) =>
+        value.Replace("\r", string.Empty).Replace("\n", string.Empty);
 }

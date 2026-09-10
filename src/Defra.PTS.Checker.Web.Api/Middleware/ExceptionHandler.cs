@@ -78,6 +78,6 @@ public class ExceptionHandler
         _logger.LogError(exception, exception.Message);
 
         var result = JsonConvert.SerializeObject(exceptionModel);
-        await context.Response.WriteAsync(result);
+        await context.Response.WriteAsync(result, context.RequestAborted);
     }
 }
