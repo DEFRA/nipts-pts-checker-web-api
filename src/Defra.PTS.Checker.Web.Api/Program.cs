@@ -7,7 +7,6 @@ using Defra.Trade.Common.AppConfig;
 using Defra.Trade.Common.Security.Authentication.Infrastructure;
 using Defra.Trade.Common.Security.AzureKeyVault;
 using Defra.Trade.Common.Security.AzureKeyVault.Configuration;
-using Microsoft.Azure.Management.Storage.Fluent.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using System.Diagnostics.CodeAnalysis;
@@ -34,6 +33,7 @@ builder.Services
 
 builder.Services.AddControllers();
 
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var connection = builder.Configuration.GetConnectionString("sql_db");
