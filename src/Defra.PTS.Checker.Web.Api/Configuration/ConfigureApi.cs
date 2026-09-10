@@ -8,9 +8,18 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Defra.PTS.Checker.Web.Api.Configuration
 {
+    /// <summary>
+    /// Provides extension methods for registering the application's API services.
+    /// </summary>
     [ExcludeFromCodeCoverage]
     public static class ConfigureApi
     {
+        /// <summary>
+        /// Registers the Defra PTS Checker API services with the dependency injection container.
+        /// </summary>
+        /// <param name="services">The service collection to add the services to.</param>
+        /// <param name="configuration">The application configuration.</param>
+        /// <returns>The updated service collection.</returns>
         public static IServiceCollection AddDefraApiServices(this IServiceCollection services, IConfiguration configuration)
         {
             services            

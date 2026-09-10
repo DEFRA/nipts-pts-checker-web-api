@@ -1,10 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Defra.PTS.Checker.Web.Api</RootNamespace>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <UserSecretsId>24e053fa-ca86-4625-a70a-626fe14c5b22</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
@@ -14,6 +13,8 @@
     <PackageReference Include="Defra.Trade.Common.Security" Version="2.0.5" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.0" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.22.0" />
+    <!-- Pinned to patched version to override vulnerable transitive dependency (Snyk). -->
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Defra.PTS.Checker.Models\Defra.PTS.Checker.Models.csproj" />
