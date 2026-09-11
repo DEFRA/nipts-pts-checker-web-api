@@ -21,7 +21,6 @@ namespace Defra.PTS.Checker.Repositories.Implementation
         public async Task<Application> GetApplicationById(Guid applicationId)
         {
             return await _context.Application
-                .Include(a => a.Pet)
                 .Include(a => a.Owner)
                 .Include(a => a.Pet!.Breed)
                 .Include(a => a.Pet!.Colour)
@@ -33,7 +32,6 @@ namespace Defra.PTS.Checker.Repositories.Implementation
             
             return await _context.Application
                 .Include(a => a.OwnerAddress)
-                .Include(a => a.Pet)
                 .Include(a => a.Owner)
                 .Include(a => a.Pet!.Breed)
                 .Include(a => a.Pet!.Colour)
