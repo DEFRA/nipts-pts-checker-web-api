@@ -23,7 +23,6 @@ namespace Defra.PTS.Checker.Repositories.Implementation
             return await _context.Application
                 .Include(a => a.Pet)
                 .Include(a => a.Owner)
-                .Include(a => a.Pet)
                 .Include(a => a.Pet!.Breed)
                 .Include(a => a.Pet!.Colour)
                 .FirstOrDefaultAsync(a => a.Id == applicationId) ?? null!;
@@ -36,7 +35,6 @@ namespace Defra.PTS.Checker.Repositories.Implementation
                 .Include(a => a.OwnerAddress)
                 .Include(a => a.Pet)
                 .Include(a => a.Owner)
-                .Include(a => a.Pet)
                 .Include(a => a.Pet!.Breed)
                 .Include(a => a.Pet!.Colour)
                 .FirstOrDefaultAsync(a => a.ReferenceNumber == referenceNumber);
@@ -95,7 +93,7 @@ namespace Defra.PTS.Checker.Repositories.Implementation
         public async Task<List<Application>> GetApplicationsByUserEmail(string email)
         {
             //we will also get the associated UserIds, in case they have had a change 
-            var userIds = _context!.User
+            var userIds = _context.User
                 .Where(a => a.Email == email);
 
             List<string> emails = [];
