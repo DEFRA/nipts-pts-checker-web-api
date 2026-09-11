@@ -406,7 +406,6 @@ public class CheckSummaryService(CommonDbContext dbContext, ILogger<CheckSummary
     {
         return _dbContext.CheckSummary
             .Include(c => c.Application)
-            .Include(c => c.TravelDocument)
             .Include(c => c.TravelDocument!.Pet!.Colour)
             .Include(c => c.CheckOutcomeEntity)
             .Where(c => c.RouteId == routeId
@@ -540,7 +539,7 @@ public class CheckSummaryService(CommonDbContext dbContext, ILogger<CheckSummary
 
         if (check != null) 
         {
-            travelBy = GetTravelMethod(check!.PassengerTypeId);
+            travelBy = GetTravelMethod(check.PassengerTypeId);
         }
 
         return (status, travelBy);

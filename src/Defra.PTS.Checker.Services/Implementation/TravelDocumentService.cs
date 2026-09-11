@@ -25,7 +25,7 @@ namespace Defra.PTS.Checker.Services.Implementation
         {
             var travelDocument = await _travelDocumentRepository.GetTravelDocumentByPTDNumber(ptdNumber);
 
-            return travelDocument!;
+            return travelDocument;
         }
 
         public async Task<TravelDocument> GetTravelDocumentByApplicationId(Guid applicationId)
