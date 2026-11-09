@@ -100,7 +100,7 @@ namespace Defra.PTS.Checker.Repositories.Implementation
                 emails.Add(user.Email!);
             }
 
-            return await _context!.Application
+            return await _context.Application
                 .Include(t => t.User)
                 .Where(a => emails.Contains(a.User!.Email!)).ToListAsync() ?? null!;
         }
