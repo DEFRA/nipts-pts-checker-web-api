@@ -29,7 +29,7 @@ namespace Defra.PTS.Checker.Repositories.Implementation
 
         public async Task<TravelDocument> GetTravelDocumentByReferenceNumber(string referenceNumber)
         {
-            return await _context!.TravelDocument
+            return await _context.TravelDocument
                 .Include(t => t.Application)
                 .Include(t => t.Owner)
                 .Include(t => t.Pet!.Breed)
@@ -42,7 +42,7 @@ namespace Defra.PTS.Checker.Repositories.Implementation
             ArgumentNullException.ThrowIfNull(_context);
             ArgumentNullException.ThrowIfNull(ptdNumber);
 
-            return await _context!.TravelDocument
+            return await _context.TravelDocument
                         .Include(t => t.Application!.OwnerAddress)
                         .Include(t => t.Owner)
                         .Include(t => t.Pet!.Breed)

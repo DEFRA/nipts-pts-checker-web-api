@@ -207,7 +207,8 @@ namespace Defra.PTS.Checker.Services.Implementation
         {
             var applications = await _applicationRepository.GetApplicationsByUserEmail(email);
 
-            if (applications.Any(x => x.Status!.Equals("Suspended", StringComparison.OrdinalIgnoreCase)))
+            if (applications.Any(x => x.User?.IsUserSuspended == true)
+                || applications.Any(x => x.Status!.Equals("Suspended", StringComparison.OrdinalIgnoreCase)))
             {
                 return true;
             }

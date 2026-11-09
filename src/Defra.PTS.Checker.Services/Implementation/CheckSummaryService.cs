@@ -23,7 +23,7 @@ public class CheckSummaryService(CommonDbContext dbContext, ILogger<CheckSummary
     public async Task<CheckOutcomeResponseModel> SaveCheckSummary(CheckOutcomeModel checkOutcomeModel)
     {
         var outcome = await _dbContext.Outcome.FirstOrDefaultAsync(x => x.Type == checkOutcomeModel.CheckOutcome);
-        var travelDocument = await _dbContext!.TravelDocument
+        var travelDocument = await _dbContext.TravelDocument
                         .Include(t => t.Application)
                         .Include(t => t.Pet)
             .SingleOrDefaultAsync(x => x.ApplicationId == checkOutcomeModel.ApplicationId);
@@ -253,7 +253,7 @@ public class CheckSummaryService(CommonDbContext dbContext, ILogger<CheckSummary
     {
         try
         {
-            var checkReport = await _dbContext!.CheckSummary
+            var checkReport = await _dbContext.CheckSummary
                 .Include(t => t.CheckOutcomeEntity)
                 .Include(t => t.Checker)
                 .SingleOrDefaultAsync(x => x.Id == gbCheckSummaryId);
