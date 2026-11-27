@@ -17,6 +17,7 @@ namespace Defra.PTS.Checker.Entities
         public string? Uniquereference { get; set; }
         public DateTime? SignInDateTime { get; set; }
         public DateTime? SignOutDateTime { get; set; }
+        public bool? IsUserSuspended { get; set; }
         public Guid? CreatedBy { get; set; }
         public DateTime? CreatedOn { get; set; }
         public Guid? UpdatedBy { get; set; }
